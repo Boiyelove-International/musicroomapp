@@ -2,12 +2,25 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:musicroom/routes.dart';
 import 'package:musicroom/screens/authentication.dart';
+import 'package:musicroom/screens/home.dart';
+import 'package:musicroom/screens/notifications.dart';
+import 'package:musicroom/screens/search.dart';
 import 'package:musicroom/styles.dart';
+import 'package:musicroom/utils.dart';
+import 'package:musicroom/utils/models.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
+
+
 void main() {
+  LicenseRegistry.addLicense(() async* {
+    final license = await rootBundle.loadString('google_fonts/OFL.txt');
+    yield LicenseEntryWithLineBreaks(['google_fonts'], license);
+  });
   runApp(MyApp());
 }
 
@@ -29,30 +42,23 @@ class MyApp extends StatelessWidget {
             // is not restarted.
             scaffoldBackgroundColor: Colors.black,
             primarySwatch: Colors.blue,
-            textTheme: TextTheme(
-              headline1: TextStyle(),
-              headline2: TextStyle(),
-              headline3: TextStyle(),
-              headline4: TextStyle(),
-              headline5: TextStyle(),
-              headline6: TextStyle(),
-              subtitle1: TextStyle(),
-              subtitle2: TextStyle(),
-              bodyText1: TextStyle(),
-              bodyText2: TextStyle(),
-              caption: TextStyle(),
-              button: TextStyle(),
-              overline: TextStyle(),
+            textTheme: GoogleFonts.workSansTextTheme(
+              Theme.of(context).textTheme,
             ).apply(
               bodyColor: Colors.white,
               displayColor: Colors.white,
             )),
+        debugShowCheckedModeBanner: false,
         home: SplashScreen(),
         routes: <String, WidgetBuilder>{
-          Routes.home: (BuildContext context) => new HomePage(title: "Login"),
+          Routes.home: (BuildContext context) => new HomeScreen(),
           Routes.onboarding: (BuildContext context) => OnBoardingPage(),
           Routes.decision: (BuildContext context) => DecisionPage(),
           Routes.registerOrganizer: (BuildContext context) => RegisterScreen(),
+          Routes.login: (BuildContext context) => LoginScreen(),
+          Routes.forgotPassword: (BuildContext context) => ForgotPassword(),
+          Routes.notifications: (BuildContext context) => NotificationScreen(),
+          Routes.search: (BuildContext context) => SearchResultScreen()
         });
   }
 }
@@ -238,6 +244,8 @@ class DecisionPage extends StatefulWidget {
 }
 
 class _DecisionPageState extends State<DecisionPage> {
+  UserType _selectedUserType = UserType.partyOrganizer;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -258,182 +266,161 @@ class _DecisionPageState extends State<DecisionPage> {
                       Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Stack(
-                              children: [
-                                Positioned.fill(
-                                  child: Align(
-                                      alignment: Alignment.center,
-                                      child: Padding(
-                                          padding: EdgeInsets.all(15),
-                                          child: Icon(Icons.check, color: Colors.red, size:30)
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _selectedUserType = UserType.partyOrganizer;
+                                });
+                              },
+                              child: Stack(
+                                children: [
+                                  Container(
+                                      width: MediaQuery.of(context).size.width *
+                                          0.43,
+                                      height:
+                                          MediaQuery.of(context).size.width *
+                                              0.55,
+                                      decoration: BoxDecoration(
+                                          color: DarkPalette.darkYellow,
+                                          border: _selectedUserType ==
+                                                  UserType.partyOrganizer
+                                              ? GradientBorder.uniform(
+                                                  width: 3.0,
+                                                  gradient: DarkPalette
+                                                      .borderGradient1)
+                                              : null,
+                                          borderRadius:
+                                              BorderRadius.circular(8)),
+                                      child: Center(
+                                        child: Padding(
+                                          padding: EdgeInsets.all(10),
+                                          child: Image.asset(
+                                              "assets/images/dj.png"),
+                                        ),
                                       )),
-                                ),
-                                Container(
-                                    width: MediaQuery.of(context).size.width * 0.43,
-                                    height:
-                                    MediaQuery.of(context).size.width * 0.55,
-                                    color: DarkPalette.darkYellow,
-                                    child: Center(
-                                      child: Padding(
-                                        padding: EdgeInsets.all(10),
-                                        child: Image.asset("assets/images/dj.png"),
-                                      ),
-                                    )),
-                                Positioned.fill(
-                                  child: Align(
-                                      alignment: Alignment.bottomCenter,
-                                      child: Padding(
-                                          padding: EdgeInsets.all(15),
-                                          child: Text("DJ / Event Center", style: TextStyle(
-                                              color: DarkPalette.darkDark, fontWeight: FontWeight.w300
-                                          ))
-                                      )),
-                                ),
-
-                              ],
+                                  Positioned.fill(
+                                    child: Align(
+                                        alignment: Alignment.bottomCenter,
+                                        child: Padding(
+                                            padding: EdgeInsets.all(15),
+                                            child: Text("DJ / Event Center",
+                                                style: TextStyle(
+                                                    color: DarkPalette.darkDark,
+                                                    fontWeight:
+                                                        FontWeight.w300)))),
+                                  ),
+                                  Visibility(
+                                    visible: _selectedUserType ==
+                                            UserType.partyOrganizer
+                                        ? true
+                                        : false,
+                                    child: Positioned.fill(
+                                      child: Align(
+                                          alignment: Alignment.topRight,
+                                          child: Padding(
+                                              padding: EdgeInsets.all(8),
+                                              child: Icon(Icons.check_circle,
+                                                  color: DarkPalette.darkGold,
+                                                  size: 20))),
+                                    ),
+                                  )
+                                ],
+                              ),
                             ),
                             SizedBox(width: 20),
-                            Stack(
-                              children: [
-                                Container(
-                                    width: MediaQuery.of(context).size.width * 0.43,
-                                    height:
-                                    MediaQuery.of(context).size.width * 0.55,
-                                    color: DarkPalette.darkYellow,
-                                    child: Center(
-                                      child: Padding(
-                                        padding: EdgeInsets.all(10),
-                                        child: Image.asset(
-                                            "assets/images/event_guest.png") ,
+                            GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _selectedUserType = UserType.partyGuest;
+                                  });
+                                },
+                                child: Stack(
+                                  children: [
+                                    Container(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.43,
+                                        height:
+                                            MediaQuery.of(context).size.width *
+                                                0.55,
+                                        decoration: BoxDecoration(
+                                            color: DarkPalette.darkYellow,
+                                            border: _selectedUserType ==
+                                                    UserType.partyGuest
+                                                ? GradientBorder.uniform(
+                                                    width: 3.0,
+                                                    gradient: DarkPalette
+                                                        .borderGradient1)
+                                                : null,
+                                            borderRadius:
+                                                BorderRadius.circular(8)),
+                                        child: Center(
+                                          child: Padding(
+                                            padding: EdgeInsets.all(10),
+                                            child: Image.asset(
+                                                "assets/images/event_guest.png"),
+                                          ),
+                                        )),
+                                    Positioned.fill(
+                                      child: Align(
+                                          alignment: Alignment.bottomCenter,
+                                          child: Padding(
+                                              padding: EdgeInsets.all(15),
+                                              child: Text("Event Guest",
+                                                  style: TextStyle(
+                                                      color:
+                                                          DarkPalette.darkDark,
+                                                      fontWeight:
+                                                          FontWeight.w300)))),
+                                    ),
+                                    Visibility(
+                                      visible: _selectedUserType ==
+                                              UserType.partyGuest
+                                          ? true
+                                          : false,
+                                      child: Positioned.fill(
+                                        child: Align(
+                                            alignment: Alignment.topRight,
+                                            child: Padding(
+                                                padding: EdgeInsets.all(8),
+                                                child: Icon(Icons.check_circle,
+                                                    color: DarkPalette.darkGold,
+                                                    size: 20))),
                                       ),
-                                    )),
-                                Positioned.fill(
-                                  child: Align(
-                                      alignment: Alignment.bottomCenter,
-                                      child: Padding(
-                                        padding: EdgeInsets.all(15),
-                                        child: Text("Event Guest", style: TextStyle(
-                                            color: DarkPalette.darkDark, fontWeight: FontWeight.w300
-                                        ))
-                                      )),
-                                ),
-
-                              ],
-                            ),
+                                    )
+                                  ],
+                                )),
                           ]),
                       SizedBox(height: 50),
                       Row(
                         children: [
                           Expanded(
                             child: ElevatedButton(
-                      style: ButtonStyle(
-                      textStyle: MaterialStateProperty.all<TextStyle>(
-                          TextStyle(fontSize: 10)),
-            backgroundColor: MaterialStateProperty.all<Color>(
-                Colors.transparent),
-            padding: MaterialStateProperty.all<EdgeInsets>(
-                EdgeInsets.only(top: 20, right: 40, left: 40, bottom:20)),
-            foregroundColor: MaterialStateProperty.all<Color>(
-                DarkPalette.darkGold),
-            shape: MaterialStateProperty.all<
-                RoundedRectangleBorder>(
-                RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5.0),
-                    side: BorderSide(color: DarkPalette.darkGold)))),
-        onPressed: () {
-          Navigator.pushReplacementNamed(
-              context, Routes.registerOrganizer);
-        },
-        child: Text("Let's Get Going")),
+                                style: ButtonStyle(
+                                    textStyle: MaterialStateProperty.all<TextStyle>(
+                                        TextStyle(fontSize: 10)),
+                                    backgroundColor: MaterialStateProperty.all<Color>(
+                                        Colors.transparent),
+                                    padding: MaterialStateProperty.all<EdgeInsets>(
+                                        EdgeInsets.only(
+                                            top: 20,
+                                            right: 40,
+                                            left: 40,
+                                            bottom: 20)),
+                                    foregroundColor: MaterialStateProperty.all<Color>(
+                                        DarkPalette.darkGold),
+                                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(5.0),
+                                        side: BorderSide(color: DarkPalette.darkGold)))),
+                                onPressed: () {
+                                  Navigator.pushReplacementNamed(
+                                      context, Routes.registerOrganizer,
+                                      arguments: _selectedUserType);
+                                },
+                                child: Text("Let's Get Going")),
                           )
                         ],
                       )
                     ]))));
-  }
-}
-
-class HomePage extends StatefulWidget {
-  HomePage({Key? key, required this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-  static const String routeName = '/home';
-
-  @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the HomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
   }
 }
