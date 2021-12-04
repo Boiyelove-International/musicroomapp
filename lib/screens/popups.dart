@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:iconly/iconly.dart';
 import 'package:musicroom/styles.dart';
 
+import '../routes.dart';
+
 enum Popup { searchFilter, nowPlayingFilter, eventFilter, resultFilter }
 
 class PopupWidget extends StatelessWidget {
@@ -429,7 +431,10 @@ class _CreateEventForm extends State<CreateEventForm> {
               // elevation: MaterialStateProperty.all(3),
               shadowColor: MaterialStateProperty.all(Colors.transparent),
             ),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).pushNamed(Routes.eventDetail);
+            },
             child: Padding(
               padding: const EdgeInsets.only(
                 top: 10,

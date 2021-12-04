@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
               displayColor: Colors.white,
             )),
         debugShowCheckedModeBanner: false,
-        home: SuggestionScreen(),
+        home: SplashScreen(),
         routes: <String, WidgetBuilder>{
           Routes.home: (BuildContext context) => new HomeScreen(),
           Routes.onboarding: (BuildContext context) => OnBoardingPage(),
@@ -49,7 +49,10 @@ class MyApp extends StatelessWidget {
           Routes.login: (BuildContext context) => LoginScreen(),
           Routes.forgotPassword: (BuildContext context) => ForgotPassword(),
           Routes.notifications: (BuildContext context) => NotificationScreen(),
-          Routes.search: (BuildContext context) => SearchResultScreen()
+          Routes.search: (BuildContext context) => SearchResultScreen(),
+          Routes.eventDetail: (BuildContext context) => EventDetail(),
+          Routes.allSuggestions: (BuildContext context) => SuggestionScreen(title: "All Suggestions", suggestionType: SuggestionType.All,),
+          Routes.acceptedSuggestions: (BuildContext context) => SuggestionScreen(suggestionType: SuggestionType.Accepted, title: "Accepted Suggestions")
         });
   }
 }
