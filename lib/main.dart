@@ -6,15 +6,15 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:musicroom/routes.dart';
 import 'package:musicroom/screens/authentication.dart';
+import 'package:musicroom/screens/events.dart';
 import 'package:musicroom/screens/home.dart';
 import 'package:musicroom/screens/notifications.dart';
 import 'package:musicroom/screens/search.dart';
+import 'package:musicroom/screens/suggestion_list.dart';
 import 'package:musicroom/styles.dart';
 import 'package:musicroom/utils.dart';
 import 'package:musicroom/utils/models.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-
-
 
 void main() {
   LicenseRegistry.addLicense(() async* {
@@ -31,15 +31,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
         title: 'Flutter Demo',
         theme: ThemeData(
-            // This is the theme of your application.
-            //
-            // Try running your application with "flutter run". You'll see the
-            // application has a blue toolbar. Then, without quitting the app, try
-            // changing the primarySwatch below to Colors.green and then invoke
-            // "hot reload" (press "r" in the console where you ran "flutter run",
-            // or simply save your changes to "hot reload" in a Flutter IDE).
-            // Notice that the counter didn't reset back to zero; the application
-            // is not restarted.
             scaffoldBackgroundColor: Colors.black,
             primarySwatch: Colors.blue,
             textTheme: GoogleFonts.workSansTextTheme(
@@ -49,7 +40,7 @@ class MyApp extends StatelessWidget {
               displayColor: Colors.white,
             )),
         debugShowCheckedModeBanner: false,
-        home: SplashScreen(),
+        home: SuggestionScreen(),
         routes: <String, WidgetBuilder>{
           Routes.home: (BuildContext context) => new HomeScreen(),
           Routes.onboarding: (BuildContext context) => OnBoardingPage(),

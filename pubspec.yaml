@@ -28,6 +28,8 @@ dependencies:
   iconly: ^1.0.1
   file_picker:
   hive:
+  focused_menu:
+  flutter_feather_icons:
 #  overlay_group_avatar: ^0.0.2
 
 
