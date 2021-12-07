@@ -1,4 +1,5 @@
 enum UserType { partyOrganizer, partyGuest }
+const String baseUrl = "https://musicroomweb.herokuapp.com/api";
 
 class User {
   UserType userType;

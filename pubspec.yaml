@@ -30,6 +30,7 @@ dependencies:
   hive:
   focused_menu:
   flutter_feather_icons:
+  shared_preferences:
 #  overlay_group_avatar: ^0.0.2
 
 
