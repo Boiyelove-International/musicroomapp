@@ -5,12 +5,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:musicroom/routes.dart';
+import 'package:musicroom/screens/advert.dart';
 import 'package:musicroom/screens/authentication.dart';
 import 'package:musicroom/screens/events.dart';
 import 'package:musicroom/screens/home.dart';
 import 'package:musicroom/screens/notifications.dart';
+import 'package:musicroom/screens/playlist.dart';
+import 'package:musicroom/screens/premium.dart';
+import 'package:musicroom/screens/profile.dart';
 import 'package:musicroom/screens/search.dart';
 import 'package:musicroom/screens/suggestion_list.dart';
+import 'package:musicroom/screens/yourRoom.dart';
 import 'package:musicroom/styles.dart';
 import 'package:musicroom/utils.dart';
 import 'package:musicroom/utils/models.dart';
@@ -33,11 +38,13 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
             scaffoldBackgroundColor: Colors.black,
             primarySwatch: Colors.blue,
+            fontFamily: GoogleFonts.workSans().fontFamily,
             textTheme: GoogleFonts.workSansTextTheme(
               Theme.of(context).textTheme,
             ).apply(
               bodyColor: Colors.white,
               displayColor: Colors.white,
+              fontFamily: GoogleFonts.workSans().fontFamily,
             )),
         debugShowCheckedModeBanner: false,
         home: SplashScreen(),
@@ -50,9 +57,15 @@ class MyApp extends StatelessWidget {
           Routes.forgotPassword: (BuildContext context) => ForgotPassword(),
           Routes.notifications: (BuildContext context) => NotificationScreen(),
           Routes.search: (BuildContext context) => SearchResultScreen(),
+          Routes.profile: (BuildContext context) => ProfileScreen(),
           Routes.eventDetail: (BuildContext context) => EventDetail(),
           Routes.allSuggestions: (BuildContext context) => SuggestionScreen(title: "All Suggestions", suggestionType: SuggestionType.All,),
-          Routes.acceptedSuggestions: (BuildContext context) => SuggestionScreen(suggestionType: SuggestionType.Accepted, title: "Accepted Suggestions")
+          Routes.acceptedSuggestions: (BuildContext context) => SuggestionScreen(suggestionType: SuggestionType.Accepted, title: "Accepted Suggestions"),
+          Routes.partyPlaylist: (BuildContext context) => PartyPlayList(),
+          Routes.premium:  (BuildContext context) => PremiumScreen(),
+          Routes.subscription: (BuildContext context) => SubscriptionScreen(),
+          Routes.yourRoom:  (BuildContext context) => YourRoom(),
+          Routes.advert:  (BuildContext context) => Advert(),
         });
   }
 }
@@ -107,17 +120,27 @@ class OnboardPageModel extends StatelessWidget {
   });
 
   Widget build(BuildContext context) {
+    final TextStyle headline4 = Theme.of(context).textTheme.headline4!;
+    final TextStyle subtitle2 = Theme.of(context).textTheme.subtitle2!;
     return Padding(
         padding: EdgeInsets.all(5),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Padding(
-              padding: EdgeInsets.all(20),
-              child: Center(child: Image.asset("$image"))),
+              padding: EdgeInsets.all(2),
+              child: Container(
+                height: MediaQuery.of(context).size.height * 0.5,
+                decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage("$image"),
+                  fit: BoxFit.contain
+                )
+                ),
+              )),
           SizedBox(height: 10),
           Text("$heading",
-              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+              style: GoogleFonts.workSans(textStyle: headline4, fontWeight: FontWeight.w700, height:1.3)),
           SizedBox(height: 25),
-          Text("$subtitle", style: TextStyle(fontSize: 14)),
+          Text("$subtitle", style: GoogleFonts.workSans(textStyle: subtitle2, fontWeight: FontWeight.w300, height:2)),
         ]));
   }
 }
@@ -133,6 +156,7 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
   int curr_page = 0;
   PageController _onboardPagesController = PageController(initialPage: 0);
   late Timer _timer;
+
 
   List<Widget> _onboardPages = [
     OnboardPageModel(
@@ -211,7 +235,7 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
                                 backgroundColor: MaterialStateProperty.all<Color>(
                                     Colors.transparent),
                                 padding: MaterialStateProperty.all<EdgeInsets>(
-                                    EdgeInsets.only(right: 40, left: 40)),
+                                    EdgeInsets.only(right: 60, left: 60, top:18, bottom: 18)),
                                 foregroundColor: MaterialStateProperty.all<Color>(
                                     DarkPalette.darkGold),
                                 shape: MaterialStateProperty.all<
@@ -223,7 +247,8 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
                               Navigator.pushReplacementNamed(
                                   context, Routes.decision);
                             },
-                            child: Text("Get Started"))
+                            child: Text("Get Started", style:GoogleFonts.workSans(fontSize: 10,
+                                fontWeight: FontWeight.w600, height: 1.3)))
                       ],
                     )
                   ],
@@ -242,6 +267,8 @@ class _DecisionPageState extends State<DecisionPage> {
 
   @override
   Widget build(BuildContext context) {
+    final TextStyle headline4 = Theme.of(context).textTheme.headline4!;
+    final TextStyle subtitle2 = Theme.of(context).textTheme.subtitle2!;
     return Scaffold(
         body: SafeArea(
             top: true,
@@ -252,10 +279,16 @@ class _DecisionPageState extends State<DecisionPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("Let's make a decision.",
-                          style: TextStyle(
-                              fontSize: 40, fontWeight: FontWeight.bold)),
+                          style: GoogleFonts.workSans(
+                            fontWeight: FontWeight.w700,
+                            textStyle: headline4
+                          )),
                       SizedBox(height: 20),
-                      Text("What would you be suing this application as"),
+                      Text("What would you be suing this application as",
+                      style: GoogleFonts.workSans(
+                        textStyle: subtitle2,
+                        fontWeight: FontWeight.w300
+                      ),),
                       SizedBox(height: 50),
                       Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -298,10 +331,12 @@ class _DecisionPageState extends State<DecisionPage> {
                                         child: Padding(
                                             padding: EdgeInsets.all(15),
                                             child: Text("DJ / Event Center",
-                                                style: TextStyle(
+                                                style: GoogleFonts.workSans(
+                                                  textStyle: subtitle2,
                                                     color: DarkPalette.darkDark,
                                                     fontWeight:
-                                                        FontWeight.w300)))),
+                                                    FontWeight.w400
+                                                )))),
                                   ),
                                   Visibility(
                                     visible: _selectedUserType ==
@@ -361,11 +396,12 @@ class _DecisionPageState extends State<DecisionPage> {
                                           child: Padding(
                                               padding: EdgeInsets.all(15),
                                               child: Text("Event Guest",
-                                                  style: TextStyle(
-                                                      color:
-                                                          DarkPalette.darkDark,
-                                                      fontWeight:
-                                                          FontWeight.w300)))),
+                                                  style:GoogleFonts.workSans(
+                                                  textStyle: subtitle2,
+                                                  color: DarkPalette.darkDark,
+                                                  fontWeight:
+                                                  FontWeight.w400
+                                              )))),
                                     ),
                                     Visibility(
                                       visible: _selectedUserType ==
@@ -411,7 +447,12 @@ class _DecisionPageState extends State<DecisionPage> {
                                       context, Routes.registerOrganizer,
                                       arguments: _selectedUserType);
                                 },
-                                child: Text("Let's Get Going")),
+                                child: Text("Let's Get Going",
+                                    style: GoogleFonts.workSans(
+                                        fontSize: 12,
+                                        fontWeight:
+                                        FontWeight.w700
+                                    ))),
                           )
                         ],
                       )

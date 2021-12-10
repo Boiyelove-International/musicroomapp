@@ -15,7 +15,7 @@ class RegistrationForm {
   RegistrationForm(this.userType);
 }
 
-enum SuggestionType { Accepted, All }
+enum SuggestionType {Accepted, All, New, Playlist}
 enum EventDetailViewType {
   DetailView,
   Atendeesview,

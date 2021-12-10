@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
 import 'package:musicroom/styles.dart';
 
@@ -6,53 +8,77 @@ import '../routes.dart';
 
 enum Popup { searchFilter, nowPlayingFilter, eventFilter, resultFilter }
 
-class PopupWidget extends StatelessWidget {
-  Popup popup;
-  late Widget _selected;
+class PopupWidget extends StatefulWidget{
 
-  PopupWidget({required this.popup});
+  PopupWidget({Key? key, required this.popup}) : super(key: key);
+
+  Popup popup;
+
+  @override
+  _PopupWidget createState() => _PopupWidget();
+}
+class _PopupWidget extends State<PopupWidget> {
+
+  late Widget _selected;
 
 // Filter Widgets
   final Widget _filterSearchPopup = Column(children: [
-    Text("Filter Search Results"),
+    Padding(
+      padding:EdgeInsets.all(30),
+      child: Text("Filter Search Results", style: GoogleFonts.workSans(
+          fontSize: 18,
+          fontWeight: FontWeight.bold
+      ),)
+    ),
     Row(children: [
-      Icon(IconlyBold.arrow_up, color: DarkPalette.darkGold),
-      Text("Most Suggested")
+      Padding(
+        padding: EdgeInsets.all(1),
+        child: Icon(IconlyBold.arrow_up, size:35, color: DarkPalette.darkGold)
+      ),
+      SizedBox(width:20),
+      Text("Most Suggested", style: GoogleFonts.workSans(
+        fontSize: 18,
+        fontWeight: FontWeight.w300
+      ))
     ]),
+    SizedBox(height:30),
     Row(children: [
-      Icon(IconlyBold.arrow_down, color: DarkPalette.darkYellow),
-      Text("Least Suggested")
+      Padding(
+          padding: EdgeInsets.all(1),
+          child: Icon(IconlyBold.arrow_down, color: DarkPalette.darkYellow, size:35)
+      ),
+      SizedBox(width:20),
+      Text("Least Suggested", style: GoogleFonts.workSans(
+          fontSize: 18,
+          fontWeight: FontWeight.w300
+      ))
     ]),
+    SizedBox(height:30),
     Row(children: [
-      Icon(IconlyBold.arrow_up, color: DarkPalette.darkGold),
-      Text("Most Played")
+      Padding(
+          padding: EdgeInsets.all(1),
+          child: Icon(IconlyBold.arrow_up, size:35, color: DarkPalette.darkGold)
+      ),
+      SizedBox(width:20),
+      Text("Most Played", style: GoogleFonts.workSans(
+          fontSize: 18,
+          fontWeight: FontWeight.w300
+      ))
     ]),
+    SizedBox(height:30),
     Row(children: [
-      Icon(IconlyBold.arrow_down, color: DarkPalette.darkYellow),
-      Text("Least Played")
-    ])
+      Padding(
+          padding: EdgeInsets.all(1),
+          child: Icon(IconlyBold.arrow_down, color: DarkPalette.darkYellow, size:35)
+      ),
+      SizedBox(width:20),
+      Text("Least Played", style: GoogleFonts.workSans(
+          fontSize: 18,
+          fontWeight: FontWeight.w300
+      ))
+    ]),
   ]);
 
-  final Widget _nowPlayingPopup = Column(children: [
-    Container(
-      child: Image.asset("assets/images/event_imagery_banner.png"),
-    ),
-    Text("Essence ft Tems"),
-    Text("Single - Wizkid"),
-    Row(children: [
-      Flexible(child: Text("0:12")),
-      Flexible(child: LinearProgressIndicator(value: 40)),
-      Flexible(child: Text("0:30"))
-    ]),
-    Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        IconButton(onPressed: null, icon: Icon(IconlyBold.arrow_left_circle)),
-        IconButton(onPressed: null, icon: Icon(IconlyBold.play)),
-        IconButton(onPressed: null, icon: Icon(IconlyBold.arrow_right_circle))
-      ],
-    )
-  ]);
 
   final Widget _filterEventPopup = Column(children: [
     Text("Filter Search Results"),
@@ -92,9 +118,108 @@ class PopupWidget extends StatelessWidget {
       Text("Newly Suggested")
     ]),
   ]);
+  double sliderValue = 50.0;
 
   @override
   Widget build(BuildContext context) {
+    final popup = widget.popup;
+    Widget _nowPlayingPopup = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          height: MediaQuery.of(context).size.height * 0.292,
+          padding: EdgeInsets.all(20),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              image: DecorationImage(
+                  image: AssetImage(
+                    "assets/images/player_art.png",
+                  ),
+                  fit: BoxFit.contain
+              )
+          ),
+        ),
+        Text("Essence ft Tems", style: GoogleFonts.workSans(
+          fontWeight: FontWeight.w700,
+          fontSize: 20,
+          height:2
+        ),),
+        Text("Single - Wizkid", style: GoogleFonts.workSans(
+            fontWeight: FontWeight.w300,
+            fontSize: 14,
+            height:2
+        )),
+    Row(
+    children: [
+    Text("0:12"),
+    Flexible(child: Slider(value: sliderValue, activeColor: Colors.amber, inactiveColor: Colors.white,
+        max:100,onChanged:(double value){
+        setState(() {
+          sliderValue = value;
+        });
+
+    })),
+    Text("0:30"),
+    ],
+    ),
+       Padding(
+         padding:EdgeInsets.only(left:30,top:10, bottom:10, right:30),
+         child: Row(
+           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+           children: [
+             Container(
+               padding: EdgeInsets.all(13),
+
+               decoration: BoxDecoration(
+                   shape: BoxShape.circle,
+                   image: DecorationImage(
+                       image: AssetImage(
+                           "assets/images/backward_icon.png"
+                       ),
+                       fit: BoxFit.contain
+                   )
+               ),
+               child: Center(
+                 child: Text("5s", style:TextStyle(fontSize: 10), textAlign: TextAlign.center,),
+               ),
+             ),
+             Container(
+               margin: EdgeInsets.only(left:10),
+               height: 50,
+               width:50,
+               decoration: BoxDecoration(
+                   image: DecorationImage(
+                       image: AssetImage(
+                           "assets/images/play_icon.png"
+                       ),
+                       fit: BoxFit.contain
+                   )
+               ),
+             ),
+             Container(
+               padding: EdgeInsets.all(13),
+
+               decoration: BoxDecoration(
+                   shape: BoxShape.circle,
+                   image: DecorationImage(
+                       image: AssetImage(
+                           "assets/images/forward_icon.png"
+                       ),
+                       fit: BoxFit.contain
+                   )
+               ),
+               child: Center(
+                 child: Text("5s", style:TextStyle(fontSize: 10), textAlign: TextAlign.center,),
+               ),
+             )
+           ],
+         )
+       )
+      ],
+    );
+
+
     switch (popup) {
       case Popup.eventFilter:
         _selected = _filterEventPopup;
@@ -112,14 +237,15 @@ class PopupWidget extends StatelessWidget {
         decoration: BoxDecoration(
             color: Colors.black,
             borderRadius: new BorderRadius.only(
-              topLeft: const Radius.circular(40.0),
-              topRight: const Radius.circular(40.0),
+              topLeft: const Radius.circular(35.0),
+              topRight: const Radius.circular(35.0),
             )),
-        padding: EdgeInsets.only(top: 30, left: 20, right: 20, bottom: 20),
+        padding: EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 20),
         height: MediaQuery.of(context).size.height * 0.6,
         child: _selected);
   }
 }
+
 
 class CreateEventForm extends StatefulWidget {
   @override

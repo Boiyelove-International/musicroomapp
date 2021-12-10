@@ -23,6 +23,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final TextStyle headline4 = Theme.of(context).textTheme.headline4!;
+    final TextStyle subtitle2 = Theme.of(context).textTheme.subtitle2!;
     final _userType = ModalRoute.of(context)!.settings.arguments;
     switch (_userType) {
       case UserType.partyOrganizer:
@@ -43,11 +45,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
       padding: EdgeInsets.only(top: 15, bottom: 20, left: 10, right: 10),
       children: [
         Text("Let's get you setup",
-            style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
+            style: GoogleFonts.workSans(
+                fontWeight: FontWeight.w700,
+                textStyle: headline4
+            )),
         SizedBox(height: 20),
         Text(
-            'Kindly provide the necessary details to get your account up and running'),
-        SizedBox(height: 30),
+            'Kindly provide the necessary details to get your account up and running',
+            style: GoogleFonts.workSans(
+                fontWeight: FontWeight.w300,
+                fontSize: 16,
+                height: 1.8
+            )),
+        SizedBox(height: 60),
         TextFormField(
           controller: _organizerName,
           textCapitalization: TextCapitalization.characters,
@@ -59,11 +69,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
           // textAlign: TextAlign.center,
           decoration: new InputDecoration(
             floatingLabelBehavior: FloatingLabelBehavior.always,
-            labelStyle: TextStyle(color: Colors.white),
+            labelStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
             focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.grey.withOpacity(0.4))),
+                borderSide: BorderSide(color: Colors.white.withOpacity(0.7))),
             enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey.withOpacity(0.4)),
+              borderSide: BorderSide(color: Colors.white.withOpacity(0.7)),
             ),
             border: OutlineInputBorder(
               borderRadius: const BorderRadius.all(
@@ -71,7 +81,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
             ),
             filled: true,
-            hintStyle: TextStyle(color: Colors.grey[800]),
+            hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
             fillColor: Colors.transparent,
             contentPadding: EdgeInsets.all(16),
             labelText: "DJ/Event Organizer Name",
@@ -89,11 +99,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
           // textAlign: TextAlign.center,
           decoration: new InputDecoration(
             floatingLabelBehavior: FloatingLabelBehavior.always,
-            labelStyle: TextStyle(color: Colors.white),
+            labelStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
             focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.grey.withOpacity(0.4))),
+                borderSide: BorderSide(color: Colors.white.withOpacity(0.7))),
             enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey.withOpacity(0.4)),
+              borderSide: BorderSide(color: Colors.white.withOpacity(0.7)),
             ),
             border: OutlineInputBorder(
               borderRadius: const BorderRadius.all(
@@ -101,7 +111,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
             ),
             filled: true,
-            hintStyle: TextStyle(color: Colors.grey[800]),
+            hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
             fillColor: Colors.transparent,
             contentPadding: EdgeInsets.all(16),
             labelText: "Email Address",
@@ -119,11 +129,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
           // textAlign: TextAlign.center,
           decoration: new InputDecoration(
             floatingLabelBehavior: FloatingLabelBehavior.always,
-            labelStyle: TextStyle(color: Colors.white),
+            labelStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
             focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.grey.withOpacity(0.4))),
+                borderSide: BorderSide(color: Colors.white.withOpacity(0.7))),
             enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey.withOpacity(0.4)),
+              borderSide: BorderSide(color: Colors.white.withOpacity(0.7)),
             ),
             border: OutlineInputBorder(
               borderRadius: const BorderRadius.all(
@@ -131,15 +141,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
             ),
             filled: true,
-            hintStyle: TextStyle(color: Colors.grey[800]),
+            hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
             fillColor: Colors.transparent,
             contentPadding: EdgeInsets.all(16),
             labelText: "Password",
           ),
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 30),
         Padding(
-          padding: const EdgeInsets.all(10.0),
+          padding: const EdgeInsets.all(2.0),
           child: Container(
             decoration: BoxDecoration(
               boxShadow: [
@@ -171,17 +181,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   bottom: 10,
                 ),
                 child: Text("Sign Up",
-                    style: TextStyle(color: DarkPalette.darkDark)),
+
+                    style: GoogleFonts.workSans(
+                      color: DarkPalette.darkDark,
+                      fontWeight: FontWeight.bold
+                    )),
               ),
             ),
           ),
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 50),
         Text(
           "OR",
           textAlign: TextAlign.center,
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 40),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -196,19 +210,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
             Image.asset("assets/images/apple_icon.png"),
           ],
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 40),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("Already have an account?"),
+            Text("Already have an account?", style: GoogleFonts.workSans(
+                fontWeight: FontWeight.w300,
+                fontSize: 16
+            ),),
             SizedBox(width: 10),
+
             TextButton(
                 onPressed: () {
                   Navigator.pushReplacementNamed(context, Routes.login);
                 },
-                child: Text("Sign In")),
-            SizedBox(width: 10),
-            Text("to continue")
+                child: Text("Sign In", style: GoogleFonts.workSans(
+
+                  color: Colors.amber,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16
+                ),)),
+            Text("to continue", style: GoogleFonts.workSans(
+              fontWeight: FontWeight.w300,
+              fontSize: 16
+            ))
           ],
         )
       ],
@@ -227,19 +252,31 @@ class _LoginScreenState extends State<LoginScreen> {
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
 
+
   @override
   Widget build(BuildContext context) {
+    final TextStyle headline4 = Theme.of(context).textTheme.headline4!;
+    final TextStyle subtitle2 = Theme.of(context).textTheme.subtitle2!;
+
     return Scaffold(
         body: SafeArea(
             child: ListView(
       padding: EdgeInsets.only(top: 15, bottom: 20, left: 10, right: 10),
       children: [
         Text("Welcome Back",
-            style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
+            style: GoogleFonts.workSans(
+                fontWeight: FontWeight.w700,
+                textStyle: headline4
+            )),
         SizedBox(height: 20),
         Text(
-            'Kindly provide the necessary details to get your account up and running'),
-        SizedBox(height: 30),
+            'Kindly provide the necessary details to  return to your activities',
+            style: GoogleFonts.workSans(
+                fontWeight: FontWeight.w300,
+                fontSize: 16,
+                height: 1.8
+            )),
+        SizedBox(height: 60),
         TextFormField(
           controller: _emailController,
           textCapitalization: TextCapitalization.characters,
@@ -251,11 +288,11 @@ class _LoginScreenState extends State<LoginScreen> {
           // textAlign: TextAlign.center,
           decoration: new InputDecoration(
             floatingLabelBehavior: FloatingLabelBehavior.always,
-            labelStyle: TextStyle(color: Colors.white),
+            labelStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
             focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.grey.withOpacity(0.4))),
+                borderSide: BorderSide(color: Colors.white.withOpacity(0.7))),
             enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey.withOpacity(0.4)),
+              borderSide: BorderSide(color: Colors.white.withOpacity(0.7)),
             ),
             border: OutlineInputBorder(
               borderRadius: const BorderRadius.all(
@@ -263,13 +300,13 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             filled: true,
-            hintStyle: TextStyle(color: Colors.grey[800]),
+            hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
             fillColor: Colors.transparent,
             contentPadding: EdgeInsets.all(16),
             labelText: "Email Address",
           ),
         ),
-        SizedBox(height: 30),
+        SizedBox(height: 40),
         TextFormField(
           controller: _passwordController,
           textCapitalization: TextCapitalization.characters,
@@ -281,11 +318,11 @@ class _LoginScreenState extends State<LoginScreen> {
           // textAlign: TextAlign.center,
           decoration: new InputDecoration(
             floatingLabelBehavior: FloatingLabelBehavior.always,
-            labelStyle: TextStyle(color: Colors.white),
+            labelStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
             focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.grey.withOpacity(0.4))),
+                borderSide: BorderSide(color: Colors.white.withOpacity(0.7))),
             enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey.withOpacity(0.4)),
+              borderSide: BorderSide(color: Colors.white.withOpacity(0.7)),
             ),
             border: OutlineInputBorder(
               borderRadius: const BorderRadius.all(
@@ -293,7 +330,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             filled: true,
-            hintStyle: TextStyle(color: Colors.grey[800]),
+            hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
             fillColor: Colors.transparent,
             contentPadding: EdgeInsets.all(16),
             labelText: "Password",
@@ -308,11 +345,16 @@ class _LoginScreenState extends State<LoginScreen> {
                   Navigator.pushReplacementNamed(
                       context, Routes.forgotPassword);
                 },
-                child: Text("Forgot Password?")),
+                child: Text("Forgot Password?", style: GoogleFonts.workSans(
+                    fontWeight: FontWeight.w300,
+                    fontSize: 14,
+                    color:Colors.white
+                ),)),
           ],
         ),
+        SizedBox(height: 10),
         Padding(
-          padding: const EdgeInsets.all(10.0),
+          padding: EdgeInsets.all(2.0),
           child: Container(
             decoration: BoxDecoration(
               boxShadow: [
@@ -346,17 +388,20 @@ class _LoginScreenState extends State<LoginScreen> {
                   bottom: 10,
                 ),
                 child: Text("Sign In",
-                    style: TextStyle(color: DarkPalette.darkDark)),
+                    style: GoogleFonts.workSans(
+                    color: DarkPalette.darkDark,
+                    fontWeight: FontWeight.bold
+                )),
               ),
             ),
           ),
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 50),
         Text(
           "OR",
           textAlign: TextAlign.center,
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 30),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -371,19 +416,28 @@ class _LoginScreenState extends State<LoginScreen> {
             Image.asset("assets/images/apple_icon.png"),
           ],
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 40),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("Already have an account?"),
-            SizedBox(width: 5),
+            Text("Already have an account?", style: GoogleFonts.workSans(
+                fontWeight: FontWeight.w300,
+                fontSize: 16
+            )),
             TextButton(
                 onPressed: () {
                   Navigator.pushReplacementNamed(context, Routes.decision);
                 },
-                child: Text("Sign Up")),
-            SizedBox(width: 5),
-            Text("to continue")
+                child: Text("Sign Up", style: GoogleFonts.workSans(
+
+                    color: Colors.amber,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16
+                ))),
+            Text("to continue", style: GoogleFonts.workSans(
+                fontWeight: FontWeight.w300,
+                fontSize: 16
+            ))
           ],
         )
       ],

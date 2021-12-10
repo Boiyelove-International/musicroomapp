@@ -29,6 +29,7 @@ class _HomeScreen extends State<HomeScreen> {
         key: scaffoldKey,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
+          centerTitle: false,
           title: Row(
             mainAxisSize: MainAxisSize.min,
             children: [Text("Hello,"), SizedBox(width: 5), Text("PartyMixers")],
@@ -37,7 +38,9 @@ class _HomeScreen extends State<HomeScreen> {
             Row(
               children: <Widget>[
                 InkWell(
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.of(context).pushNamed(Routes.profile);
+                    },
                     child: Container(
                         height: 30,
                         width: 30,
@@ -134,13 +137,18 @@ class _HomeScreen extends State<HomeScreen> {
                                   angle: 90 * math.pi / 180,
                                   child: IconButton(
                                       onPressed: () {
-                                        scaffoldKey.currentState!
-                                            .showBottomSheet(
-                                                (context) => PopupWidget(
-                                                      popup: Popup.searchFilter,
-                                                    ),
-                                                backgroundColor:
-                                                    Colors.transparent);
+                                        showFab = false;
+                                        showModalBottomSheet(context: context,
+                                            backgroundColor:
+                                            Colors.transparent,
+                                            builder: (context){
+                                          return PopupWidget(
+                                            popup: Popup.searchFilter,
+                                          );
+                                        }).whenComplete(() => setState((){
+                                          showFab = true;
+                                        }));
+
                                       },
                                       icon: Icon(
                                         IconlyBold.filter,

@@ -124,16 +124,20 @@ class _EventDetail extends State<EventDetail> {
                   Positioned(
                     right: 0,
                     bottom: -40,
-                    child: Container(
-                      height: 80,
-                      width: 80,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: DarkPalette.borderGradient1,
-                      ),
-                      child: Center(
-                          child: Image.asset("assets/images/music.png",
-                              height: 100, width: 100)),
+                    child: GestureDetector(
+                      onTap: (){
+                        Navigator.of(context).pushNamed(Routes.partyPlaylist);
+                      }, child:Container(
+                          height: 80,
+                          width: 80,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: DarkPalette.borderGradient1,
+                          ),
+                          child: Center(
+                              child: Image.asset("assets/images/music.png",
+                                  height: 100, width: 100)),
+                        )
                     ),
                   )
                 ],
@@ -291,7 +295,7 @@ class _EventDetail extends State<EventDetail> {
                                     ),
                                     SizedBox(
                                       width: MediaQuery.of(context).size.width *
-                                          0.05,
+                                          0.048,
                                     ),
                                     GestureDetector(
                                         onTap: () {

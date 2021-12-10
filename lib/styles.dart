@@ -19,6 +19,8 @@ class DarkPalette {
   static const Color darkGrey2 = Color(0xffABAAAA);
   static const Color darkGrey3 = Color(0xffE3E1E1);
   static const Color white = Color(0xff000000);
+  static const Color lightBlue = Color(0xff3B7AD8);
+  static const Color lightFushia = Color(0xffCD446D);
   static const Gradient borderGradient1 = LinearGradient(colors: <Color>[
     Color(0xffF9F295),
     Color(0xffE0AA3E),
