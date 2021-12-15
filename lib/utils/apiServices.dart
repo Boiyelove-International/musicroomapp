@@ -83,6 +83,7 @@ class ApiBaseHelper {
                 'Token $token',
           },
           body: json.encode(data));
+      print("response is ${response.body}");
       responseJson = _returnResponse(response);
     } on SocketException {
       print('No net');
@@ -93,6 +94,7 @@ class ApiBaseHelper {
   }
 
   dynamic _returnResponse(http.Response response) {
+    print("status is ${response.statusCode}");
     switch (response.statusCode) {
       case 200:
         var responseJson = json.decode(response.body.toString());
@@ -100,7 +102,6 @@ class ApiBaseHelper {
         return responseJson;
       case 201:
         var responseJson = json.decode(response.body.toString());
-        print(responseJson);
         return responseJson;
       case 400:
         throw BadRequestException(response.body.toString());
