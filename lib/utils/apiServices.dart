@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AppException implements Exception {
   final _message;
@@ -46,7 +47,8 @@ class ApiResponse<T> {
 enum Status { LOADING, COMPLETED, ERROR }
 
 class ApiBaseHelper {
-  final String _baseUrl = "https://musicroomweb.herokuapp.com/apit";
+  final String _baseUrl = "http://127.0.0.1:8000/api";
+  // final String _baseUrl = "https://musicroomweb.herokuapp.com/api";
 
   Future<dynamic> get(String url) async {
     print('Api Get, url $url');
@@ -71,11 +73,14 @@ class ApiBaseHelper {
   Future<dynamic> post(String url, Map<String, dynamic> data) async {
     print('Api Post, url $url');
     var responseJson;
+    SharedPreferences pref  = await SharedPreferences.getInstance();
+    String? token = await pref.getString("token");
     try {
       final response = await http.post(Uri.parse(_baseUrl + url),
           headers: {
+            "Content-Type": "application/json",
             HttpHeaders.authorizationHeader:
-                'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3R1c2VyQGJvaXllbG92ZS53ZWJzaXRlIiwibmFtZWlkIjoiNjE2MWQ0ZjYwMDYxNjdkYTNiM2E0YmJhIiwicm9sZSI6IkFkbWluIiwibmJmIjoxNjMzODAxNDYyLCJleHAiOjE2NTIxMTgyNjIsImlhdCI6MTYzMzgwMTQ2Mn0.hXatLjuc0puyFXar_Czu0-tLF2gweOGals0bNOfF8tg',
+                'Token $token',
           },
           body: json.encode(data));
       responseJson = _returnResponse(response);
@@ -90,6 +95,10 @@ class ApiBaseHelper {
   dynamic _returnResponse(http.Response response) {
     switch (response.statusCode) {
       case 200:
+        var responseJson = json.decode(response.body.toString());
+        print(responseJson);
+        return responseJson;
+      case 201:
         var responseJson = json.decode(response.body.toString());
         print(responseJson);
         return responseJson;

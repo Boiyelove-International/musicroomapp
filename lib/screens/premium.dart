@@ -14,12 +14,10 @@ class SubscriptionScreen extends StatefulWidget {
 }
 
 class _SubscriptionScreen extends State<SubscriptionScreen> {
-  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: scaffoldKey,
       body: SafeArea(
           top: true,
           bottom: true,
@@ -191,12 +189,10 @@ class PremiumScreen extends StatefulWidget {
 }
 
 class _PremiumScreen extends State<PremiumScreen> {
-  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: scaffoldKey,
       body: SafeArea(
           top: true,
           bottom: true,

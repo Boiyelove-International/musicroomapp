@@ -21,12 +21,11 @@ class SuggestionScreen extends StatefulWidget {
 }
 
 class _SuggestionScreen extends State<SuggestionScreen> {
-  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: scaffoldKey,
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(IconlyBold.arrow_left),
@@ -184,5 +183,220 @@ class _SuggestionScreen extends State<SuggestionScreen> {
             itemCount: 5),
       ),
     );
+  }
+}
+
+class SongSuggestion extends StatelessWidget{
+  SongSuggestion({
+    this.color=DarkPalette.darkGrey1,
+    this.suggestionType = SuggestionType.All,
+    this.showTrailing = true,
+    this.userType = UserType.partyGuest
+  });
+
+  Color color;
+  SuggestionType suggestionType;
+  bool showTrailing;
+  UserType userType;
+  late List<FocusedMenuItem> menuItems;
+  IconData menuIcon = Icons.more_vert;
+
+
+  @override
+  Widget build(context){
+    switch (suggestionType){
+      case SuggestionType.Accepted: {
+        if (userType == UserType.partyGuest){
+          menuIcon = IconlyBold.plus;
+          menuItems = <FocusedMenuItem>[
+            FocusedMenuItem(
+                title: Text(
+                  "Remove this song",
+                  style: TextStyle(
+                      color: Colors.white),
+                ),
+                onPressed: () {}),
+          ];
+        }
+      }
+      break;
+      case SuggestionType.All:{
+        if (userType == UserType.partyOrganizer){
+          menuItems = <FocusedMenuItem>[
+            FocusedMenuItem(
+                title: Text(
+                  "Cool! I'm gonna play this",
+                  style: TextStyle(
+                      color: Colors.black),
+                ),
+                onPressed: () {}),
+            FocusedMenuItem(
+                title: Text(
+                    "Oops! can't play this song",
+                    style: TextStyle(
+                        color: Colors.black)),
+                onPressed: () {})
+          ];
+        }
+        if (userType == UserType.partyGuest){
+          menuIcon = IconlyBold.plus;
+          menuItems = <FocusedMenuItem>[
+            FocusedMenuItem(
+                title: Text(
+                  "Cool! I'm gonna play this",
+                  style: TextStyle(
+                      color: Colors.black),
+                ),
+                onPressed: () {}),
+            FocusedMenuItem(
+                title: Text(
+                    "Oops! can't play this song",
+                    style: TextStyle(
+                        color: Colors.black)),
+                onPressed: () {})
+          ];
+        }
+      }
+      break;
+      case SuggestionType.New:{
+
+      }
+      break;
+    }
+    return Container(
+        padding: EdgeInsets.all(10),
+        decoration: BoxDecoration(
+            color: DarkPalette.darkGrey1,
+            borderRadius: BorderRadius.circular(15)),
+        child: Row(children: [
+          Container(
+            height: 90,
+            width: 90,
+            decoration: BoxDecoration(
+                image: DecorationImage(
+                    fit: BoxFit.cover,
+                    image: AssetImage(
+                        "assets/images/album_art_1.png"))),
+          ),
+          SizedBox(width: 10),
+          Flexible(
+            child: Column(
+              // mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      "Implication",
+                      style: TextStyle(
+                          fontSize:
+                          MediaQuery.of(context).size.width *
+                              0.05,
+                          fontWeight: FontWeight.w900),
+                    ),
+                    Spacer(),
+                    this.showTrailing ? FocusedMenuHolder(
+                        openWithTap: true,
+                        child: Container(
+                          padding: EdgeInsets.all(5),
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: DarkPalette.borderGradient1),
+                          child: Center(
+                            child: Icon(menuIcon,
+                                size: 15, color: Colors.white),
+                          ),
+                        ),
+                        onPressed: () {},
+                        menuItems: menuItems
+                    ) : Container()
+                  ],
+                ),
+                SizedBox(
+                    height: MediaQuery.of(context).size.width * 0.02),
+                Text("Single - Burna Boy",
+                    style: TextStyle(
+                        fontSize: MediaQuery.of(context).size.width *
+                            0.028)),
+                SizedBox(
+                    height: MediaQuery.of(context).size.width * 0.02),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Flexible(
+                        child: Container(
+                          width: MediaQuery.of(context).size.width * 0.26,
+                          height: 20,
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Positioned(
+                                  left: 0,
+                                  child: CircleAvatar(
+                                    radius: 12,
+                                    backgroundImage: AssetImage(
+                                        "assets/images/circle_avatar_1.png"),
+                                  )),
+                              Positioned(
+                                  left: 15,
+                                  child: CircleAvatar(
+                                    radius: 12,
+                                    backgroundImage: AssetImage(
+                                        "assets/images/circle_avatar_2.png"),
+                                  )),
+                              Positioned(
+                                  left: 35,
+                                  child: CircleAvatar(
+                                    radius: 12,
+                                    backgroundImage: AssetImage(
+                                        "assets/images/circle_avatar_3.png"),
+                                  )),
+                              Positioned(
+                                  left: 55,
+                                  child: CircleAvatar(
+                                    radius: 12,
+                                    backgroundImage: AssetImage(
+                                        "assets/images/circle_avatar_1.png"),
+                                  )),
+                            ],
+                          ),
+                        )),
+                    Text(
+                      "3000+ people suggested",
+                      style: TextStyle(fontSize: 10),
+                    )
+                  ],
+                )
+              ],
+            ),
+          )
+        ]));
+  }
+}
+
+class SongSuggestionList extends StatelessWidget{
+  SongSuggestionList({required this.itemCount, this.isScrollable = false, this.title, this.color=DarkPalette.darkGrey1 });
+  int itemCount;
+  bool isScrollable;
+  String? title;
+  Color color;
+
+
+  @override
+  Widget build(context){
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: !isScrollable ? NeverScrollableScrollPhysics() : null,
+        itemBuilder: (context, index){
+        if (title != null && index==0){
+          return Text("$title");
+        }
+      return SongSuggestion(
+        color: color,
+      );
+    }, separatorBuilder: (context, index){
+      return SizedBox(height:20);
+    }, itemCount: title != null ? itemCount + 1 : itemCount );
   }
 }

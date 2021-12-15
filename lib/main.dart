@@ -47,9 +47,10 @@ class MyApp extends StatelessWidget {
               fontFamily: GoogleFonts.workSans().fontFamily,
             )),
         debugShowCheckedModeBanner: false,
-        home: SplashScreen(),
+        home: RegisterScreen(),
         routes: <String, WidgetBuilder>{
-          Routes.home: (BuildContext context) => new HomeScreen(),
+          Routes.guestHome: (BuildContext context) => PartyGuestHome(),
+          Routes.organizerHome: (BuildContext context) => EventOrganizerHome(),
           Routes.onboarding: (BuildContext context) => OnBoardingPage(),
           Routes.decision: (BuildContext context) => DecisionPage(),
           Routes.registerOrganizer: (BuildContext context) => RegisterScreen(),
@@ -66,6 +67,7 @@ class MyApp extends StatelessWidget {
           Routes.subscription: (BuildContext context) => SubscriptionScreen(),
           Routes.yourRoom:  (BuildContext context) => YourRoom(),
           Routes.advert:  (BuildContext context) => Advert(),
+          Routes.registerPartyGuest : (BuildContext context) => RegisterPartyGuest(),
         });
   }
 }
@@ -422,6 +424,7 @@ class _DecisionPageState extends State<DecisionPage> {
                                 )),
                           ]),
                       SizedBox(height: 50),
+                      _selectedUserType == UserType.partyOrganizer ?
                       Row(
                         children: [
                           Expanded(
@@ -443,9 +446,9 @@ class _DecisionPageState extends State<DecisionPage> {
                                         borderRadius: BorderRadius.circular(5.0),
                                         side: BorderSide(color: DarkPalette.darkGold)))),
                                 onPressed: () {
-                                  Navigator.pushReplacementNamed(
-                                      context, Routes.registerOrganizer,
-                                      arguments: _selectedUserType);
+                                  Navigator.of(context).pushNamed(
+                                      Routes.registerOrganizer);
+
                                 },
                                 child: Text("Let's Get Going",
                                     style: GoogleFonts.workSans(
@@ -455,7 +458,48 @@ class _DecisionPageState extends State<DecisionPage> {
                                     ))),
                           )
                         ],
-                      )
+                      ) : Row(children: [
+                        Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                boxShadow: [
+                                  BoxShadow(
+                                      color: Colors.black26,
+                                      offset: Offset(0, 4),
+                                      blurRadius: 5.0)
+                                ],
+                                gradient: DarkPalette.borderGradient1,
+                                // color: Colors.deepPurple.shade300,
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                              child: ElevatedButton(
+                                style: ButtonStyle(
+                                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                    RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5.0),
+                                    ),
+                                  ),
+                                  minimumSize: MaterialStateProperty.all(Size(50, 50)),
+                                  backgroundColor: MaterialStateProperty.all(Colors.transparent),
+                                  // elevation: MaterialStateProperty.all(3),
+                                  shadowColor: MaterialStateProperty.all(Colors.transparent),
+                                ),
+                                onPressed: () {
+                                  Navigator.of(context).pushNamed(
+                                      Routes.guestHome);
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: 10,
+                                    bottom: 10,
+                                  ),
+                                  child: Text("Let's get going",
+                                      style: TextStyle(
+                                          color: Colors.black, fontWeight: FontWeight.bold)),
+                                ),
+                              ),
+                            ))
+                      ])
                     ]))));
   }
 }

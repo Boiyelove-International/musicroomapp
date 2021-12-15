@@ -17,7 +17,6 @@ class PartyPlayList extends StatefulWidget {
 }
 
 class _PartyPlayList extends State<PartyPlayList> {
-  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   SuggestionType playlistType = SuggestionType.New;
 
   @override
@@ -54,11 +53,12 @@ class _PartyPlayList extends State<PartyPlayList> {
                               alignment: Alignment.topRight,
                               child: IconButton(
                                   onPressed: () {
-                                    scaffoldKey.currentState!.showBottomSheet(
-                                            (context) => PopupWidget(
-                                          popup: Popup.resultFilter,
-                                        ),
-                                        backgroundColor: Colors.transparent);
+                                    showModalBottomSheet(
+                                        backgroundColor: Colors.transparent,
+                                        context: context, builder:(context) => PopupWidget(
+                                      popup: Popup.resultFilter,
+                                    ));
+
                                   },
                                   icon: Icon(
                                       IconlyBold.filter,
@@ -257,11 +257,11 @@ class _PartyPlayList extends State<PartyPlayList> {
                             alignment: Alignment.topRight,
                             child: IconButton(
                                 onPressed: () {
-                                  scaffoldKey.currentState!.showBottomSheet(
-                                          (context) => PopupWidget(
-                                        popup: Popup.searchFilter,
-                                      ),
-                                      backgroundColor: Colors.transparent);
+                                  showModalBottomSheet(
+                                      backgroundColor: Colors.transparent,
+                                      context: context, builder:(context) => PopupWidget(
+                                    popup: Popup.searchFilter,
+                                  ));
                                 },
                                 icon: Icon(
                                     IconlyBold.filter,
@@ -955,7 +955,6 @@ class _PartyPlayList extends State<PartyPlayList> {
 
     }
     return Scaffold(
-      key: scaffoldKey,
       body: SafeArea(
         top: true,
         bottom: true,

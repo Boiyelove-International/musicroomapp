@@ -31,6 +31,7 @@ dependencies:
   focused_menu:
   flutter_feather_icons:
   shared_preferences:
+  email_validator: "^2.0.0"
 #  overlay_group_avatar: ^0.0.2
 
 

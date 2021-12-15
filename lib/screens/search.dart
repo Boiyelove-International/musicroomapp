@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:iconly/iconly.dart';
 import 'package:musicroom/screens/popups.dart';
 import 'package:musicroom/styles.dart';
+import 'package:musicroom/utils/models.dart';
 
 class SearchResultScreen extends StatefulWidget {
   static const String routeName = "/search";
@@ -12,12 +13,11 @@ class SearchResultScreen extends StatefulWidget {
 }
 
 class _SearchResultScreen extends State<SearchResultScreen> {
-  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-
+  UserType _userType = UserType.partyOrganizer;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: scaffoldKey,
+
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(IconlyBold.arrow_left),
@@ -34,11 +34,11 @@ class _SearchResultScreen extends State<SearchResultScreen> {
               angle: 90 * math.pi / 180,
               child: IconButton(
                   onPressed: () {
-                    scaffoldKey.currentState!.showBottomSheet(
-                        (context) => PopupWidget(
-                              popup: Popup.searchFilter,
-                            ),
-                        backgroundColor: Colors.transparent);
+                    showModalBottomSheet(
+                        backgroundColor: Colors.transparent,
+                        context: context, builder:(context) => PopupWidget(
+                      popup: Popup.searchFilter,
+                    ));
                   },
                   icon: Icon(
                     IconlyBold.filter,
@@ -52,7 +52,21 @@ class _SearchResultScreen extends State<SearchResultScreen> {
         child: ListView.separated(
             padding: EdgeInsets.only(top: 30, left: 18, right: 18),
             itemBuilder: (context, index) {
-              return Container(
+              return GestureDetector(
+                  onTap: (){
+                    showModalBottomSheet(
+                        context: context,
+                        backgroundColor: Colors.transparent,
+                        builder: (context){
+                        return PopupWidget(
+                            popup: Popup.nowPlayingFilter,
+                            userType: UserType.partyGuest,
+                            height: 0.7
+                        );
+                        });
+
+                  },
+                  child:Container(
                   padding: EdgeInsets.all(5),
                   decoration: BoxDecoration(
                       color: DarkPalette.darkGrey1,
@@ -62,7 +76,20 @@ class _SearchResultScreen extends State<SearchResultScreen> {
                         Image.asset("assets/images/album_art_${index + 1}.png"),
                     title: Text("Focus"),
                     subtitle: Text("Single - Joe Boy"),
-                  ));
+                    trailing: _userType == UserType.partyOrganizer ? Container(
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                            gradient: DarkPalette.borderGradient1,
+                            shape: BoxShape.circle
+                        ),
+                        child: Icon(
+                          IconlyBold.plus,
+                          size: 20,
+                          color: Colors.white,
+                        )
+                    ) : null,
+
+                  )));
             },
             separatorBuilder: (context, index) {
               return SizedBox(height: 30);

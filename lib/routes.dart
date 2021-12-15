@@ -14,7 +14,8 @@ import 'package:musicroom/screens/yourRoom.dart';
 class Routes {
   // static String splash = OnBoardingPage.routeName;
   static String onboarding = OnBoardingPage.routeName;
-  static String home = HomeScreen.routeName;
+  static String organizerHome = EventOrganizerHome.routeName;
+  static String guestHome = PartyGuestHome.routeName;
   static String decision = DecisionPage.routeName;
   static String registerOrganizer = RegisterScreen.routeName;
   static String login = LoginScreen.routeName;
@@ -30,4 +31,5 @@ class Routes {
   static String advert = Advert.routeName;
   static String premium = PremiumScreen.routeName;
   static String subscription = SubscriptionScreen.routeName;
+  static String registerPartyGuest =  RegisterPartyGuest.routeName;
 }

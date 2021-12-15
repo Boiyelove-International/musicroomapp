@@ -1,12 +1,14 @@
-import 'dart:math' as math;
 
+
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
-import 'package:musicroom/screens/popups.dart';
 import 'package:musicroom/styles.dart';
+import 'package:musicroom/utils/apiServices.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../routes.dart';
 
@@ -17,14 +19,32 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreen extends State<ProfileScreen> {
-  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  String _enteredText = '';
+  String? email = "partymixers@gmail.com";
+  String? display_name = "PartyMixers";
+  TextEditingController displayNameController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  late SharedPreferences prefs;
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  _loadData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      display_name  = prefs.getString("display_name");
+      email = prefs.getString("email");
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(length: 2,
         initialIndex: 0,
         child: Scaffold(
-      key: scaffoldKey,
       appBar: AppBar(
         centerTitle: false,
         leading: IconButton(
@@ -104,16 +124,50 @@ class _ProfileScreen extends State<ProfileScreen> {
                                     builder: (context) {
                                       return AlertDialog(
                                         actions: [
-                                      TextButton(
-                                      child: Text("OK"),
-                                      onPressed: () { },
-                                      ),
                                           TextButton(
-                                            child: Text("Cancel"),
+                                            child: Text("Cancel",
+                                              style: GoogleFonts.workSans(
+                                                  fontSize: 18,
+                                                  color: Colors.grey
+                                              ),),
+
                                             onPressed: () {
                                               Navigator.pop(context);
                                             },
-                                          )
+                                          ),
+                                      TextButton(
+                                      child: Text("OK", style: GoogleFonts.workSans(
+                                        fontSize: 18,
+                                          color: Colors.amber
+                                      )),
+                                      onPressed: () async {
+                                        //Display name alert dialogue
+                                        // print("something happened");
+
+                                        SharedPreferences prefs = await SharedPreferences.getInstance();
+                                        // String? token = prefs.getString("token");
+                                        // print("token is $token");
+
+                                        if (displayNameController.text != null && displayNameController.text.isNotEmpty){
+                                          ApiBaseHelper api = ApiBaseHelper();
+                                          api.post("/account-settings/change_name/", {
+                                            "display_name": displayNameController.text
+                                          }).then((data) async {
+                                            await prefs.setString("display_name", data["display_name"]);
+                                            setState(() {
+                                              display_name = data["display_name"];
+                                              Navigator.pop(context);
+                                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                                content: Text('Display name updated..', textAlign: TextAlign.center,),
+                                                backgroundColor: Colors.green,
+                                              ));
+                                            });
+                                          });
+
+                                        }
+                                      },
+                                      ),
+
                                         ],
                                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                         backgroundColor: Colors.black,
@@ -121,12 +175,31 @@ class _ProfileScreen extends State<ProfileScreen> {
                                         content: Container(
                                           padding: EdgeInsets.all(10),
                                           child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
                                             mainAxisSize: MainAxisSize.min,
                                             children: <Widget>[
                                               SizedBox(height: 20),
-                                              Center(child: Text('Leaderboard')),
-                                              SizedBox(height: 20),
-                                              Text("This thing and that")
+                                              Text('Change Display Name',  style: GoogleFonts.workSans(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.bold
+                                              ),),
+                                          TextField(
+                                            controller: displayNameController,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                _enteredText = value;
+                                              });
+                                            },
+                                            decoration: InputDecoration(
+                                              enabledBorder: UnderlineInputBorder(
+                                                borderSide: BorderSide(color: DarkPalette.darkYellow),
+                                              ),
+                                              focusedBorder: UnderlineInputBorder(
+                                                borderSide: BorderSide(color: DarkPalette.darkYellow),
+                                              ),
+                                                counterText: '${_enteredText.length.toString()} character(s)'),
+                                          ),
+
                                             ],
                                           ),
                                         ),
@@ -141,7 +214,7 @@ class _ProfileScreen extends State<ProfileScreen> {
                                       fontWeight: FontWeight.w300,
                                       fontSize: 16
                                   )),
-                                  Text("PartyMixers", style: GoogleFonts.workSans(
+                                  Text("$display_name", style: GoogleFonts.workSans(
                                     fontWeight: FontWeight.w700,
                                     fontSize: 18
                                   ),)
@@ -161,19 +234,106 @@ class _ProfileScreen extends State<ProfileScreen> {
                                       )
                                   )
                               ),
-                              child: Row(
+                              child: GestureDetector(
+                                  onTap: (){
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return AlertDialog(
+                                          actions: [
+                                            TextButton(
+                                              child: Text("Cancel",
+                                                style: GoogleFonts.workSans(
+                                                    fontSize: 18,
+                                                    color: Colors.grey
+                                                ),),
+
+                                              onPressed: ()  async {
+                                                Navigator.pop(context);
+                                              },
+                                            ),
+                                            TextButton(
+                                              child: Text("OK", style: GoogleFonts.workSans(
+                                                  fontSize: 18,
+                                                  color: Colors.amber
+                                              )),
+                                              onPressed: () async {
+
+                                                SharedPreferences prefs = await SharedPreferences.getInstance();
+
+                                                if (EmailValidator.validate(emailController.text)){
+                                                  ApiBaseHelper api = ApiBaseHelper();
+                                                  api.post("/account-settings/change_email/", {
+                                                    "email": emailController.text
+                                                  }).then((data) async {
+                                                    await prefs.setString("email", data["email"]);
+                                                    setState(() {
+                                                      email = data["email"];
+                                                      Navigator.pop(context);
+                                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                                        content: Text('Email address updated..', textAlign: TextAlign.center,),
+                                                        backgroundColor: Colors.green,
+                                                      ));
+                                                    });
+                                                  });
+
+                                                }
+
+                                              },
+                                            ),
+
+                                          ],
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                          backgroundColor: Colors.black,
+                                          elevation: 16,
+                                          content: Container(
+                                            padding: EdgeInsets.all(10),
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: <Widget>[
+                                                SizedBox(height: 20),
+                                                Text('Change Email Address',  style: GoogleFonts.workSans(
+                                                    fontSize: 20,
+                                                    fontWeight: FontWeight.bold
+                                                ),),
+                                                TextField(
+                                                  controller: emailController,
+                                                  onChanged: (value) {
+                                                    setState(() {
+                                                      _enteredText = value;
+                                                    });
+                                                  },
+                                                  decoration: InputDecoration(
+                                                      enabledBorder: UnderlineInputBorder(
+                                                        borderSide: BorderSide(color: DarkPalette.darkYellow),
+                                                      ),
+                                                      focusedBorder: UnderlineInputBorder(
+                                                        borderSide: BorderSide(color: DarkPalette.darkYellow),
+                                                      ),
+                                                      counterText: '${_enteredText.length.toString()} character(s)'),
+                                                ),
+
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                  child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text("Email Address", style: GoogleFonts.workSans(
                                       fontWeight: FontWeight.w300,
                                       fontSize: 16
                                   ),),
-                                  Text("Partymixers@gmail.com", style: GoogleFonts.workSans(
+                                  Text("$email", style: GoogleFonts.workSans(
                                       fontWeight: FontWeight.w700,
                                       fontSize: 18
                                   ),)
                                 ],
-                              ),
+                              )),
                             ),
                             Container(
                               padding: EdgeInsets.only(
@@ -188,7 +348,118 @@ class _ProfileScreen extends State<ProfileScreen> {
                                       )
                                   )
                               ),
-                              child: Row(
+                              child: GestureDetector(
+                                  onTap: (){
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return AlertDialog(
+                                          actions: [
+                                            TextButton(
+                                              child: Text("Cancel",
+                                                style: GoogleFonts.workSans(
+                                                    fontSize: 18,
+                                                    color: Colors.grey
+                                                ),),
+
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                              },
+                                            ),
+                                            TextButton(
+                                              child: Text("SAVE", style: GoogleFonts.workSans(
+                                                  fontSize: 18,
+                                                  color: Colors.amber
+                                              )),
+                                              onPressed: () { },
+                                            ),
+
+                                          ],
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                          backgroundColor: Colors.black,
+                                          elevation: 16,
+                                          content: Container(
+                                            padding: EdgeInsets.all(10),
+                                            width: MediaQuery.of(context).size.width * 0.7,
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: <Widget>[
+                                                SizedBox(height: 20),
+                                                Text('Change Password',  style: GoogleFonts.workSans(
+                                                    fontSize: 20,
+                                                    fontWeight: FontWeight.bold
+                                                ),),
+                                                SizedBox(height: 20),
+                                                TextField(
+                                                  onChanged: (value) {
+                                                    setState(() {
+                                                      _enteredText = value;
+                                                    });
+                                                  },
+                                                  decoration: InputDecoration(
+                                                    hintText: "Old Password",
+                                                      hintStyle: GoogleFonts.workSans(
+                                                          color: Colors.grey,
+                                                          fontSize: 13
+                                                      ),
+                                                      enabledBorder: UnderlineInputBorder(
+                                                        borderSide: BorderSide(color: DarkPalette.darkYellow),
+                                                      ),
+                                                      focusedBorder: UnderlineInputBorder(
+                                                        borderSide: BorderSide(color: DarkPalette.darkYellow),
+                                                      ),
+                                                      counterText: '${_enteredText.length.toString()} character(s)'),
+                                                ),
+                                                TextField(
+                                                  onChanged: (value) {
+                                                    setState(() {
+                                                      _enteredText = value;
+                                                    });
+                                                  },
+                                                  decoration: InputDecoration(
+                                                      hintText: "New Password",
+                                                      hintStyle: GoogleFonts.workSans(
+                                                          color: Colors.grey,
+                                                          fontSize: 13
+                                                      ),
+                                                      enabledBorder: UnderlineInputBorder(
+                                                        borderSide: BorderSide(color: DarkPalette.darkYellow),
+                                                      ),
+                                                      focusedBorder: UnderlineInputBorder(
+                                                        borderSide: BorderSide(color: DarkPalette.darkYellow),
+                                                      ),
+                                                      counterText: '${_enteredText.length.toString()} character(s)'),
+                                                ),
+                                                TextField(
+                                                  onChanged: (value) {
+                                                    setState(() {
+                                                      _enteredText = value;
+                                                    });
+                                                  },
+                                                  decoration: InputDecoration(
+                                                      hintText: "Confirm New Password",
+                                                      hintStyle: GoogleFonts.workSans(
+                                                        color: Colors.grey,
+                                                        fontSize: 13
+                                                      ),
+                                                      enabledBorder: UnderlineInputBorder(
+                                                        borderSide: BorderSide(color: DarkPalette.darkYellow),
+                                                      ),
+                                                      focusedBorder: UnderlineInputBorder(
+                                                        borderSide: BorderSide(color: DarkPalette.darkYellow),
+                                                      ),
+                                                      counterText: '${_enteredText.length.toString()} character(s)'),
+                                                ),
+
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                  child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text("Change Password", style: GoogleFonts.workSans(
@@ -203,7 +474,7 @@ class _ProfileScreen extends State<ProfileScreen> {
                                     color: Colors.amber),
                                   )
                                 ],
-                              ),
+                              )),
                             ),
                             SizedBox(
                               height: 40,
