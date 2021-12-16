@@ -22,6 +22,7 @@ class Routes {
   static String forgotPassword = ForgotPassword.routeName;
   static String notifications = NotificationScreen.routeName;
   static String search = SearchResultScreen.routeName;
+  static String eventCardList = EventListScreen.routeName;
   static String eventDetail = EventDetail.routeName;
   static String allSuggestions = SuggestionScreen.routeName;
   static String acceptedSuggestions = "/acceptedSuggestions";
@@ -32,4 +33,5 @@ class Routes {
   static String premium = PremiumScreen.routeName;
   static String subscription = SubscriptionScreen.routeName;
   static String registerPartyGuest =  RegisterPartyGuest.routeName;
+  static String partyGuestProfile = PartyGuestProfile.routeName;
 }

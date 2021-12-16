@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
 import 'package:musicroom/screens/popups.dart';
+import 'package:musicroom/screens/search.dart';
 import 'package:musicroom/styles.dart';
 import 'package:musicroom/utils/models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../routes.dart';
+import 'events.dart';
 
 class EventOrganizerHome extends StatefulWidget {
   static const String routeName = "/eventOrganizerHome";
@@ -112,6 +114,7 @@ class _EventOrganizerHome extends State<EventOrganizerHome>{
                                   SizedBox(height: 20),
                                   TextFormField(
                                     autofocus: false,
+                                    style: TextStyle(color: Colors.black),
                                     decoration: InputDecoration(
                                       border: OutlineInputBorder(
                                           borderRadius: BorderRadius.circular(7.0),
@@ -365,7 +368,7 @@ class _PartyGuestHome extends State<PartyGuestHome> {
         appBar: AppBar(
           leading: InkWell(
               onTap: () {
-                Navigator.of(context).pushNamed(Routes.profile);
+                Navigator.of(context).pushNamed(Routes.partyGuestProfile);
               },
               child: Container(
                   height: 30,
@@ -404,240 +407,202 @@ class _PartyGuestHome extends State<PartyGuestHome> {
             bottom: true,
             child: Padding(
                 padding: EdgeInsets.only(top: 10, left: 10, right: 10),
-                child: CustomScrollView(slivers: [
-                  SliverToBoxAdapter(
-                    child: Container(
-                        height: MediaQuery.of(context).size.height * 0.3,
-                        margin: EdgeInsets.only(top: 20, bottom: 20),
-                        decoration: BoxDecoration(
-                            border: Border.all(),
-                            borderRadius: BorderRadius.all(Radius.circular(15)),
-                            image: DecorationImage(
-                              image: AssetImage(
-                                  "assets/images/home-gradient-bg.png"),
-                              fit: BoxFit.cover,
-                            )),
-                        padding: EdgeInsets.only(left: 15, right: 15),
-                        child: Center(
-                            child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                              Text(
-                                "Find your hits and favourties and add them to events, let's go.",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold,
-                                    height: 2),
-                              ),
-                              SizedBox(height: 20),
-                              TextFormField(
-                                autofocus: false,
-                                decoration: InputDecoration(
-                                  border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(7.0),
-                                      borderSide: BorderSide(
-                                          color: Colors.transparent)),
-                                  enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(7.0),
-                                      borderSide: BorderSide(
-                                          color: Colors.transparent)),
-                                  focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(7.0),
-                                      borderSide: BorderSide(
-                                          color: Colors.transparent)),
-                                  filled: true,
-                                  fillColor: Colors.white,
-                                  hintText: "Find those hits",
-                                  hintStyle: TextStyle(fontSize: 13),
-                                  contentPadding: EdgeInsets.only(
-                                      left: 15, right: 15, top: 5, bottom: 5),
-                                  suffixIcon: IconButton(
-                                    icon: Icon(
-                                      IconlyBold.search,
-                                      color: DarkPalette.darkGold,
-                                    ),
-                                    onPressed: () {
-                                      Navigator.of(context)
-                                          .pushNamed(Routes.search);
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ]))),
-                  ),
-                  SliverToBoxAdapter(
-                    child: Container(
-                      child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SizedBox(height:30),
-                            Row(
-                              children: [
-                                Text("Trending Suggestions", style: GoogleFonts.workSans(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w700
-                                )),
-                                Spacer(),
-                                InkWell(
-                                    child: Container(
-                                      child: Row(
-                                        children: [
-                                          Text("See All", style: TextStyle(
-                                              color: Colors.amber
-                                          )),
-                                          Icon(Icons.arrow_right,
-                                              color: Colors.amber)
-                                        ],
-                                      ),
-                                    )
-                                )
-                              ],
-                            ),
-                            SizedBox(height:30),
-                            GridView.builder(
-                                shrinkWrap: true,
-                                physics: NeverScrollableScrollPhysics(),
-                                gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                                  // maxCrossAxisExtent: 300,
-                                    mainAxisExtent: 230,
-                                    // childAspectRatio: 2 / 3,
-                                    crossAxisCount: 2,
-                                    crossAxisSpacing: 20,
-                                    mainAxisSpacing: 20),
-                                itemCount: 2,
-                                itemBuilder: (context, index){
-                                  return Container(
-                                    padding: EdgeInsets.all(15),
-                                    decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(15),
-                                        gradient: DarkPalette.borderGradient1
-
-                                    ),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Expanded(
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                  image: DecorationImage(
-                                                      image: AssetImage(
-                                                          "assets/images/album_art_7.png"
-                                                      ),
-                                                      fit: BoxFit.cover
-                                                  )
-                                              ),
-                                            )
-                                        ),
-                                        SizedBox(height:15),
-                                        Text("Essence ft. Tems", style: GoogleFonts.workSans(
-                                            color: Colors.black, fontSize: 12,
-                                            fontWeight: FontWeight.w500
-                                        )),
-                                        SizedBox(height:5),
-                                        Text("Single - Wizkid", style: GoogleFonts.workSans(
-                                            color: Colors.black, fontSize: 12,
-                                            fontWeight: FontWeight.w500
-                                        ))
-                                      ],
-                                    ),
-                                  );
-                                }),
-                            SizedBox(height:30),
-                          ]
-                      ),
-                    ),
-                  ),
-                  SliverAppBar(
-                      backgroundColor: Colors.transparent,
-                      pinned: true,
-                      flexibleSpace: Padding(
-                          padding: EdgeInsets.only(
-                              left: 5, right: 5, top: 5, bottom: 10),
-                          child: Row(
-                            children: [
-                              Text("Your Events", style: GoogleFonts.workSans(
-                                fontSize: 23,
-                                fontWeight: FontWeight.w700
-                              )),
-                              Spacer(),
-                              Transform.rotate(
-                                  angle: 90 * math.pi / 180,
-                                  child: IconButton(
-                                      onPressed: () {
-                                        showFab = false;
-                                        showModalBottomSheet(context: context,
-                                            backgroundColor:
-                                            Colors.transparent,
-                                            builder: (context){
-                                          return PopupWidget(
-                                            popup: Popup.searchFilter,
-                                          );
-                                        }).whenComplete(() => setState((){
-                                          showFab = true;
-                                        }));
-
-                                      },
-                                      icon: Icon(
-                                        IconlyBold.filter,
-                                        color: DarkPalette.darkGold,
-                                      )))
-                            ],
-                          ))),
-                  SliverGrid(
-                    gridDelegate:
-                    SliverGridDelegateWithFixedCrossAxisCount(
-                      // maxCrossAxisExtent: 300,
-                        mainAxisExtent: 230,
-                        // childAspectRatio: 2 / 3,
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 20,
-                        mainAxisSpacing: 20),
-
-                    delegate: SliverChildBuilderDelegate(
-                          (BuildContext context, int index) {
-                        return Container(
-                          padding: EdgeInsets.all(15),
+                child: ListView(
+                    children: [
+                      Container(
+                          height: MediaQuery.of(context).size.height * 0.3,
+                          margin: EdgeInsets.only(top: 20, bottom: 20),
                           decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(15),
-                              gradient: DarkPalette.borderGradient1
-
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                        image: DecorationImage(
-                                            image: AssetImage(
-                                                "assets/images/album_art_7.png"
-                                            ),
-                                            fit: BoxFit.cover
-                                        )
-                                    ),
-                                  )
-                              ),
-                              SizedBox(height:15),
-                              Text("Essence ft. Tems", style: GoogleFonts.workSans(
-                                  color: Colors.black, fontSize: 12,
-                                  fontWeight: FontWeight.w500
+                              border: Border.all(),
+                              borderRadius: BorderRadius.all(Radius.circular(15)),
+                              image: DecorationImage(
+                                image: AssetImage(
+                                    "assets/images/home-gradient-bg.png"),
+                                fit: BoxFit.cover,
                               )),
-                              SizedBox(height:5),
-                              Text("Single - Wizkid", style: GoogleFonts.workSans(
-                                  color: Colors.black, fontSize: 12,
-                                  fontWeight: FontWeight.w500
-                              ))
-                            ],
-                          ),
-                        );;
-                      },
-                      childCount: 20,
-                    ),
-                  )
+                          padding: EdgeInsets.only(left: 15, right: 15),
+                          child: Center(
+                              child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      "Find your hits and favourties and add them to events, let's go.",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.bold,
+                                          height: 2),
+                                    ),
+                                    SizedBox(height: 20),
+                                    TextFormField(
+                                      autofocus: false,
+                                      decoration: InputDecoration(
+                                        border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(7.0),
+                                            borderSide: BorderSide(
+                                                color: Colors.transparent)),
+                                        enabledBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(7.0),
+                                            borderSide: BorderSide(
+                                                color: Colors.transparent)),
+                                        focusedBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(7.0),
+                                            borderSide: BorderSide(
+                                                color: Colors.transparent)),
+                                        filled: true,
+                                        fillColor: Colors.white,
+                                        hintText: "Find those hits",
+                                        hintStyle: TextStyle(fontSize: 13),
+                                        contentPadding: EdgeInsets.only(
+                                            left: 15, right: 15, top: 5, bottom: 5),
+                                        suffixIcon: IconButton(
+                                          icon: Icon(
+                                            IconlyBold.search,
+                                            color: DarkPalette.darkGold,
+                                          ),
+                                          onPressed: () {
+                                            Navigator.of(context)
+                                                .pushNamed(Routes.search);
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  ]))),
+                      Container(
+                        child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(height:30),
+                              Row(
+                                children: [
+                                  Text("Trending Suggestions", style: GoogleFonts.workSans(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w700
+                                  )),
+                                  Spacer(),
+                                  InkWell(
+                                    onTap: (){
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(builder: (context) => SearchResultScreen(
+                                          title: "Trending Result",
+                                        )),
+                                      );
+                                    },
+                                      child: Container(
+                                        child: Row(
+                                          children: [
+                                            Text("See All", style: TextStyle(
+                                                color: Colors.amber
+                                            )),
+                                            Icon(Icons.arrow_right,
+                                                color: Colors.amber)
+                                          ],
+                                        ),
+                                      )
+                                  )
+                                ],
+                              ),
+                              SizedBox(height:30),
+                              GridView.builder(
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                    // maxCrossAxisExtent: 300,
+                                      mainAxisExtent: 230,
+                                      // childAspectRatio: 2 / 3,
+                                      crossAxisCount: 2,
+                                      crossAxisSpacing: 20,
+                                      mainAxisSpacing: 20),
+                                  itemCount: 2,
+                                  itemBuilder: (context, index){
+                                    return GestureDetector(
+                                        onTap: (){
+
+                                          showModalBottomSheet<void>(
+                                            isScrollControlled: true,
+                                            backgroundColor: Colors.transparent,
+                                            context: context,
+                                            builder: (BuildContext context) => Container(
+                                                decoration: BoxDecoration(
+                                                    color: Colors.black,
+                                                    borderRadius: new BorderRadius.only(
+                                                      topLeft: const Radius.circular(40.0),
+                                                      topRight: const Radius.circular(40.0),
+                                                    )),
+                                                padding: EdgeInsets.only(
+                                                    top: 30, left: 20, right: 20, bottom: 20),
+                                                height: MediaQuery.of(context).size.height * 0.7,
+                                                child: SuggestEventForm()),
+                                          );
+
+                                        },
+                                        child:EventCardGold());
+                                  }),
+                              SizedBox(height:30),
+                            ]
+                        ),
+                      ),
+                      Container(
+                        child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(height:30),
+                              Row(
+                                children: [
+                                  Text("Your Events", style: GoogleFonts.workSans(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w700
+                                  )),
+                                  Spacer(),
+                                  InkWell(
+                                    onTap: (){
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(builder: (context) => EventListScreen()),
+                                      );
+                                    },
+                                      child: Container(
+                                        child: Row(
+                                          children: [
+                                            Text("See All", style: TextStyle(
+                                                color: Colors.amber
+                                            )),
+                                            Icon(Icons.arrow_right,
+                                                color: Colors.amber)
+                                          ],
+                                        ),
+                                      )
+                                  )
+                                ],
+                              ),
+                              SizedBox(height:30),
+                              GridView.builder(
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                    // maxCrossAxisExtent: 300,
+                                      mainAxisExtent: 230,
+                                      // childAspectRatio: 2 / 3,
+                                      crossAxisCount: 2,
+                                      crossAxisSpacing: 20,
+                                      mainAxisSpacing: 20),
+                                  itemCount: 20,
+                                  itemBuilder: (context, index){
+                                    return GestureDetector(
+                                        onTap: (){
+
+                                        },
+                                        child:EventCardGold());
+                                  }),
+                              SizedBox(height:30),
+                            ]
+                        ),
+                      ),
+
+
                 ]))),
         floatingActionButton: Visibility(
             visible: showFab,
@@ -648,6 +613,7 @@ class _PartyGuestHome extends State<PartyGuestHome> {
                     showFab = false;
                   });
                   showModalBottomSheet<void>(
+                      isScrollControlled: true,
                           builder: (BuildContext context) => Container(
                               decoration: BoxDecoration(
                                   color: Colors.black,
@@ -657,8 +623,8 @@ class _PartyGuestHome extends State<PartyGuestHome> {
                                   )),
                               padding: EdgeInsets.only(
                                   top: 30, left: 20, right: 20, bottom: 20),
-                              height: MediaQuery.of(context).size.height * 0.6,
-                              child: CreateEventForm()),
+                              height: MediaQuery.of(context).size.height * 7,
+                              child: JoinEventForm()),
                           backgroundColor: Colors.transparent,
                           context: context)
                       .whenComplete(() => setState(() {

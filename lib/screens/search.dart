@@ -1,12 +1,18 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
 import 'package:musicroom/screens/popups.dart';
 import 'package:musicroom/styles.dart';
 import 'package:musicroom/utils/models.dart';
 
 class SearchResultScreen extends StatefulWidget {
+  SearchResultScreen({Key? key, this.title = "Search Results",
+  this.actions} ) : super(key: key);
+
+  String? title;
+  List<Widget>? actions = [];
   static const String routeName = "/search";
   @override
   _SearchResultScreen createState() => _SearchResultScreen();
@@ -26,25 +32,15 @@ class _SearchResultScreen extends State<SearchResultScreen> {
             Navigator.pop(context);
           },
         ),
-        title: Text("Search Results"),
+        title: Text("${widget.title}",
+        style: GoogleFonts.workSans(
+          fontSize: 20,
+          fontWeight: FontWeight.w700
+        ),),
+        centerTitle: false,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        actions: [
-          Transform.rotate(
-              angle: 90 * math.pi / 180,
-              child: IconButton(
-                  onPressed: () {
-                    showModalBottomSheet(
-                        backgroundColor: Colors.transparent,
-                        context: context, builder:(context) => PopupWidget(
-                      popup: Popup.searchFilter,
-                    ));
-                  },
-                  icon: Icon(
-                    IconlyBold.filter,
-                    color: DarkPalette.darkGold,
-                  )))
-        ],
+        actions: widget.actions != null ?  widget.actions : [],
       ),
       body: SafeArea(
         top: true,

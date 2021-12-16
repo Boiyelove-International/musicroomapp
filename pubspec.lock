@@ -15,6 +15,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.0"
+  change_notifier:
+    dependency: "direct main"
+    description:
+      name: change_notifier
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.24.0"
   characters:
     dependency: transitive
     description:
@@ -57,6 +64,27 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.4"
+  dart_internal:
+    dependency: transitive
+    description:
+      name: dart_internal
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.3"
+  device_info:
+    dependency: "direct main"
+    description:
+      name: device_info
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.3"
+  device_info_platform_interface:
+    dependency: transitive
+    description:
+      name: device_info_platform_interface
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.1"
   email_validator:
     dependency: "direct main"
     description:
@@ -184,6 +212,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.7.0"
+  nested:
+    dependency: transitive
+    description:
+      name: nested
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.0"
+  page_transition:
+    dependency: "direct main"
+    description:
+      name: page_transition
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.4"
   path:
     dependency: transitive
     description:
@@ -247,6 +289,48 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.1.0"
+  platform_device_id:
+    dependency: "direct main"
+    description:
+      name: platform_device_id
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.1"
+  platform_device_id_linux:
+    dependency: transitive
+    description:
+      name: platform_device_id_linux
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.0"
+  platform_device_id_macos:
+    dependency: transitive
+    description:
+      name: platform_device_id_macos
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.0"
+  platform_device_id_platform_interface:
+    dependency: transitive
+    description:
+      name: platform_device_id_platform_interface
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.0"
+  platform_device_id_web:
+    dependency: transitive
+    description:
+      name: platform_device_id_web
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.0"
+  platform_device_id_windows:
+    dependency: transitive
+    description:
+      name: platform_device_id_windows
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.0"
   plugin_platform_interface:
     dependency: transitive
     description:
@@ -261,6 +345,41 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.2.4"
+  provider:
+    dependency: "direct main"
+    description:
+      name: provider
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "6.0.1"
+  qr:
+    dependency: transitive
+    description:
+      name: qr
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.1.0"
+  qr_code_scanner:
+    dependency: "direct main"
+    description:
+      name: qr_code_scanner
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.6.1"
+  qr_flutter:
+    dependency: "direct main"
+    description:
+      name: qr_flutter
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.0.0"
+  quiver:
+    dependency: transitive
+    description:
+      name: quiver
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.1+1"
   shared_preferences:
     dependency: "direct main"
     description:
@@ -400,5 +519,5 @@ packages:
     source: hosted
     version: "0.2.0"
 sdks:
-  dart: ">=2.14.0 <3.0.0"
+  dart: ">=2.14.0 <2.17.0"
   flutter: ">=2.5.0"

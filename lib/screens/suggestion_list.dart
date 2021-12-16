@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:focused_menu/focused_menu.dart';
 import 'package:focused_menu/modals.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
+import 'package:musicroom/screens/search.dart';
 import 'package:musicroom/styles.dart';
 import 'package:musicroom/utils/models.dart';
 
@@ -376,11 +378,17 @@ class SongSuggestion extends StatelessWidget{
 }
 
 class SongSuggestionList extends StatelessWidget{
-  SongSuggestionList({required this.itemCount, this.isScrollable = false, this.title, this.color=DarkPalette.darkGrey1 });
+  SongSuggestionList({required this.itemCount,
+    this.isScrollable = false,
+    this.title,
+    this.color=DarkPalette.darkGrey1,
+  this.trailing = false});
   int itemCount;
   bool isScrollable;
   String? title;
   Color color;
+  bool trailing;
+
 
 
   @override
@@ -390,7 +398,42 @@ class SongSuggestionList extends StatelessWidget{
       physics: !isScrollable ? NeverScrollableScrollPhysics() : null,
         itemBuilder: (context, index){
         if (title != null && index==0){
-          return Text("$title");
+          if(trailing == true){
+            return Row(
+              children: [
+                Text("$title", style: GoogleFonts.workSans(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700
+                )),
+                Spacer(),
+                InkWell(
+                    onTap: (){
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => SearchResultScreen(
+                          title: "$title",
+                        )),
+                      );
+                    },
+                    child: Container(
+                      child: Row(
+                        children: [
+                          Text("See All", style: TextStyle(
+                              color: Colors.amber
+                          )),
+                          Icon(Icons.arrow_right,
+                              color: Colors.amber)
+                        ],
+                      ),
+                    )
+                )
+              ],
+            );
+          }
+          return Text("$title", style: GoogleFonts.workSans(
+              fontSize: 18,
+              fontWeight: FontWeight.bold
+          ));
         }
       return SongSuggestion(
         color: color,

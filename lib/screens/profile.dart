@@ -766,3 +766,348 @@ class _ProfileScreen extends State<ProfileScreen> {
     );
   }
 }
+
+
+class PartyGuestProfile extends StatefulWidget{
+  static const String routeName = "/partyGuestProfile";
+  @override
+  _PartyGuestProfile createState() => _PartyGuestProfile();
+}
+
+class _PartyGuestProfile extends State<PartyGuestProfile>{
+
+  String _enteredText = '';
+  String? email = "partymixers@gmail.com";
+  String? display_name = "PartyMixers";
+  TextEditingController displayNameController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController oldPasswordController = TextEditingController();
+  TextEditingController newPasswordController1 = TextEditingController();
+  TextEditingController newPasswordController2 = TextEditingController();
+  late SharedPreferences prefs;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  _loadData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      display_name = prefs.getString("display_name");
+      email = prefs.getString("email");
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: false,
+        leading: IconButton(
+          icon: Icon(IconlyBold.arrow_left),
+          color: DarkPalette.darkGold,
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        title: Text("Profile"),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: SafeArea(
+          top: true,
+          bottom: true,
+          child: Column(children: [
+            Container(
+                padding: EdgeInsets.all(20),
+                child: Center(
+                    child: CircleAvatar(
+                      radius: 60,
+                      backgroundImage: AssetImage(
+                          "assets/images/avatars/organizer-profile-icon.png"),
+                    ))),
+            Text("Change Profile picture",
+                style: GoogleFonts.workSans(
+                    fontWeight: FontWeight.w300, fontSize: 16)),
+            SizedBox(height: 20),
+            Expanded(
+                child: Container(
+                    padding: EdgeInsets.only(left: 5, right: 5),
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            padding: EdgeInsets.only(top: 50, bottom: 15),
+                            decoration: BoxDecoration(
+                                border: Border(
+                                    bottom: BorderSide(
+                                        width: 2,
+                                        color: DarkPalette.darkYellow))),
+                            child: GestureDetector(
+                                onTap: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return AlertDialog(
+                                        actions: [
+                                          TextButton(
+                                            child: Text(
+                                              "Cancel",
+                                              style: GoogleFonts.workSans(
+                                                  fontSize: 18,
+                                                  color: Colors.grey),
+                                            ),
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                          ),
+                                          TextButton(
+                                            child: Text("OK",
+                                                style: GoogleFonts.workSans(
+                                                    fontSize: 18,
+                                                    color: Colors.amber)),
+                                            onPressed: () async {
+                                              //Display name alert dialogue
+                                              // print("something happened");
+
+                                              SharedPreferences prefs =
+                                              await SharedPreferences
+                                                  .getInstance();
+                                              // String? token = prefs.getString("token");
+                                              // print("token is $token");
+
+                                              if (displayNameController
+                                                  .text !=
+                                                  null &&
+                                                  displayNameController
+                                                      .text.isNotEmpty) {
+                                                ApiBaseHelper api =
+                                                ApiBaseHelper();
+                                                api.post(
+                                                    "/account-settings/change_name/",
+                                                    {
+                                                      "display_name":
+                                                      displayNameController
+                                                          .text
+                                                    }).then((data) async {
+                                                  await prefs.setString(
+                                                      "display_name",
+                                                      data["display_name"]);
+                                                  setState(() {
+                                                    display_name = data[
+                                                    "display_name"];
+                                                    Navigator.pop(context);
+                                                    ScaffoldMessenger.of(
+                                                        context)
+                                                        .showSnackBar(
+                                                        SnackBar(
+                                                          content: Text(
+                                                            'Display name updated..',
+                                                            textAlign: TextAlign
+                                                                .center,
+                                                          ),
+                                                          backgroundColor:
+                                                          Colors.green,
+                                                        ));
+                                                  });
+                                                });
+                                              }
+                                            },
+                                          ),
+                                        ],
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                            BorderRadius.circular(10)),
+                                        backgroundColor: Colors.black,
+                                        elevation: 16,
+                                        content: Container(
+                                          padding: EdgeInsets.all(10),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: <Widget>[
+                                              SizedBox(height: 20),
+                                              Text(
+                                                'Change Display Name',
+                                                style: GoogleFonts.workSans(
+                                                    fontSize: 20,
+                                                    fontWeight:
+                                                    FontWeight.bold),
+                                              ),
+                                              TextField(
+                                                controller:
+                                                displayNameController,
+                                                onChanged: (value) {
+                                                  setState(() {
+                                                    _enteredText = value;
+                                                  });
+                                                },
+                                                decoration: InputDecoration(
+                                                    enabledBorder:
+                                                    UnderlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                          color: DarkPalette
+                                                              .darkYellow),
+                                                    ),
+                                                    focusedBorder:
+                                                    UnderlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                          color: DarkPalette
+                                                              .darkYellow),
+                                                    ),
+                                                    counterText:
+                                                    '${_enteredText.length.toString()} character(s)'),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                                child: Row(
+                                  mainAxisAlignment:
+                                  MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text("Display Name",
+                                        style: GoogleFonts.workSans(
+                                            fontWeight: FontWeight.w300,
+                                            fontSize: 16)),
+                                    Text(
+                                      "$display_name",
+                                      style: GoogleFonts.workSans(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 18),
+                                    )
+                                  ],
+                                )),
+                          ),
+                          SizedBox(height: 35),
+                          Text("SETTINGS",
+                              style: GoogleFonts.workSans(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 16)),
+                          Container(
+                            padding: EdgeInsets.only(top: 30, bottom: 5),
+                            child: Row(
+                              mainAxisAlignment:
+                              MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("Enable Dark Mode",
+                                    style: GoogleFonts.workSans(
+                                        fontWeight: FontWeight.w300,
+                                        fontSize: 16)),
+                                CupertinoSwitch(
+                                    value: false,
+                                    trackColor: Colors.grey,
+                                    onChanged: null)
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: EdgeInsets.only(top: 20, bottom: 5),
+                            child: Row(
+                              mainAxisAlignment:
+                              MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("Turn off Notifications",
+                                    style: GoogleFonts.workSans(
+                                        fontWeight: FontWeight.w300,
+                                        fontSize: 16)),
+                                CupertinoSwitch(
+                                    value: true,
+                                    activeColor: Colors.amber,
+                                    trackColor: Colors.grey,
+                                    onChanged: null)
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 20),
+                          Text("Send Feedbacks & communicate with us",
+                              style: GoogleFonts.workSans(
+                                  fontWeight: FontWeight.w300,
+                                  fontSize: 16)),
+                          SizedBox(height: 20),
+                          Row(children: [
+                            InkWell(
+                                onTap: () {},
+                                child: Container(
+                                    padding: EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                        color: DarkPalette.darkYellow,
+                                        borderRadius:
+                                        BorderRadius.circular(5)),
+                                    child: Icon(FeatherIcons.facebook,
+                                        color: Colors.amber))),
+                            SizedBox(
+                              width: 20,
+                            ),
+                            InkWell(
+                                onTap: () {},
+                                child: Container(
+                                    padding: EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                        color: DarkPalette.darkYellow,
+                                        borderRadius:
+                                        BorderRadius.circular(5)),
+                                    child: Icon(FeatherIcons.twitter,
+                                        color: Colors.amber))),
+                            SizedBox(
+                              width: 20,
+                            ),
+                            InkWell(
+                                onTap: () {},
+                                child: Container(
+                                  padding: EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                      color: DarkPalette.darkYellow,
+                                      borderRadius:
+                                      BorderRadius.circular(5)),
+                                  child: Icon(FeatherIcons.instagram,
+                                      color: Colors.amber),
+                                )),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            InkWell(
+                                onTap: () {},
+                                child: Container(
+                                  padding: EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                      color: DarkPalette.darkYellow,
+                                      borderRadius:
+                                      BorderRadius.circular(5)),
+                                  child: Icon(FeatherIcons.mail,
+                                      color: Colors.amber),
+                                )),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            InkWell(
+                                onTap: () {},
+                                child: Container(
+                                  padding: EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                      color: DarkPalette.darkYellow,
+                                      borderRadius:
+                                      BorderRadius.circular(5)),
+                                  child: Icon(FeatherIcons.phone,
+                                      color: Colors.amber),
+                                )),
+                            SizedBox(
+                              width: 10,
+                            ),
+                          ])
+                        ]))),
+            Text("Copyright 2021 | Music Room | Version 1.1",
+                style: GoogleFonts.workSans(
+                    fontWeight: FontWeight.w300, fontSize: 13))
+          ])),
+    );
+  }
+}

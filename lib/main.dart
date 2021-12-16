@@ -26,7 +26,8 @@ void main() {
     final license = await rootBundle.loadString('google_fonts/OFL.txt');
     yield LicenseEntryWithLineBreaks(['google_fonts'], license);
   });
-  runApp(MyApp());
+  runApp(
+      MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -47,7 +48,7 @@ class MyApp extends StatelessWidget {
               fontFamily: GoogleFonts.workSans().fontFamily,
             )),
         debugShowCheckedModeBanner: false,
-        home: RegisterScreen(),
+        home: SplashScreen(),
         routes: <String, WidgetBuilder>{
           Routes.guestHome: (BuildContext context) => PartyGuestHome(),
           Routes.organizerHome: (BuildContext context) => EventOrganizerHome(),
@@ -68,6 +69,8 @@ class MyApp extends StatelessWidget {
           Routes.yourRoom:  (BuildContext context) => YourRoom(),
           Routes.advert:  (BuildContext context) => Advert(),
           Routes.registerPartyGuest : (BuildContext context) => RegisterPartyGuest(),
+          Routes.partyGuestProfile: (BuildContext context)=> PartyGuestProfile(),
+          Routes.eventCardList:  (BuildContext context)=> EventListScreen(),
         });
   }
 }
@@ -486,7 +489,7 @@ class _DecisionPageState extends State<DecisionPage> {
                                 ),
                                 onPressed: () {
                                   Navigator.of(context).pushNamed(
-                                      Routes.guestHome);
+                                      Routes.registerPartyGuest);
                                 },
                                 child: Padding(
                                   padding: const EdgeInsets.only(
