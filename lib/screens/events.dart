@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
 import 'package:musicroom/screens/popups.dart';
 import 'package:musicroom/screens/suggestion_list.dart';
+import 'package:musicroom/utils/apiServices.dart';
 import 'package:musicroom/utils/models.dart';
 import 'package:page_transition/page_transition.dart';
 import 'dart:math' as math;
@@ -12,22 +13,31 @@ import '../routes.dart';
 import '../styles.dart';
 
 class EmptyContent extends StatelessWidget {
+  String message;
+  EmptyContent({this.message = "Wow! such empty. We can’t have you"
+  "live like this. Join an event to"
+  "see them appear here."});
+
   @override
   Widget build(BuildContext context) {
     return Center(
         child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        AspectRatio(
-            aspectRatio: 1,
-            child: Container(
-                decoration: BoxDecoration(
-                    image: DecorationImage(
-                        image: AssetImage("assets/images/dj.;png"),
-                        fit: BoxFit.cover)))),
-        Text("Wow! such empty. We can’t have you"
-            "live like this. Join an event to"
-            "see them appear here. ")
+        Container(
+            height: MediaQuery.of(context).size.height * 0.3,
+            decoration: BoxDecoration(
+                image: DecorationImage(
+                    image: AssetImage("assets/images/empty_event_icon.png"),
+                    fit: BoxFit.contain))),
+        SizedBox(height:20),
+        Padding(padding: EdgeInsets.symmetric(
+          horizontal: 50
+        ), child:  Text("$message", style: GoogleFonts.workSans(
+          fontWeight: FontWeight.w300,
+          height: 1.5
+        ),
+          textAlign: TextAlign.center,),)
       ],
     ));
   }
@@ -163,9 +173,9 @@ class EventCard extends StatelessWidget {
 }
 
 class EventDetail extends StatefulWidget {
-  static const String routeName = "/evetDetail";
+  static const String routeName = "/eventDetail";
 
-  EventDetail({Key? key, this.userType = UserType.partyGuest})
+  EventDetail({Key? key, this.userType = UserType.partyGuest,})
       : super(key: key);
 
   UserType? userType;
@@ -179,6 +189,7 @@ class _EventDetail extends State<EventDetail> {
   late Widget _rightContext;
   bool _showAbout = false;
   bool _showPartyStats = false;
+  ApiBaseHelper _api = ApiBaseHelper();
 
   @override
   Widget build(BuildContext context) {
@@ -240,7 +251,9 @@ class _EventDetail extends State<EventDetail> {
                     "Share Event",
                     style: TextStyle(color: Colors.black),
                   )),
-              onPressed: () {}),
+              onPressed: () {
+                Navigator.of(context).pushNamed(Routes.yourRoom);
+              }),
           FocusedMenuItem(
               title: Text("Edit Event", style: TextStyle(color: Colors.black)),
               onPressed: () {}),

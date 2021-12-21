@@ -2,7 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
+import 'package:musicroom/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppException implements Exception {
@@ -53,13 +56,29 @@ class ApiBaseHelper {
   Future<dynamic> get(String url) async {
     print('Api Get, url $url');
     var responseJson;
+    SharedPreferences pref  = await SharedPreferences.getInstance();
+    String? token = await pref.getString("token");
+    String deviceId= await getDeviceId();
+
+
     try {
+      Map<String, String> headers = {"Content-Type": "application/json",};
+      if (token != null && token.isNotEmpty){
+        headers.addAll(
+            {
+              HttpHeaders.authorizationHeader:
+              'Token $token',
+            }
+        );
+      } else {
+        headers.addAll({
+          "guest" : deviceId
+        });
+      }
+
       final response = await http.get(
         Uri.parse(_baseUrl + url),
-        headers: {
-          HttpHeaders.authorizationHeader:
-              'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3R1c2VyQGJvaXllbG92ZS53ZWJzaXRlIiwibmFtZWlkIjoiNjE2MWQ0ZjYwMDYxNjdkYTNiM2E0YmJhIiwicm9sZSI6IkFkbWluIiwibmJmIjoxNjMzODAxNDYyLCJleHAiOjE2NTIxMTgyNjIsImlhdCI6MTYzMzgwMTQ2Mn0.hXatLjuc0puyFXar_Czu0-tLF2gweOGals0bNOfF8tg',
-        },
+        headers: headers,
       );
       responseJson = _returnResponse(response);
     } on SocketException {
@@ -70,20 +89,36 @@ class ApiBaseHelper {
     return responseJson;
   }
 
-  Future<dynamic> post(String url, Map<String, dynamic> data) async {
+
+  Future<dynamic> post(String url, Map<String, dynamic> data, ) async {
     print('Api Post, url $url');
     var responseJson;
     SharedPreferences pref  = await SharedPreferences.getInstance();
     String? token = await pref.getString("token");
+    String deviceId= await getDeviceId();
+
+
     try {
+      Map<String, String> headers = {"Content-Type": "application/json",};
+      if (token != null && token.isNotEmpty){
+        headers.addAll(
+            {
+              HttpHeaders.authorizationHeader:
+              'Token $token',
+            }
+        );
+      } else {
+        headers.addAll({
+          "guest" : deviceId
+        });
+      }
       final response = await http.post(Uri.parse(_baseUrl + url),
-          headers: {
-            "Content-Type": "application/json",
-            HttpHeaders.authorizationHeader:
-                'Token $token',
-          },
+          headers: headers,
           body: json.encode(data));
+
       print("response is ${response.body}");
+
+
       responseJson = _returnResponse(response);
     } on SocketException {
       print('No net');
@@ -98,7 +133,7 @@ class ApiBaseHelper {
     switch (response.statusCode) {
       case 200:
         var responseJson = json.decode(response.body.toString());
-        print(responseJson);
+        // print(responseJson);
         return responseJson;
       case 201:
         var responseJson = json.decode(response.body.toString());

@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:musicroom/styles.dart';
@@ -6,6 +10,7 @@ import 'package:musicroom/utils/models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../routes.dart';
+import '../utils.dart';
 
 class RegisterScreen extends StatefulWidget {
   static const String routeName = '/RegisterScreen';
@@ -606,7 +611,9 @@ class RegisterPartyGuest extends StatefulWidget{
   _RegisterPartyGuest createState() => _RegisterPartyGuest();
 }
 class _RegisterPartyGuest extends State<RegisterPartyGuest>{
-
+  FilePickerResult? result;
+  TextEditingController _displayNameController = TextEditingController();
+  final _displayNameKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context){
@@ -633,10 +640,37 @@ class _RegisterPartyGuest extends State<RegisterPartyGuest>{
                     )),
                 SizedBox(height: 60),
                 Center(
-                  child: CircleAvatar(
-                    backgroundImage: AssetImage("assets/images/avatar_upload.png"),
+                  child: GestureDetector(
+                      onTap: () async {
+                        result = await FilePicker.platform.pickFiles(
+                            type: FileType.image
+                        );
+                        if (result != null) {
+                          File file = File("${result!.files.single.path}");
+                          setState(() {
+                          });
+                        } else {
+                          // User canceled the picker
+                        }
+                      },
+                      child:
+                      result == null ?  CircleAvatar(
+                    backgroundImage: AssetImage(
+                        "assets/images/avatar_upload.png"),
                     radius: 50,
-                  )
+                  ) : Container(
+                          width: 120.0,
+                          height: 120.0,
+                          decoration:  BoxDecoration(
+                              shape: BoxShape.circle,
+                              image: DecorationImage(
+                                  fit: BoxFit.fill,
+                                  image:  FileImage(
+                                      File("${result!.files.single.path}")
+                                  )
+                              )
+                          )
+                      ),)
                 ),
                 SizedBox(
                   height:20
@@ -650,30 +684,34 @@ class _RegisterPartyGuest extends State<RegisterPartyGuest>{
                         height: 1.8
                     )),
                 SizedBox(height: 30),
-                TextFormField(
-                  textCapitalization: TextCapitalization.characters,
+                Form(
+                  key: _displayNameKey,
+                  child: TextFormField(
+                    controller: _displayNameController,
+                    textCapitalization: TextCapitalization.characters,
 
-                  validator: (value) => value!.isEmpty ? "Cannot be empty" : null,
-                  // textAlign: TextAlign.center,
-                  decoration: new InputDecoration(
-                    floatingLabelBehavior: FloatingLabelBehavior.always,
-                    labelStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
-                    focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white.withOpacity(0.7))),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white.withOpacity(0.7)),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: const BorderRadius.all(
-                        const Radius.circular(10.0),
+                    validator: (value) => value!.isEmpty ? "Cannot be empty" : null,
+                    // textAlign: TextAlign.center,
+                    decoration: new InputDecoration(
+                      floatingLabelBehavior: FloatingLabelBehavior.always,
+                      labelStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
+                      focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white.withOpacity(0.7))),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white.withOpacity(0.7)),
                       ),
+                      border: OutlineInputBorder(
+                        borderRadius: const BorderRadius.all(
+                          const Radius.circular(10.0),
+                        ),
+                      ),
+                      filled: true,
+                      hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+                      fillColor: Colors.transparent,
+                      contentPadding: EdgeInsets.all(16),
+                      labelText: "Display Name",
                     ),
-                    filled: true,
-                    hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
-                    fillColor: Colors.transparent,
-                    contentPadding: EdgeInsets.all(16),
-                    labelText: "Display Name",
-                  ),
+                  )
                 ),
 
 
@@ -704,8 +742,28 @@ class _RegisterPartyGuest extends State<RegisterPartyGuest>{
                         // elevation: MaterialStateProperty.all(3),
                         shadowColor: MaterialStateProperty.all(Colors.transparent),
                       ),
-                      onPressed: () {
-                        Navigator.pushReplacementNamed(context, Routes.guestHome);
+                      onPressed: () async {
+                        if(_displayNameKey.currentState!.validate()){
+                          ApiBaseHelper api = ApiBaseHelper();
+                          var data = <String, dynamic>{
+                            "device_id": await getDeviceId(),
+                            "display_name": _displayNameController.text,
+                          };
+                          if (result != null){
+                            Map image = {
+                              "file": base64Encode(File("${result!.files.single.path}").readAsBytesSync()),
+                              "filename": result!.files.single.path!.split("/").last
+                            };
+                            data["image"] = image;
+                          }
+
+                          api.post("/register/guest/", data).then((data) async {
+                            SharedPreferences prefs = await SharedPreferences.getInstance();
+                            prefs.setString("display_name", _displayNameController.text);
+                            Navigator.pushReplacementNamed(context, Routes.guestHome);
+                          });
+                          }
+
                       },
                       child: Padding(
                         padding: const EdgeInsets.only(

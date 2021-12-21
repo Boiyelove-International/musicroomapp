@@ -49,3 +49,13 @@ class ProfileModel extends ChangeNotifier{
 
 
 }
+
+class SongModel{
+  String title;
+  String previewUrl;
+  String artist;
+  String album_art;
+  SongModel({
+    required this.title, required this.artist, required this.album_art, required this.previewUrl
+    });
+}

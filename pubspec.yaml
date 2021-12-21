@@ -39,6 +39,10 @@ dependencies:
   qr_flutter:
   qr_code_scanner:
   page_transition:
+  audioplayers:
+  cached_network_image:
+  intl:
+  http_parser:
 
   #  overlay_group_avatar: ^0.0.2
 

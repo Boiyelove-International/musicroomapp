@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:email_validator/email_validator.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
@@ -81,9 +84,20 @@ class _ProfileScreen extends State<ProfileScreen> {
                     backgroundImage: AssetImage(
                         "assets/images/avatars/organizer-profile-icon.png"),
                   ))),
-              Text("Change Profile picture",
-                  style: GoogleFonts.workSans(
-                      fontWeight: FontWeight.w300, fontSize: 16)),
+              InkWell(
+                  onTap: () async {
+                    FilePickerResult? result = await FilePicker.platform.pickFiles(
+                      type: FileType.image
+                    );
+                    if (result != null) {
+                      File file = File("${result.files.single.path}");
+                    } else {
+                      // User canceled the picker
+                    }
+                  },
+                  child:Text("Change Profile picture",
+                      style: GoogleFonts.workSans(
+                          fontWeight: FontWeight.w300, fontSize: 16))),
               SizedBox(height: 20),
               TabBar(
                 tabs: [
@@ -828,9 +842,18 @@ class _PartyGuestProfile extends State<PartyGuestProfile>{
                       backgroundImage: AssetImage(
                           "assets/images/avatars/organizer-profile-icon.png"),
                     ))),
-            Text("Change Profile picture",
+            InkWell(
+              onTap: () async {
+                FilePickerResult? result = await FilePicker.platform.pickFiles();
+                if (result != null) {
+                  File file = File("${result.files.single.path}");
+                } else {
+                  // User canceled the picker
+                }
+              },
+                child:Text("Change Profile picture",
                 style: GoogleFonts.workSans(
-                    fontWeight: FontWeight.w300, fontSize: 16)),
+                    fontWeight: FontWeight.w300, fontSize: 16))),
             SizedBox(height: 20),
             Expanded(
                 child: Container(

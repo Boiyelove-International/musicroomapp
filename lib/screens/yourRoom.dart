@@ -3,6 +3,7 @@ import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
 import 'package:musicroom/styles.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class YourRoom extends StatefulWidget {
   static const String routeName = "/yourRoom";
@@ -139,7 +140,16 @@ class _YourRoom extends State<YourRoom> {
                         ),
                         fit: BoxFit.contain
                     )
-                )
+                ),
+              child: Center(
+                child: QrImage(
+                  data: 'TQYL1',
+                  version: QrVersions.auto,
+                  size: 200,
+                  gapless: false,
+                  backgroundColor: Colors.white,
+                ),
+              ),
             ),),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,

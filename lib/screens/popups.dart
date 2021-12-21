@@ -1,10 +1,21 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:audioplayers/audioplayers.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
 import 'package:musicroom/screens/search.dart';
 import 'package:musicroom/styles.dart';
+import 'package:musicroom/utils/apiServices.dart';
 import 'package:musicroom/utils/models.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:intl/intl.dart';
 
 import '../routes.dart';
 import '../utils.dart';
@@ -14,18 +25,19 @@ enum Popup { searchFilter, nowPlayingFilter, eventFilter, resultFilter, suggesti
 
 class PopupWidget extends StatefulWidget{
 
-  PopupWidget({Key? key, required this.popup, this.userType, this.height = 0.6}) : super(key: key);
+  PopupWidget({Key? key, required this.popup, this.userType, this.height = 0.6, this.song}) : super(key: key);
 
   UserType? userType;
   Popup popup;
   double? height;
-
+  SongModel? song;
 
   @override
   _PopupWidget createState() => _PopupWidget();
 }
 class _PopupWidget extends State<PopupWidget> {
-
+  var audio = AudioPlayer();
+  bool playing = false;
   late Widget _selected;
 
 // Filter Widgets
@@ -125,8 +137,17 @@ class _PopupWidget extends State<PopupWidget> {
       Text("Newly Suggested")
     ]),
   ]);
-  double sliderValue = 50.0;
+  double sliderValue = 0.0;
 
+  @override
+  void dispose() {
+    if (playing){
+      // audio.stop();
+      audio.dispose();
+    }
+    // TODO: implement dispose
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     final userType = widget.userType;
@@ -135,25 +156,42 @@ class _PopupWidget extends State<PopupWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          height: MediaQuery.of(context).size.height * 0.292,
-          padding: EdgeInsets.all(20),
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              image: DecorationImage(
-                  image: AssetImage(
-                    "assets/images/player_art.png",
-                  ),
-                  fit: BoxFit.contain
-              )
+        CachedNetworkImage(
+          imageUrl: widget.song!.album_art.replaceAll("300x300", "300x200"),
+          imageBuilder: (context, imageProvider) => Container(
+            height: MediaQuery.of(context).size.height * 0.292,
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                image: DecorationImage(
+                    image: imageProvider,
+                    fit: BoxFit.contain
+                )
+            ),
           ),
+          placeholder: (context, url) =>
+    Container(
+    height: MediaQuery.of(context).size.height * 0.292,
+    padding: EdgeInsets.all(20),
+    child: Center(
+      child: CircularProgressIndicator(
+        color: Colors.amber,
+        strokeWidth: 1.0,
+      ),
+    ),
+    ),
+          errorWidget: (context, url, error) => const Icon(Icons.error),
         ),
-        Text("Essence ft Tems", style: GoogleFonts.workSans(
+        Text(widget.song!.title, style: GoogleFonts.workSans(
           fontWeight: FontWeight.w700,
           fontSize: 20,
-          height:2
-        ),),
-        Text("Single - Wizkid", style: GoogleFonts.workSans(
+          height:2,
+        ),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
+          softWrap: true,
+        ),
+        Text(widget.song!.artist, style: GoogleFonts.workSans(
             fontWeight: FontWeight.w300,
             fontSize: 14,
             height:2
@@ -161,14 +199,23 @@ class _PopupWidget extends State<PopupWidget> {
         Row(
     children: [
     Text("0:12"),
-    Flexible(child: Slider(value: sliderValue, activeColor: Colors.amber, inactiveColor: Colors.white,
-        max:100,onChanged:(double value){
-        setState(() {
-          sliderValue = value;
-        });
-
-    })),
-    Text("0:30"),
+    Flexible(child: StreamBuilder(
+      initialData: 0.0,
+      stream: audio.onAudioPositionChanged,
+      builder: (BuildContext context,  snapshot){
+        return Slider(
+            value: 0.0,
+            activeColor: Colors.amber,
+            inactiveColor: Colors.white,
+            min: 0.0,
+            max:29.0,onChanged:(double value){
+              setState(() {
+                sliderValue = value;
+              });
+            });
+      },
+    )),
+    Text("0:29"),
     ],
     ),
         Padding(
@@ -176,35 +223,64 @@ class _PopupWidget extends State<PopupWidget> {
          child: Row(
            mainAxisAlignment: MainAxisAlignment.spaceBetween,
            children: [
-             Container(
-               padding: EdgeInsets.all(13),
+             GestureDetector(
+               onTap: ()async {
+                 int cur  = await audio.getCurrentPosition();
+                 // if (cur > 5){
+                 //   var val  = cur - 5;
+                 //   audio.seek(
+                 //     Duration(seconds: val)
+                 //   );
+                 // }
 
-               decoration: BoxDecoration(
-                   shape: BoxShape.circle,
-                   image: DecorationImage(
-                       image: AssetImage(
-                           "assets/images/backward_icon.png"
-                       ),
-                       fit: BoxFit.contain
-                   )
-               ),
-               child: Center(
-                 child: Text("5s", style:TextStyle(fontSize: 10), textAlign: TextAlign.center,),
-               ),
-             ),
-             Container(
-               margin: EdgeInsets.only(left:10),
-               height: 50,
-               width:50,
-               decoration: BoxDecoration(
-                   image: DecorationImage(
-                       image: AssetImage(
-                           "assets/images/play_icon.png"
-                       ),
-                       fit: BoxFit.contain
-                   )
+
+               },
+               child: Container(
+                 padding: EdgeInsets.all(13),
+
+                 decoration: BoxDecoration(
+                     shape: BoxShape.circle,
+                     image: DecorationImage(
+                         image: AssetImage(
+                             "assets/images/backward_icon.png"
+                         ),
+                         fit: BoxFit.contain
+                     )
+                 ),
+                 child: Center(
+                   child: Text("5s", style:TextStyle(fontSize: 10), textAlign: TextAlign.center,),
+                 ),
                ),
              ),
+             GestureDetector(
+                onTap: (){
+                 if(!playing){
+                    audio.play(widget.song!.previewUrl);
+                    setState(() {
+                      playing = true;
+                    });
+                  } else {
+                    audio.pause();
+                    setState(() {
+                      playing = false;
+                    });
+                  }
+
+                },
+                 child: playing ? Icon(FeatherIcons.stopCircle,
+                   size: 30, color: Colors.amber,) :Container(
+                   margin: EdgeInsets.only(left:10),
+                   height: 50,
+                   width:50,
+                   decoration: BoxDecoration(
+                       image: DecorationImage(
+                           image: AssetImage(
+                               "assets/images/play_icon.png"
+                           ),
+                           fit: BoxFit.contain
+                       )
+                   ),
+                 )),
              Container(
                padding: EdgeInsets.all(13),
 
@@ -383,7 +459,15 @@ class CreateEventForm extends StatefulWidget {
 
 class _CreateEventForm extends State<CreateEventForm> {
   PageController _pageController = PageController(initialPage: 0);
+  FilePickerResult? result;
 
+  final _aboutEventFormKey = GlobalKey<FormState>();
+  final _eventDateFormKey = GlobalKey<FormState>();
+  final TextEditingController _eventNameController = TextEditingController();
+  final TextEditingController _aboutEventController = TextEditingController();
+  final TextEditingController _eventTimeController = TextEditingController(text: "");
+  final TextEditingController _eventDateController = TextEditingController();
+  var _selectedDate;
   @override
   Widget build(BuildContext context) {
     void _changePage(int curr_page) {
@@ -396,15 +480,25 @@ class _CreateEventForm extends State<CreateEventForm> {
       }
     }
 
+
     // Create Event FLow
     Widget _createEventForm = Form(
+      key: _aboutEventFormKey,
         child: Column(
       children: [
         Text("Let's create the event!",
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900)),
-        SizedBox(height: 30),
+            style: GoogleFonts.workSans(fontSize: 20, fontWeight: FontWeight.bold)),
+        SizedBox(height: 50),
         TextFormField(
+          controller: _eventNameController,
+          style: GoogleFonts.workSans(color: Colors.white),
+          cursorColor: Colors.amber,
+          validator: (value){
+            if (value == null || value.isEmpty){
+              return "Please enter an event name";
+            }
+          },
           decoration: InputDecoration(
             border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(7.0),
@@ -419,15 +513,23 @@ class _CreateEventForm extends State<CreateEventForm> {
             floatingLabelBehavior: FloatingLabelBehavior.always,
             fillColor: Colors.transparent,
             labelText: "Name of the Event",
-            labelStyle: TextStyle(fontSize: 13, color: Colors.white),
+            labelStyle: GoogleFonts.workSans(fontSize: 15, color: Colors.grey),
             contentPadding:
                 EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
           ),
         ),
-        SizedBox(height: 30),
+        SizedBox(height: 50),
         TextFormField(
+          controller: _aboutEventController,
           keyboardType: TextInputType.multiline,
-          maxLines: 5,
+          maxLines: 4,
+          style: GoogleFonts.workSans(color: Colors.white, height:1.8),
+          cursorColor: Colors.amber,
+          validator: (value){
+            if (value == null || value.isEmpty){
+              return "Evter details about the event";
+            }
+          },
           decoration: InputDecoration(
             border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(7.0),
@@ -442,7 +544,7 @@ class _CreateEventForm extends State<CreateEventForm> {
             fillColor: Colors.transparent,
             floatingLabelBehavior: FloatingLabelBehavior.always,
             labelText: "About the Event",
-            labelStyle: TextStyle(fontSize: 13, color: Colors.white),
+            labelStyle: GoogleFonts.workSans(fontSize: 15, color: Colors.grey),
             contentPadding:
                 EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
           ),
@@ -475,7 +577,9 @@ class _CreateEventForm extends State<CreateEventForm> {
                 shadowColor: MaterialStateProperty.all(Colors.transparent),
               ),
               onPressed: () {
-                _changePage(1);
+                if (_aboutEventFormKey.currentState!.validate()){
+                  _changePage(1);
+                }
               },
               child: Padding(
                 padding: const EdgeInsets.only(
@@ -493,13 +597,46 @@ class _CreateEventForm extends State<CreateEventForm> {
     ));
 
     Widget _eventTimeForm = Form(
+      key:  _eventDateFormKey,
         child: Column(mainAxisSize: MainAxisSize.min, children: [
       Text(
         "Time & Date for this event",
         textAlign: TextAlign.center,
+          style: GoogleFonts.workSans(fontSize: 20, fontWeight: FontWeight.bold)
       ),
-      SizedBox(height: 30),
+          SizedBox(height: 50),
       TextFormField(
+        controller: _eventTimeController,
+        readOnly: true,  //set it true, so that user will not able to edit text
+        style: TextStyle(color: Colors.white),
+        validator: (value){
+          if (value == null || value.isEmpty){
+            return "Select the time of this event";
+          }
+        },
+        onTap: () async {
+          TimeOfDay? pickedTime =  await showTimePicker(
+            initialTime: TimeOfDay.now(),
+            context: context,
+          );
+
+          if(pickedTime != null ){
+            print(pickedTime.format(context));   //output 10:51 PM
+            // DateTime parsedTime = DateFormat.jm().parse(pickedTime.format(context).toString());
+            // //converting to DateTime so that we can further format on different pattern.
+            // print(parsedTime); //output 1970-01-01 22:53:00.000
+            // String formattedTime = DateFormat('HH:mm:ss').format(parsedTime);
+            // print(formattedTime); //output 14:59:00
+            // //DateFormat() is from intl package, you can format the time on any pattern you need.
+
+            setState(() {
+              _eventTimeController.text = pickedTime.format(context); //set the value of text field.
+              print("the time is set");
+            });
+          }else{
+            print("Time is not selected");
+          }
+        },
         decoration: InputDecoration(
           border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(7.0),
@@ -523,8 +660,38 @@ class _CreateEventForm extends State<CreateEventForm> {
           ),
         ),
       ),
-      SizedBox(height: 20),
+      SizedBox(height: 30),
       TextFormField(
+        controller: _eventDateController,
+        readOnly: true,
+        validator: (value){
+          if (value == null || value.isEmpty){
+            return "Select the date of this event";
+          }
+        },
+        onTap: () async {
+          DateFormat dateFormat = new DateFormat("dd MMMM, yyyy");
+          DateTime? pickedDate =  await showDatePicker(
+              context: context,
+              initialDate: DateTime.now(),
+              firstDate: DateTime.now(),
+              lastDate: DateTime(2101));
+
+          if(pickedDate != null ){
+             //output 10:51 PM
+            // DateTime parsedDate = DateFormat.jm().parse(pickedDate.toString());
+            // //converting to DateTime so that we can further format on different pattern.
+            print("date is $pickedDate"); //output 1970-01-01 22:53:00.000
+
+
+            setState(() {
+              _eventDateController.text = dateFormat.format(pickedDate);
+              _selectedDate = "${pickedDate.year}-${pickedDate.month}-${pickedDate.day}";
+            });
+          }else{
+            print("Time is not selected");
+          }
+        },
         decoration: InputDecoration(
           border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(7.0),
@@ -548,7 +715,7 @@ class _CreateEventForm extends State<CreateEventForm> {
           ),
         ),
       ),
-      SizedBox(height: 20),
+      SizedBox(height: 50),
       Row(children: [
         Expanded(
             child: Container(
@@ -574,7 +741,9 @@ class _CreateEventForm extends State<CreateEventForm> {
               shadowColor: MaterialStateProperty.all(Colors.transparent),
             ),
             onPressed: () {
-              _changePage(2);
+              if (_eventDateFormKey.currentState!.validate()){
+                _changePage(2);
+              }
             },
             child: Padding(
               padding: const EdgeInsets.only(
@@ -590,22 +759,41 @@ class _CreateEventForm extends State<CreateEventForm> {
       ])
     ]));
 
+    File? _selectedImage;
     Widget _eventImageFormPopup = Form(
         child: Column(children: [
       Text(
         "Time for some imagery",
         textAlign: TextAlign.center,
+          style: GoogleFonts.workSans(fontSize: 20, fontWeight: FontWeight.bold)
       ),
-      SizedBox(height: 20),
-      Container(
-        child: Image.asset("assets/images/upload_image_banner.png"),
-      ),
+      SizedBox(height: 30),
+      GestureDetector(
+          onTap: () async {
+            result = await FilePicker.platform.pickFiles(
+                type: FileType.image
+            );
+            if (result != null) {
+              File file = File("${result!.files.single.path}");
+              setState(() {
+
+              });
+            } else {
+              // User canceled the picker
+            }
+          },
+          child:Container(
+        child: result == null ? Image.asset("assets/images/upload_image_banner.png") :
+            Image.file( File("${result!.files.single.path}"),
+              fit: BoxFit.cover,
+              width: double.infinity,),
+      )),
       SizedBox(height: 20),
       Text(
         "Click to upload the banner image for this event",
         textAlign: TextAlign.center,
       ),
-      SizedBox(height: 20),
+          SizedBox(height: 20),
       Row(children: [
         Expanded(
             child: Container(
@@ -631,7 +819,25 @@ class _CreateEventForm extends State<CreateEventForm> {
               shadowColor: MaterialStateProperty.all(Colors.transparent),
             ),
             onPressed: () {
-              _changePage(3);
+              if(result != null ){
+                ApiBaseHelper _api = ApiBaseHelper();
+                Map image = {
+                  "file": base64Encode(File("${result!.files.single.path}").readAsBytesSync()),
+                  "filename": result!.files.single.path!.split("/").last
+                 };
+
+                _api.post(
+                  "/events/", {
+                    "name": _eventNameController.text,
+                  "about": _aboutEventController.text,
+                  "event_time": _eventTimeController.text,
+                  "event_date": _selectedDate,
+                  "image": image
+                }).then((value){
+                  _changePage(3);
+                });
+
+              }
             },
             child: Padding(
               padding: const EdgeInsets.only(
@@ -656,11 +862,14 @@ class _CreateEventForm extends State<CreateEventForm> {
       Text(
         "Yay!! Your event has been created.",
         textAlign: TextAlign.center,
+          style: GoogleFonts.workSans(fontSize: 25, fontWeight: FontWeight.bold, height:1.5)
       ),
       SizedBox(height: 20),
       Text(
           "Proceed to the event page to share and see all suggested songs for this event",
-          textAlign: TextAlign.center),
+          textAlign: TextAlign.center,
+          style: GoogleFonts.workSans(fontSize: 15, fontWeight: FontWeight.w300, height:1.5)
+      ),
       SizedBox(height: 20),
       Row(children: [
         Expanded(
@@ -998,7 +1207,11 @@ class JoinEventForm extends StatefulWidget{
 class _JoinEventForm extends State<JoinEventForm>{
   PageController _pageController = PageController(initialPage: 0);
   UserType _selectedUserType = UserType.partyOrganizer;
-
+  TextEditingController _codeBox1 = TextEditingController();
+  TextEditingController _codeBox2 = TextEditingController();
+  TextEditingController _codeBox3 = TextEditingController();
+  TextEditingController _codeBox4 = TextEditingController();
+  ApiBaseHelper _api = ApiBaseHelper();
 
   @override
   Widget build(BuildContext context) {
@@ -1258,7 +1471,7 @@ class _JoinEventForm extends State<JoinEventForm>{
             ]),
       ],
     );
-
+    final _eventCodeForm = GlobalKey<FormState>();
     Widget _partyCodeForm = Column(
       children: [
         Text("Provide a code", style: GoogleFonts.workSans(
@@ -1273,74 +1486,142 @@ class _JoinEventForm extends State<JoinEventForm>{
             height:1.8
         ), textAlign: TextAlign.center,),
         SizedBox(height:20),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Container(
-              height:70,
-              width: 70,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5),
-                  border: Border.all(color: Colors.amber)
+        Form(
+          key: _eventCodeForm,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                height:70,
+                width: 70,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5),
+                    border: Border.all(color: Colors.amber)
 
-              ),
-              child: Center(
-                  child: Text("|", style: GoogleFonts.workSans(
-                      fontSize: 40,
-                      fontWeight: FontWeight.w100,
-                      color: Colors.amber
-                  ))
-              ),
-            ),
-            Container(
-              height:70,
-              width: 70,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5),
-                  border: Border.all(color: Colors.amber)
+                ),
+                child: TextFormField(
+                  controller: _codeBox1,
+                  inputFormatters: [
+                    new LengthLimitingTextInputFormatter(1),
+                  ],
+                  textCapitalization: TextCapitalization.characters,
+                  validator: (value){
+                    if( value == null || value.isEmpty){
+                      return'required';
+                    }
+                  },
+                  textAlignVertical: TextAlignVertical.center,
+                  textAlign: TextAlign.center,
+                  cursorColor: Colors.amber,
+                  style: TextStyle(
+                      color: Colors.amber,
+                      height: 2
+                  ),
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                  ),
 
+                ),
               ),
-              child:  Center(
-                  child: Text("|", style: GoogleFonts.workSans(
-                      fontSize: 40,
-                      fontWeight: FontWeight.w100,
-                      color: Colors.amber
-                  ))
-              ),
-            ),
-            Container(
-              height:70,
-              width: 70,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5),
-                  border: Border.all(color: Colors.amber)
+              Container(
+                height:70,
+                width: 70,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5),
+                    border: Border.all(color: Colors.amber)
 
-              ),
-              child:  Center(
-                  child: Text("|", style: GoogleFonts.workSans(
-                      fontSize: 40,
-                      fontWeight: FontWeight.w100,
-                      color: Colors.amber
-                  ))
-              ),
-            ),
-            Container(
-              height:70,
-              width: 70,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5),
-                  border: Border.all(color: Colors.amber)
+                ),
+                child:  TextFormField(
+                  controller: _codeBox2,
+                  textCapitalization: TextCapitalization.characters,
+                  inputFormatters: [
+                    new LengthLimitingTextInputFormatter(1),
+                  ],
+                  validator: (value){
+                    if( value == null || value.isEmpty){
+                      return'required';
+                    }
+                  },
+                  textAlignVertical: TextAlignVertical.center,
+                  textAlign: TextAlign.center,
+                  cursorColor: Colors.amber,
+                  style: TextStyle(
+                      color: Colors.amber,
+                      height: 2
+                  ),
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                  ),
 
+                ),
               ),
-              child:  Center(
-                  child: Text("|", style: GoogleFonts.workSans(
-                      fontSize: 40,
-                      fontWeight: FontWeight.w100,
-                      color: Colors.amber
-                  ))
+              Container(
+                height:70,
+                width: 70,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5),
+                    border: Border.all(color: Colors.amber)
+
+                ),
+                child:  TextFormField(
+                  controller: _codeBox3,
+                  textCapitalization: TextCapitalization.characters,
+                  validator: (value){
+                    if( value == null || value.isEmpty){
+                      return'required';
+                    }
+                  },
+                  inputFormatters: [
+                    new LengthLimitingTextInputFormatter(1),
+                  ],
+                  textAlignVertical: TextAlignVertical.center,
+                  textAlign: TextAlign.center,
+                  cursorColor: Colors.amber,
+                  style: TextStyle(
+                      color: Colors.amber,
+                      height: 2
+                  ),
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                  ),
+
+                ),
               ),
-            )
-          ],
+              Container(
+                height:70,
+                width: 70,
+
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5),
+                    border: Border.all(color: Colors.amber)
+
+                ),
+                child:  TextFormField(
+                  controller: _codeBox4,
+                  textCapitalization: TextCapitalization.characters,
+                  validator: (value){
+                    if( value == null || value.isEmpty){
+                      return'required';
+                    }
+                  },
+                  inputFormatters: [
+                    new LengthLimitingTextInputFormatter(1),
+                  ],
+                  textAlignVertical: TextAlignVertical.center,
+                  textAlign: TextAlign.center,
+                  cursorColor: Colors.amber,
+                  style: TextStyle(
+                      color: Colors.amber,
+                      height: 2
+                  ),
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                  ),
+
+                ),
+              )
+            ],
+          ),
         ),
         SizedBox(height:40),
         Row(children: [
@@ -1370,8 +1651,15 @@ class _JoinEventForm extends State<JoinEventForm>{
                     shadowColor: MaterialStateProperty.all(Colors.transparent),
                   ),
                   onPressed: () {
+                      if(_eventCodeForm.currentState!.validate()) {
+                        String q = _codeBox1.text + _codeBox2.text + _codeBox3.text + _codeBox4.text;
 
-                  },
+                        _api.get("/event/join/?q=$q")
+                        .then((value){
+
+                        });
+                      }
+                      },
                   child: Padding(
                     padding: const EdgeInsets.only(
                       top: 10,
@@ -1412,7 +1700,14 @@ class _JoinEventForm extends State<JoinEventForm>{
                             ),
                             fit: BoxFit.contain
                         )
-                    )
+                    ),
+                  child: Center(
+                    child: QrImage(
+                      data: "QYL!",
+                      version: QrVersions.auto,
+                      size: 00.0,
+                    ),
+                  ),
                 ),)
           )
         )

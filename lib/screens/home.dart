@@ -7,6 +7,7 @@ import 'package:iconly/iconly.dart';
 import 'package:musicroom/screens/popups.dart';
 import 'package:musicroom/screens/search.dart';
 import 'package:musicroom/styles.dart';
+import 'package:musicroom/utils/apiServices.dart';
 import 'package:musicroom/utils/models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -24,6 +25,7 @@ class EventOrganizerHome extends StatefulWidget {
 class _EventOrganizerHome extends State<EventOrganizerHome>{
   bool showFab = true;
   String? display_name = "PartyMixers";
+  TextEditingController _searchContoller = TextEditingController();
 
   @override
   void initState() {
@@ -113,7 +115,14 @@ class _EventOrganizerHome extends State<EventOrganizerHome>{
                                   ),
                                   SizedBox(height: 20),
                                   TextFormField(
+                                    controller: _searchContoller,
+                                    validator: (value){
+                                      if (value!.isEmpty || value == null){
+                                        return "Enter a search query";
+                                      }
+                                    },
                                     autofocus: false,
+                                    autocorrect: false,
                                     style: TextStyle(color: Colors.black),
                                     decoration: InputDecoration(
                                       border: OutlineInputBorder(
@@ -140,10 +149,18 @@ class _EventOrganizerHome extends State<EventOrganizerHome>{
                                           color: DarkPalette.darkGold,
                                         ),
                                         onPressed: () {
-                                          Navigator.of(context)
-                                              .pushNamed(Routes.search);
-                                        },
-                                      ),
+
+                                          if (_searchContoller.text != null && _searchContoller.text.isNotEmpty){
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(builder: (context) => SearchResultScreen(
+                                                url: "/search/?term=${_searchContoller.text}",
+                                              )),
+                                            );
+                                          }
+
+
+                                        }),
                                     ),
                                   ),
                                 ]))),
@@ -353,7 +370,21 @@ class PartyGuestHome extends StatefulWidget {
 
 class _PartyGuestHome extends State<PartyGuestHome> {
   bool showFab = true;
+  ApiBaseHelper _api = ApiBaseHelper();
+  String display_name = "Guest";
+  TextEditingController _searchContoller = TextEditingController();
 
+  @override
+  void initState() {
+    // TODO: implement initState
+
+    SharedPreferences.getInstance().then((prefs) => setState((){
+      display_name = prefs.getString("display_name")!;
+    }));
+
+    super.initState();
+
+  }
   @override
   Widget build(BuildContext context) {
     // FocusScopeNode currentFocus = FocusScope.of(context);
@@ -382,11 +413,11 @@ class _PartyGuestHome extends State<PartyGuestHome> {
             children: [Text("Hello,", style: GoogleFonts.workSans(
               fontSize: 27, fontWeight: FontWeight.w300
             ),), SizedBox(width: 5), Text(
-              "Stacey",
-            style: GoogleFonts.workSans(
-              fontWeight: FontWeight.w700,
+              "${display_name}",
+              style: GoogleFonts.workSans(
+                fontWeight: FontWeight.w700,
                 fontSize: 27,
-            ),)],
+              ),)],
           ),
           actions: [
             Row(
@@ -435,7 +466,15 @@ class _PartyGuestHome extends State<PartyGuestHome> {
                                     ),
                                     SizedBox(height: 20),
                                     TextFormField(
+                                      controller: _searchContoller,
+                                      validator: (value){
+                                        if (value!.isEmpty || value == null){
+                                          return "Enter a search query";
+                                        }
+                                      },
                                       autofocus: false,
+                                      autocorrect: false,
+                                      style: TextStyle(color: Colors.black),
                                       decoration: InputDecoration(
                                         border: OutlineInputBorder(
                                             borderRadius: BorderRadius.circular(7.0),
@@ -461,8 +500,14 @@ class _PartyGuestHome extends State<PartyGuestHome> {
                                             color: DarkPalette.darkGold,
                                           ),
                                           onPressed: () {
-                                            Navigator.of(context)
-                                                .pushNamed(Routes.search);
+                                            if (_searchContoller.text != null && _searchContoller.text.isNotEmpty){
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(builder: (context) => SearchResultScreen(
+                                                  url: "/search/?term=${_searchContoller.text}",
+                                                )),
+                                              );
+                                            }
                                           },
                                         ),
                                       ),
@@ -578,25 +623,42 @@ class _PartyGuestHome extends State<PartyGuestHome> {
                                 ],
                               ),
                               SizedBox(height:30),
-                              GridView.builder(
-                                  shrinkWrap: true,
-                                  physics: NeverScrollableScrollPhysics(),
-                                  gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                    // maxCrossAxisExtent: 300,
-                                      mainAxisExtent: 230,
-                                      // childAspectRatio: 2 / 3,
-                                      crossAxisCount: 2,
-                                      crossAxisSpacing: 20,
-                                      mainAxisSpacing: 20),
-                                  itemCount: 20,
-                                  itemBuilder: (context, index){
-                                    return GestureDetector(
-                                        onTap: (){
+                              FutureBuilder(
+                                future: _api.get("/events"),
+                                builder:(context, snapshot){
+                                  if (snapshot.hasData){
+                                    return GridView.builder(
+                                        shrinkWrap: true,
+                                        physics: NeverScrollableScrollPhysics(),
+                                        gridDelegate:
+                                        SliverGridDelegateWithFixedCrossAxisCount(
+                                          // maxCrossAxisExtent: 300,
+                                            mainAxisExtent: 230,
+                                            // childAspectRatio: 2 / 3,
+                                            crossAxisCount: 2,
+                                            crossAxisSpacing: 20,
+                                            mainAxisSpacing: 20),
+                                        itemCount: 20,
+                                        itemBuilder: (context, index){
+                                          return GestureDetector(
+                                              onTap: (){
 
-                                        },
-                                        child:EventCardGold());
-                                  }),
+                                              },
+                                              child:EventCardGold());
+                                        });
+                                  } else if (snapshot.hasError ){
+                                    return Center(
+                                      child: Text("Oops Something went wrong"),
+                                    );
+                                  }
+                                  return Center(
+                                    child: CircularProgressIndicator(
+                                      color: Colors.amber,
+                                      strokeWidth: 1,
+                                    ),
+                                  );
+                                }
+                              ),
                               SizedBox(height:30),
                             ]
                         ),
