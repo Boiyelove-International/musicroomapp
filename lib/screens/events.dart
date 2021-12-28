@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
 import 'package:musicroom/screens/popups.dart';
 import 'package:musicroom/screens/suggestion_list.dart';
+import 'package:musicroom/utils.dart';
 import 'package:musicroom/utils/apiServices.dart';
 import 'package:musicroom/utils/models.dart';
 import 'package:page_transition/page_transition.dart';
@@ -44,6 +45,17 @@ class EmptyContent extends StatelessWidget {
 }
 
 class EventCardGold extends StatelessWidget {
+
+  EventCardGold({
+      required this.title,
+    required this.artist,
+    required this.image
+  });
+
+  String title;
+  String artist;
+  String image;
+
   @override
   Widget build(context) {
     return Container(
@@ -63,7 +75,7 @@ class EventCardGold extends StatelessWidget {
                     fit: BoxFit.cover)),
           )),
           SizedBox(height: 15),
-          Text("Essence ft. Tems",
+          Text("$title",
               style: GoogleFonts.workSans(
                   color: Colors.black,
                   fontSize: 12,
@@ -175,10 +187,13 @@ class EventCard extends StatelessWidget {
 class EventDetail extends StatefulWidget {
   static const String routeName = "/eventDetail";
 
-  EventDetail({Key? key, this.userType = UserType.partyGuest,})
+  EventDetail({Key? key, this.userType = UserType.partyGuest, this.url, this.data, this.event})
       : super(key: key);
 
   UserType? userType;
+  Map<dynamic, dynamic>? data;
+  String? url;
+  Event? event;
 
   @override
   _EventDetail createState() => _EventDetail();
@@ -212,7 +227,7 @@ class _EventDetail extends State<EventDetail> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      "Sandra",
+                       "Sandra",
                       style:
                           TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                     ),
@@ -1797,11 +1812,12 @@ class EventDetailPartyGuest extends StatefulWidget {
 
   EventDetailPartyGuest({Key? key,
     this.userType = UserType.partyGuest,
-    this.eventStatus = EventStatus.EventPending})
+    this.eventStatus = EventStatus.EventPending, this.event})
       : super(key: key);
 
   UserType? userType;
   EventStatus? eventStatus;
+  Event? event;
 
   @override
   _EventDetailPartyGuest createState() => _EventDetailPartyGuest();
@@ -2055,12 +2071,12 @@ class _EventDetailPartyGuest extends State<EventDetailPartyGuest> {
                     children: [
                       ListTile(
                         title: Text(
-                          'WSJ Rock Concert',
+                          '${widget.event!.name}'.capitalize(),
                           style: TextStyle(
                               fontSize: 25, fontWeight: FontWeight.w900),
                         ),
                         subtitle: Text(
-                          "2019 August, 2021",
+                          "${widget.event!.renderDate()}",
                           style: TextStyle(fontSize: 10),
                         ),
                       ),
@@ -2080,8 +2096,9 @@ class _EventDetailPartyGuest extends State<EventDetailPartyGuest> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  "You",
+                                  '${widget.event!.organizer}',
                                   style: TextStyle(
+
                                       fontSize: 15,
                                       fontWeight: FontWeight.bold),
                                 ),
@@ -2160,7 +2177,7 @@ class _EventDetailPartyGuest extends State<EventDetailPartyGuest> {
                           child:SizedBox(height: 20)),
                           Visibility(visible: _showAbout,
                           child:Text(
-                              "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Orci, scelerisque nunc, diam lorem. Nunc ipsum aliquet ornare nec pretium. Morbi semper fermentum, pellentesque tincidunt a, accumsan sodales. Blandit eget nisi consectetur odio fermentum. Praesent elementum ante feugiat non scelerisque pellentesque lectus ultricies sollicitudin. Ipsum a ut sit vel nulla sed odio nulla lectus. Fermentum turpis amet in...")),
+                              "${widget.event!.about}".capitalize())),
                           SizedBox(height: 30),
                           Visibility(
                               visible: !_showAbout,
@@ -2180,13 +2197,18 @@ class _EventDetailPartyGuest extends State<EventDetailPartyGuest> {
 
 
 class EventListScreen extends StatefulWidget {
+  EventListScreen({Key? key,  this.url = "/events/"})
+      : super(key: key);
+
   static const String routeName = "/eventList";
+  String url;
   @override
   _EventListScreen createState() => _EventListScreen();
 }
 
 class _EventListScreen extends State<EventListScreen> {
   UserType _userType = UserType.partyOrganizer;
+  ApiBaseHelper _api = ApiBaseHelper();
 
   @override
   Widget build(BuildContext context) {
@@ -2226,24 +2248,41 @@ class _EventListScreen extends State<EventListScreen> {
       body: SafeArea(
         top: true,
         bottom: true,
-        child: ListView.separated(
-            padding: EdgeInsets.only(top: 30, left: 18, right: 18),
-            itemBuilder: (context, index) {
-              return GestureDetector(
-                  onTap: () {
-                    // Navigator.push(context, PageTransition(type: PageTransitionType.bottomToTop,
-                    //     child: EventDetail()));
+        child: FutureBuilder(
+          future: _api.get("${widget.url}"),
+          builder: (context, snapshot){
+            if (snapshot.hasData){
+              var itemList = snapshot.data as List;
+              if (itemList.isNotEmpty){
+                return ListView.separated(
+                    padding: EdgeInsets.only(top: 30, left: 18, right: 18),
+                    itemBuilder: (context, index) {
+                      return GestureDetector(
+                          onTap: () {
+                            // Navigator.push(context, PageTransition(type: PageTransitionType.bottomToTop,
+                            //     child: EventDetail()));
 
-                    Navigator.push(context, PageTransition(type: PageTransitionType.bottomToTop,
-                        child: EventDetailPartyGuest()));
-                  },
-                  child: EventCard());
-              ;
-            },
-            separatorBuilder: (context, index) {
-              return SizedBox(height: 30);
-            },
-            itemCount: 5),
+                            Navigator.push(context, PageTransition(type: PageTransitionType.bottomToTop,
+                                child: EventDetailPartyGuest()));
+                          },
+                          child: EventCard());
+                      ;
+                    },
+                    separatorBuilder: (context, index) {
+                      return SizedBox(height: 30);
+                    },
+                    itemCount: 5);
+              }
+              return EmptyContent();
+            } if (snapshot.hasError){
+              return Text("Oops! something went wrong");
+            }
+            return CircularProgressIndicator(
+              color: Colors.amber,
+              strokeWidth: 1,
+            );
+          }
+        ),
       ),
     );
   }

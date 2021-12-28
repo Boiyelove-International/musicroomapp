@@ -5,14 +5,13 @@ import 'package:iconly/iconly.dart';
 import 'package:musicroom/styles.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
-class YourRoom extends StatefulWidget {
+
+class YourRoom extends StatelessWidget {
   static const String routeName = "/yourRoom";
-
-  @override
-  _YourRoom createState() => _YourRoom();
-}
-
-class _YourRoom extends State<YourRoom> {
+  String code;
+  YourRoom({
+   this.code ="QRY1"
+  });
   @override
   Widget build(BuildContext context) {
     return Scaffold(

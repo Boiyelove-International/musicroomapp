@@ -1,5 +1,10 @@
-import 'package:change_notifier/change_notifier.dart';
+
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:musicroom/utils/apiServices.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+
 
 enum UserType { partyOrganizer, partyGuest }
 const String baseUrl = "https://musicroomweb.herokuapp.com/api";
@@ -32,6 +37,7 @@ enum EventStatus {
   EventStarted,
   EventEnded
 }
+
 class ProfileModel extends ChangeNotifier{
   String display_name = "";
   String email = "";
@@ -46,8 +52,6 @@ class ProfileModel extends ChangeNotifier{
     notifyListeners();
   }
 
-
-
 }
 
 class SongModel{
@@ -58,4 +62,87 @@ class SongModel{
   SongModel({
     required this.title, required this.artist, required this.album_art, required this.previewUrl
     });
+}
+
+class Event{
+  int id;
+  String? organizer_display_picture;
+  String created;
+  String modified;
+  String name;
+  String about;
+  TimeOfDay event_time;
+  DateTime event_date;
+  String image;
+  String code;
+  String organizer;
+  List? attendees =  [];
+  List? suggestions =[];
+
+  Event({
+    required this.id,
+    this.organizer_display_picture,
+    required this.about,
+    required this.name,
+    required this.modified,
+    required this.created,
+    required this.event_time,
+    required this.event_date,
+    required this.image,
+    required this.code,
+    required this.organizer,
+    this.attendees,
+    this.suggestions,
+  });
+  String renderDate(){
+    return DateFormat("dd MMMM, yyy").format(this.event_date).toString();
+  }
+
+  factory Event.fromJson(Map<String, dynamic> data){
+    String s  = data["event_time"];
+    TimeOfDay _event_time = TimeOfDay(hour:int.parse(s.split(":")[0]),minute: int.parse(s.split(":")[1]));
+    DateFormat format = new DateFormat("yyy-mm-dd");
+    DateTime _event_date = format.parse(data["event_date"]);
+    // event_time =
+    // data is {'id': 2, 
+    // 'organizer_display_picture': None, 
+    // 'created': '2021-12-21T13:15:06.019476Z', 
+    // 'modified': '2021-12-21T13:15:06.023665Z', 
+    // 'name': 'dfghjhgfdsaw', 
+    // 'about': 'ertgyhjkjhgfdsa', 
+    // 'event_time': '09:37:00', 
+    // 'event_date': '2021-12-21', 
+    // 'image': '/media/event_images/IMG_0003.jpeg', 
+    // 'code': 'ABCD', 
+    // 'organizer': 9, 
+    // 'attendees': [], 
+    // 'suggestions': []}
+
+    return Event(
+      id : data["id"],
+      about: data["about"],
+      organizer_display_picture: data["organizer_display_picture"],
+      name: data["name"],
+      modified: data["modified"],
+      created: data["created"],
+      event_time: _event_time,
+      event_date: _event_date,
+      image: data["image"],
+      code: data["code"],
+      organizer: data["organizer"],
+      attendees: data["attendees"],
+      suggestions: data["suggestions"],
+    );
+  }
+
+  Future<bool> joinEvent() async{
+    ApiBaseHelper _api = ApiBaseHelper();
+    Map<String, dynamic> response = await _api.post("/event/join/",
+        {"event_code": this.code});
+    if (response["joined"] == true ){
+      return true;
+    }
+    return false;
+    }
+
 }

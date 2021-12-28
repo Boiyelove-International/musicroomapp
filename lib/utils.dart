@@ -115,3 +115,9 @@ print('Failed to get platform version');
 //if (!mounted) return;
 return identifier;
 }
+
+extension StringExtension on String {
+  String capitalize() {
+    return "${this[0].toUpperCase()}${this.substring(1)}";
+  }
+}

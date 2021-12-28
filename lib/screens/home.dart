@@ -9,6 +9,7 @@ import 'package:musicroom/screens/search.dart';
 import 'package:musicroom/styles.dart';
 import 'package:musicroom/utils/apiServices.dart';
 import 'package:musicroom/utils/models.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../routes.dart';
@@ -202,128 +203,133 @@ class _EventOrganizerHome extends State<EventOrganizerHome>{
                             ],
                           ))),
                   SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                          (BuildContext context, int index) {
-                        return Container(
-                          height: 300,
-                          width: 300,
-                          padding: EdgeInsets.all(10.0),
-                          margin: EdgeInsets.only(top: 20, bottom: 20),
-                          child: Stack(
-                            children: [
-                              Positioned.fill(
-                                  child: Align(
-                                      alignment: Alignment.topRight,
-                                      child: Container(
-                                          padding: EdgeInsets.all(10.0),
-                                          decoration: BoxDecoration(
-                                            color:
-                                            Colors.white.withOpacity(0.2),
-                                            borderRadius:
-                                            BorderRadius.circular(10),
-                                          ),
-                                          child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Text("Starts in"),
-                                                Text("24h: 30m")
-                                              ])))),
-                              Positioned.fill(
-                                  child: Align(
-                                      alignment: Alignment.bottomCenter,
-                                      child: Container(
-                                          padding: EdgeInsets.only(
-                                              top: 20,
-                                              bottom: 20,
-                                              left: 20,
-                                              right: 20),
-                                          decoration: BoxDecoration(
-                                            color:
-                                            Colors.white.withOpacity(0.2),
-                                            borderRadius:
-                                            BorderRadius.circular(10),
-                                          ),
-                                          child: Row(
-                                              mainAxisAlignment:
-                                              MainAxisAlignment
-                                                  .spaceBetween,
-                                              children: [
-                                                Flexible(
-                                                    child: Column(
-                                                        mainAxisSize:
-                                                        MainAxisSize.min,
-                                                        mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                        crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                        children: [
-                                                          Text("Owambe Party",
-                                                              style: TextStyle(
-                                                                  fontSize: 15,
-                                                                  fontWeight:
-                                                                  FontWeight
-                                                                      .w900)),
-                                                          SizedBox(height: 10),
-                                                          Text(
-                                                              "Hosted by - Owambe Hitz",
-                                                              style: TextStyle(
-                                                                  fontSize: 10))
-                                                        ])),
-                                                Flexible(
-                                                    child: Container(
-                                                      width: MediaQuery.of(context)
-                                                          .size
-                                                          .width *
-                                                          0.3,
-                                                      height: 35,
-                                                      child: Stack(
-                                                        children: [
-                                                          Positioned(
-                                                              right: 50,
-                                                              child: CircleAvatar(
-                                                                backgroundImage:
-                                                                AssetImage(
-                                                                    "assets/images/circle_avatar_2.png"),
-                                                              )),
-                                                          Positioned(
-                                                              right: 25,
-                                                              child: CircleAvatar(
-                                                                backgroundImage:
-                                                                AssetImage(
-                                                                    "assets/images/circle_avatar_3.png"),
-                                                              )),
-                                                          Positioned(
-                                                              right: 0,
-                                                              child: Container(
-                                                                height: 35,
-                                                                decoration:
-                                                                BoxDecoration(
-                                                                  shape: BoxShape
-                                                                      .circle,
-                                                                  gradient: DarkPalette
-                                                                      .borderGradient1,
-                                                                ),
-                                                                child: Center(
-                                                                    child: Text(
-                                                                        "+500")),
-                                                              ))
-                                                        ],
-                                                      ),
-                                                    ))
-                                              ]))))
-                            ],
-                          ),
-                          decoration: BoxDecoration(
-                              image: DecorationImage(
-                                  fit: BoxFit.cover,
-                                  image: AssetImage(
-                                      "assets/images/party_people_${index + 1}.png"))),
-                        );
-                      },
-                      childCount: 4, // 1000 list items
-                    ),
+                      delegate: SliverChildBuilderDelegate(
+                            (BuildContext context, int index) {
+                          return Container(
+                            height: 300,
+                            width: 300,
+                            padding: EdgeInsets.all(10.0),
+                            margin: EdgeInsets.only(top: 20, bottom: 20),
+                            child: Stack(
+                              children: [
+                                Positioned.fill(
+                                    child: Align(
+                                        alignment: Alignment.topRight,
+                                        child: Container(
+                                            padding: EdgeInsets.all(10.0),
+                                            decoration: BoxDecoration(
+                                              color:
+                                              Colors.white.withOpacity(0.2),
+                                              borderRadius:
+                                              BorderRadius.circular(10),
+                                            ),
+                                            child: Column(
+                                                mainAxisSize: MainAxisSize
+                                                    .min,
+                                                children: [
+                                                  Text("Starts in"),
+                                                  Text("24h: 30m")
+                                                ])))),
+                                Positioned.fill(
+                                    child: Align(
+                                        alignment: Alignment.bottomCenter,
+                                        child: Container(
+                                            padding: EdgeInsets.only(
+                                                top: 20,
+                                                bottom: 20,
+                                                left: 20,
+                                                right: 20),
+                                            decoration: BoxDecoration(
+                                              color:
+                                              Colors.white.withOpacity(0.2),
+                                              borderRadius:
+                                              BorderRadius.circular(10),
+                                            ),
+                                            child: Row(
+                                                mainAxisAlignment:
+                                                MainAxisAlignment
+                                                    .spaceBetween,
+                                                children: [
+                                                  Flexible(
+                                                      child: Column(
+                                                          mainAxisSize:
+                                                          MainAxisSize.min,
+                                                          mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                          crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                          children: [
+                                                            Text(
+                                                                "Owambe Party",
+                                                                style: TextStyle(
+                                                                    fontSize: 15,
+                                                                    fontWeight:
+                                                                    FontWeight
+                                                                        .w900)),
+                                                            SizedBox(
+                                                                height: 10),
+                                                            Text(
+                                                                "Hosted by - Owambe Hitz",
+                                                                style: TextStyle(
+                                                                    fontSize: 10))
+                                                          ])),
+                                                  Flexible(
+                                                      child: Container(
+                                                        width: MediaQuery
+                                                            .of(context)
+                                                            .size
+                                                            .width *
+                                                            0.3,
+                                                        height: 35,
+                                                        child: Stack(
+                                                          children: [
+                                                            Positioned(
+                                                                right: 50,
+                                                                child: CircleAvatar(
+                                                                  backgroundImage:
+                                                                  AssetImage(
+                                                                      "assets/images/circle_avatar_2.png"),
+                                                                )),
+                                                            Positioned(
+                                                                right: 25,
+                                                                child: CircleAvatar(
+                                                                  backgroundImage:
+                                                                  AssetImage(
+                                                                      "assets/images/circle_avatar_3.png"),
+                                                                )),
+                                                            Positioned(
+                                                                right: 0,
+                                                                child: Container(
+                                                                  height: 35,
+                                                                  decoration:
+                                                                  BoxDecoration(
+                                                                    shape: BoxShape
+                                                                        .circle,
+                                                                    gradient: DarkPalette
+                                                                        .borderGradient1,
+                                                                  ),
+                                                                  child: Center(
+                                                                      child: Text(
+                                                                          "+500")),
+                                                                ))
+                                                          ],
+                                                        ),
+                                                      ))
+                                                ]))))
+                              ],
+                            ),
+                            decoration: BoxDecoration(
+                                image: DecorationImage(
+                                    fit: BoxFit.cover,
+                                    image: AssetImage(
+                                        "assets/images/party_people_${index +
+                                            1}.png"))),
+                          );
+                        },
+                        childCount: 4, // 1000 list items
+                      )
                   )
                 ]))),
         floatingActionButton: Visibility(
@@ -531,6 +537,7 @@ class _PartyGuestHome extends State<PartyGuestHome> {
                                         context,
                                         MaterialPageRoute(builder: (context) => SearchResultScreen(
                                           title: "Trending Result",
+                                          url: "/suggestions/?qt=trending",
                                         )),
                                       );
                                     },
@@ -549,42 +556,62 @@ class _PartyGuestHome extends State<PartyGuestHome> {
                                 ],
                               ),
                               SizedBox(height:30),
-                              GridView.builder(
-                                  shrinkWrap: true,
-                                  physics: NeverScrollableScrollPhysics(),
-                                  gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                    // maxCrossAxisExtent: 300,
-                                      mainAxisExtent: 230,
-                                      // childAspectRatio: 2 / 3,
-                                      crossAxisCount: 2,
-                                      crossAxisSpacing: 20,
-                                      mainAxisSpacing: 20),
-                                  itemCount: 2,
-                                  itemBuilder: (context, index){
-                                    return GestureDetector(
-                                        onTap: (){
+                              FutureBuilder(
+                                future: _api.get("/suggestions/?qt=trending"),
+                                builder: (context, snapshot){
+                                 if (snapshot.hasData){
+                                   var itemList = snapshot.data as List;
+                                   if (itemList.isNotEmpty){
+                                     return GridView.builder(
+                                         shrinkWrap: true,
+                                         physics: NeverScrollableScrollPhysics(),
+                                         gridDelegate:
+                                         SliverGridDelegateWithFixedCrossAxisCount(
+                                           // maxCrossAxisExtent: 300,
+                                             mainAxisExtent: 230,
+                                             // childAspectRatio: 2 / 3,
+                                             crossAxisCount: 2,
+                                             crossAxisSpacing: 20,
+                                             mainAxisSpacing: 20),
+                                         itemCount: 2,
+                                         itemBuilder: (context, index){
+                                           return GestureDetector(
+                                               onTap: (){
+                                                 showModalBottomSheet<void>(
+                                                   isScrollControlled: true,
+                                                   backgroundColor: Colors.transparent,
+                                                   context: context,
+                                                   builder: (BuildContext context) => Container(
+                                                       decoration: BoxDecoration(
+                                                           color: Colors.black,
+                                                           borderRadius: new BorderRadius.only(
+                                                             topLeft: const Radius.circular(40.0),
+                                                             topRight: const Radius.circular(40.0),
+                                                           )),
+                                                       padding: EdgeInsets.only(
+                                                           top: 30, left: 20, right: 20, bottom: 20),
+                                                       height: MediaQuery.of(context).size.height * 0.7,
+                                                       child: SuggestEventForm()),
+                                                 );
 
-                                          showModalBottomSheet<void>(
-                                            isScrollControlled: true,
-                                            backgroundColor: Colors.transparent,
-                                            context: context,
-                                            builder: (BuildContext context) => Container(
-                                                decoration: BoxDecoration(
-                                                    color: Colors.black,
-                                                    borderRadius: new BorderRadius.only(
-                                                      topLeft: const Radius.circular(40.0),
-                                                      topRight: const Radius.circular(40.0),
-                                                    )),
-                                                padding: EdgeInsets.only(
-                                                    top: 30, left: 20, right: 20, bottom: 20),
-                                                height: MediaQuery.of(context).size.height * 0.7,
-                                                child: SuggestEventForm()),
-                                          );
-
-                                        },
-                                        child:EventCardGold());
-                                  }),
+                                               },
+                                               child:EventCardGold(
+                                                   title: "Essence ft Tems",
+                                                   artist: "Wizkid",
+                                                   image: "ahsdfggg.jpg"
+                                               ));
+                                         });
+                                   }
+                                   return EmptyContent();
+                                 } else if (snapshot.hasError){
+                                   return Text("Oops! something went wrong");
+                                 }
+                                 return CircularProgressIndicator(
+                                   color: Colors.amber,
+                                   strokeWidth: 1,
+                                 );
+                                },
+                              ),
                               SizedBox(height:30),
                             ]
                         ),
@@ -605,7 +632,9 @@ class _PartyGuestHome extends State<PartyGuestHome> {
                                     onTap: (){
                                       Navigator.push(
                                         context,
-                                        MaterialPageRoute(builder: (context) => EventListScreen()),
+                                        MaterialPageRoute(builder: (context) => EventListScreen(
+                                          url: "/events/"
+                                        )),
                                       );
                                     },
                                       child: Container(
@@ -624,28 +653,44 @@ class _PartyGuestHome extends State<PartyGuestHome> {
                               ),
                               SizedBox(height:30),
                               FutureBuilder(
-                                future: _api.get("/events"),
+                                future: _api.get("/events/"),
                                 builder:(context, snapshot){
                                   if (snapshot.hasData){
-                                    return GridView.builder(
-                                        shrinkWrap: true,
-                                        physics: NeverScrollableScrollPhysics(),
-                                        gridDelegate:
-                                        SliverGridDelegateWithFixedCrossAxisCount(
-                                          // maxCrossAxisExtent: 300,
-                                            mainAxisExtent: 230,
-                                            // childAspectRatio: 2 / 3,
-                                            crossAxisCount: 2,
-                                            crossAxisSpacing: 20,
-                                            mainAxisSpacing: 20),
-                                        itemCount: 20,
-                                        itemBuilder: (context, index){
-                                          return GestureDetector(
-                                              onTap: (){
+                                    var itemList = snapshot.data as List;
 
-                                              },
-                                              child:EventCardGold());
-                                        });
+                                    if (itemList.isNotEmpty){
+                                      return GridView.builder(
+                                          shrinkWrap: true,
+                                          physics: NeverScrollableScrollPhysics(),
+                                          gridDelegate:
+                                          SliverGridDelegateWithFixedCrossAxisCount(
+                                            // maxCrossAxisExtent: 300,
+                                              mainAxisExtent: 230,
+                                              // childAspectRatio: 2 / 3,
+                                              crossAxisCount: 2,
+                                              crossAxisSpacing: 20,
+                                              mainAxisSpacing: 20),
+                                          itemCount: itemList.length,
+                                          itemBuilder: (context, index){
+                                            Event event = Event.fromJson(itemList[index]);
+                                            return GestureDetector(
+                                                onTap: (){
+                                                  Navigator.push(
+                                                      context,PageTransition(type: PageTransitionType.bottomToTop,
+                                                      child: EventDetailPartyGuest(
+                                                        userType: UserType.partyGuest,
+                                                        event: event,
+                                                      )));
+
+                                                },
+                                                child:EventCardGold(
+                                                    title: "Essence ft Tems",
+                                                    artist: "Wizkid",
+                                                    image: "ahsdfggg.jpg"
+                                                ));
+                                          });
+                                    }
+                                    return EmptyContent();
                                   } else if (snapshot.hasError ){
                                     return Center(
                                       child: Text("Oops Something went wrong"),
@@ -676,17 +721,21 @@ class _PartyGuestHome extends State<PartyGuestHome> {
                   });
                   showModalBottomSheet<void>(
                       isScrollControlled: true,
-                          builder: (BuildContext context) => Container(
-                              decoration: BoxDecoration(
-                                  color: Colors.black,
-                                  borderRadius: new BorderRadius.only(
-                                    topLeft: const Radius.circular(40.0),
-                                    topRight: const Radius.circular(40.0),
-                                  )),
-                              padding: EdgeInsets.only(
-                                  top: 30, left: 20, right: 20, bottom: 20),
-                              height: MediaQuery.of(context).size.height * 7,
-                              child: JoinEventForm()),
+                          builder: (BuildContext context) => Wrap(
+                            children: [
+                              Container(
+                                  decoration: BoxDecoration(
+                                      color: Colors.black,
+                                      borderRadius: new BorderRadius.only(
+                                        topLeft: const Radius.circular(40.0),
+                                        topRight: const Radius.circular(40.0),
+                                      )),
+                                  padding: EdgeInsets.only(
+                                      top: 30, left: 20, right: 20, bottom: 20),
+                                  height: MediaQuery.of(context).size.height * 7,
+                                  child: JoinEventForm())
+                            ],
+                          ),
                           backgroundColor: Colors.transparent,
                           context: context)
                       .whenComplete(() => setState(() {

@@ -24,6 +24,9 @@ dependencies:
   smooth_page_indicator:
   flutter:
     sdk: flutter
+  intl:
+  provider: ^5.0.0
+  change_notifier:
   google_fonts: ^2.1.0
   iconly: ^1.0.1
   file_picker:
@@ -32,8 +35,6 @@ dependencies:
   flutter_feather_icons:
   shared_preferences:
   email_validator: "^2.0.0"
-  provider:
-  change_notifier:
   device_info:
   platform_device_id:
   qr_flutter:
@@ -41,7 +42,6 @@ dependencies:
   page_transition:
   audioplayers:
   cached_network_image:
-  intl:
   http_parser:
 
   #  overlay_group_avatar: ^0.0.2

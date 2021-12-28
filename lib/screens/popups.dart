@@ -14,6 +14,7 @@ import 'package:musicroom/screens/search.dart';
 import 'package:musicroom/styles.dart';
 import 'package:musicroom/utils/apiServices.dart';
 import 'package:musicroom/utils/models.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:intl/intl.dart';
 
@@ -402,7 +403,11 @@ class _PopupWidget extends State<PopupWidget> {
               return GestureDetector(
                 onTap: (){
                 },
-                child:  EventCardGold(),
+                child:  EventCardGold(
+                    title: "Essence ft Tems",
+                    artist: "Wizkid",
+                    image: "ahsdfggg.jpg"
+                ),
               );
             })
       ]
@@ -468,6 +473,7 @@ class _CreateEventForm extends State<CreateEventForm> {
   final TextEditingController _eventTimeController = TextEditingController(text: "");
   final TextEditingController _eventDateController = TextEditingController();
   var _selectedDate;
+  Event?  eventItem;
   @override
   Widget build(BuildContext context) {
     void _changePage(int curr_page) {
@@ -834,6 +840,9 @@ class _CreateEventForm extends State<CreateEventForm> {
                   "event_date": _selectedDate,
                   "image": image
                 }).then((value){
+                  setState(() {
+                    // eventItem = Event.fromJson(value);
+                  });
                   _changePage(3);
                 });
 
@@ -896,8 +905,13 @@ class _CreateEventForm extends State<CreateEventForm> {
               shadowColor: MaterialStateProperty.all(Colors.transparent),
             ),
             onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).pushNamed(Routes.eventDetail);
+              Navigator.pushReplacement(
+                  context,PageTransition(type: PageTransitionType.bottomToTop,
+                  child: EventDetail(
+                    event: eventItem,
+                    userType: UserType.partyGuest,
+                  )));
+
             },
             child: Padding(
               padding: const EdgeInsets.only(
@@ -1137,7 +1151,11 @@ class _SuggestEventForm extends State<SuggestEventForm>{
                     //     });
                     _changePage(2);
                   },
-                  child:EventCardGold());
+                  child:EventCardGold(
+                      title: "Essence ft Tems",
+                      artist: "Wizkid",
+                      image: "ahsdfggg.jpg"
+                  ));
             })
       ],
     );
@@ -1206,23 +1224,28 @@ class JoinEventForm extends StatefulWidget{
 
 class _JoinEventForm extends State<JoinEventForm>{
   PageController _pageController = PageController(initialPage: 0);
-  UserType _selectedUserType = UserType.partyOrganizer;
+  int _selectedUserType = 0;
   TextEditingController _codeBox1 = TextEditingController();
   TextEditingController _codeBox2 = TextEditingController();
   TextEditingController _codeBox3 = TextEditingController();
   TextEditingController _codeBox4 = TextEditingController();
   ApiBaseHelper _api = ApiBaseHelper();
-
+  Event? eventData;
   @override
   Widget build(BuildContext context) {
     final TextStyle subtitle2 = Theme.of(context).textTheme.subtitle2!;
-    void _changePage(int curr_page) {
+    void _changePage(int curr_page, {skip = false}) {
       if (_pageController.hasClients) {
-        _pageController.animateToPage(
-          curr_page,
-          duration: Duration(milliseconds: 350),
-          curve: Curves.easeIn,
-        );
+        if (skip){
+          _pageController.jumpToPage(curr_page);
+        } else{
+          _pageController.animateToPage(
+            curr_page,
+            duration: Duration(milliseconds: 350),
+            curve: Curves.easeIn,
+          );
+        }
+
       }
     }
 
@@ -1343,8 +1366,12 @@ class _JoinEventForm extends State<JoinEventForm>{
             children: [
               GestureDetector(
                 onTap: () {
+                  if (_selectedUserType == 0){
+                    _changePage(1);
+                  }
                   setState(() {
-                    _selectedUserType = UserType.partyOrganizer;
+                    _selectedUserType = 0;
+
                   });
                 },
                 child: Stack(
@@ -1358,7 +1385,7 @@ class _JoinEventForm extends State<JoinEventForm>{
                         decoration: BoxDecoration(
                             color: DarkPalette.darkYellow,
                             border: _selectedUserType ==
-                                UserType.partyOrganizer
+                                0
                                 ? GradientBorder.uniform(
                                 width: 3.0,
                                 gradient: DarkPalette
@@ -1388,7 +1415,7 @@ class _JoinEventForm extends State<JoinEventForm>{
                     ),
                     Visibility(
                       visible: _selectedUserType ==
-                          UserType.partyOrganizer
+                          0
                           ? true
                           : false,
                       child: Positioned.fill(
@@ -1406,8 +1433,12 @@ class _JoinEventForm extends State<JoinEventForm>{
               ),
               GestureDetector(
                 onTap: () {
+                  if (_selectedUserType == 1){
+                    _changePage(2);
+                  }
                   setState(() {
-                    _selectedUserType = UserType.partyGuest;
+                    _selectedUserType = 1;
+
                   });
                 },
                 child: Stack(
@@ -1421,7 +1452,7 @@ class _JoinEventForm extends State<JoinEventForm>{
                         decoration: BoxDecoration(
                             color: DarkPalette.darkYellow,
                             border: _selectedUserType ==
-                                UserType.partyGuest
+                                1
                                 ? GradientBorder.uniform(
                                 width: 3.0,
                                 gradient: DarkPalette
@@ -1441,7 +1472,7 @@ class _JoinEventForm extends State<JoinEventForm>{
                           alignment: Alignment.bottomCenter,
                           child: Padding(
                               padding: EdgeInsets.all(15),
-                              child: Text("Unique Code",
+                              child: Text("Scan QR Code",
                                   style: GoogleFonts.workSans(
                                       textStyle: subtitle2,
                                       color: DarkPalette.darkDark,
@@ -1451,7 +1482,7 @@ class _JoinEventForm extends State<JoinEventForm>{
                     ),
                     Visibility(
                       visible: _selectedUserType ==
-                          UserType.partyGuest
+                          1
                           ? true
                           : false,
                       child: Positioned.fill(
@@ -1501,6 +1532,7 @@ class _JoinEventForm extends State<JoinEventForm>{
                 ),
                 child: TextFormField(
                   controller: _codeBox1,
+                  textInputAction: TextInputAction.next,
                   inputFormatters: [
                     new LengthLimitingTextInputFormatter(1),
                   ],
@@ -1533,6 +1565,7 @@ class _JoinEventForm extends State<JoinEventForm>{
                 ),
                 child:  TextFormField(
                   controller: _codeBox2,
+                  textInputAction: TextInputAction.next,
                   textCapitalization: TextCapitalization.characters,
                   inputFormatters: [
                     new LengthLimitingTextInputFormatter(1),
@@ -1565,7 +1598,9 @@ class _JoinEventForm extends State<JoinEventForm>{
                 ),
                 child:  TextFormField(
                   controller: _codeBox3,
+                  textInputAction: TextInputAction.next,
                   textCapitalization: TextCapitalization.characters,
+
                   validator: (value){
                     if( value == null || value.isEmpty){
                       return'required';
@@ -1656,7 +1691,10 @@ class _JoinEventForm extends State<JoinEventForm>{
 
                         _api.get("/event/join/?q=$q")
                         .then((value){
-
+                            setState(() {
+                              eventData = Event.fromJson(value);
+                            });
+                            _changePage(3, skip:true);
                         });
                       }
                       },
@@ -1714,7 +1752,7 @@ class _JoinEventForm extends State<JoinEventForm>{
       ]
     );
 
-    Widget _partyDetail =  Column(
+    Widget _partyDetail =  eventData != null ? Column(
         children: [
           Container(
             padding: EdgeInsets.only(top: 50, left: 5, right: 5),
@@ -1750,15 +1788,15 @@ class _JoinEventForm extends State<JoinEventForm>{
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text("House Party", style: GoogleFonts.workSans(
+                                Text("${eventData!.name}", style: GoogleFonts.workSans(
                                     fontWeight: FontWeight.w700,
                                     fontSize: 25,
                                     )),
                                 SizedBox(height:15),
                                 Text("20th August 2021", style: GoogleFonts.workSans(
-    fontWeight: FontWeight.w300,
-    fontSize: 16,
-    )),
+                                fontWeight: FontWeight.w300,
+                                fontSize: 16,
+                                )),
                               ],
                             )
                           ],
@@ -1788,7 +1826,7 @@ class _JoinEventForm extends State<JoinEventForm>{
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                "PartyMixers",
+                                "${eventData!.organizer}",
                                 style: TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.bold),
@@ -1861,7 +1899,7 @@ class _JoinEventForm extends State<JoinEventForm>{
                         fontWeight: FontWeight.bold
                     )),
                     SizedBox(height:20),
-                    Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Orci, scelerisque nunc, diam lorem. More....",
+                    Text("${eventData!.about}",
                         style: GoogleFonts.workSans(
                             fontSize: 18,
                             fontWeight: FontWeight.w300
@@ -1894,8 +1932,11 @@ class _JoinEventForm extends State<JoinEventForm>{
                                 // elevation: MaterialStateProperty.all(3),
                                 shadowColor: MaterialStateProperty.all(Colors.transparent),
                               ),
-                              onPressed: () {
-                                Navigator.pushReplacementNamed(context, Routes.guestHome);
+                              onPressed: () async {
+                               bool joined = await eventData!.joinEvent();
+                               if (joined ) {
+                                 _changePage(5);
+                               }
                               },
                               child: Padding(
                                 padding: const EdgeInsets.only(
@@ -1915,6 +1956,11 @@ class _JoinEventForm extends State<JoinEventForm>{
                     )
                   ]))
         ],
+    ) : Center(
+      child: CircularProgressIndicator(
+        color: Colors.amber,
+        strokeWidth: 1,
+      )
     );
     Widget _joinEventDone =  Column(children: [
       Container(
@@ -1963,8 +2009,13 @@ class _JoinEventForm extends State<JoinEventForm>{
                   shadowColor: MaterialStateProperty.all(Colors.transparent),
                 ),
                 onPressed: () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pushNamed(Routes.allSuggestions);
+
+                  Navigator.pushReplacement(
+                    context,PageTransition(type: PageTransitionType.bottomToTop,
+                            child: EventDetailPartyGuest(
+                              event: eventData!,
+                              userType: UserType.partyGuest,
+                            )));
                 },
                 child: Padding(
                   padding: const EdgeInsets.only(
@@ -1983,7 +2034,7 @@ class _JoinEventForm extends State<JoinEventForm>{
 
 
     return PageView(
-      // physics: NeverScrollableScrollPhysics(),
+      physics: NeverScrollableScrollPhysics(),
         controller: _pageController,
         children: [
           _eventChoice,
@@ -2007,7 +2058,7 @@ class _SuggestSongForm extends State<SuggestSongForm>{
   PageController _pageController = PageController(initialPage: 0);
   UserType _selectedUserType = UserType.partyOrganizer;
   double sliderValue = 50.0;
-
+  TextEditingController  _songSearchController = TextEditingController();
 
   @override
   Widget build(BuildContext context){
@@ -2045,6 +2096,7 @@ class _SuggestSongForm extends State<SuggestSongForm>{
             textAlign: TextAlign.center),
         SizedBox(height: 20),
         TextFormField(
+          controller: _songSearchController,
           autofocus: false,
           style: TextStyle(color: Colors.black),
           decoration: InputDecoration(
@@ -2073,7 +2125,11 @@ class _SuggestSongForm extends State<SuggestSongForm>{
               ),
               onPressed: () {
                 Navigator.of(context)
-                    .pushNamed(Routes.search);
+                    .push(MaterialPageRoute(builder: (_){
+                  return SearchResultScreen(
+                      url: "/search/?term=${_songSearchController.text}"
+                  );
+                }));
               },
             ),
           ),
@@ -2109,7 +2165,13 @@ class _SuggestSongForm extends State<SuggestSongForm>{
                       shadowColor: MaterialStateProperty.all(Colors.transparent),
                     ),
                     onPressed: () {
-                      _changePage(1);
+                      Navigator.of(context)
+                          .push(MaterialPageRoute(builder: (_){
+                            return SearchResultScreen(
+                              url: "/search/?term=${_songSearchController.text}"
+                            );
+                      }));
+                      // _changePage(1);
                     },
                     child: Padding(
                       padding: const EdgeInsets.only(
@@ -2282,7 +2344,7 @@ class _SuggestSongForm extends State<SuggestSongForm>{
                 SizedBox(height:30),
                 Row(
                   children: [
-                    Text("Trending Suggestions", style: GoogleFonts.workSans(
+                    Text("Similar songs", style: GoogleFonts.workSans(
                         fontSize: 20,
                         fontWeight: FontWeight.w700
                     )),
@@ -2345,7 +2407,11 @@ class _SuggestSongForm extends State<SuggestSongForm>{
                             );
 
                           },
-                          child:EventCardGold());
+                          child:EventCardGold(
+                              title: "Essence ft Tems",
+                              artist: "Wizkid",
+                              image: "ahsdfggg.jpg"
+                          ));
                     }),
                 SizedBox(height:30),
               ]
@@ -2394,7 +2460,11 @@ class _SuggestSongForm extends State<SuggestSongForm>{
                     //     });
                     _changePage(2);
                   },
-                  child:EventCardGold());
+                  child:EventCardGold(
+                      title: "Essence ft Tems",
+                      artist: "Wizkid",
+                      image: "ahsdfggg.jpg"
+                  ));
             })
       ],
     );

@@ -71,6 +71,7 @@ class _SearchResultScreen extends State<SearchResultScreen> {
                     return GestureDetector(
                         onTap: (){
                           showModalBottomSheet(
+                            isScrollControlled: true,
                               context: context,
                               backgroundColor: Colors.transparent,
                               builder: (context){
@@ -111,7 +112,9 @@ class _SearchResultScreen extends State<SearchResultScreen> {
                                 ),
                                 errorWidget: (context, url, error) => Icon(Icons.error),
                               ),
-                              title: Text("${dataItems[index]['title']}"),
+                              title: Text("${dataItems[index]['title']}", style:GoogleFonts.workSans(
+                                fontWeight: FontWeight.bold
+                              )),
                               subtitle: Text("${dataItems[index]['artist']}y"),
                               trailing: _userType == UserType.partyOrganizer ? Container(
                                   padding: EdgeInsets.all(10),
@@ -144,7 +147,10 @@ class _SearchResultScreen extends State<SearchResultScreen> {
              );
             }
             return Center(
-                child: CircularProgressIndicator()
+                child: CircularProgressIndicator(
+                  color: Colors.amber,
+                  strokeWidth: 2,
+                )
             );
           },
         )
