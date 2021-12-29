@@ -9,9 +9,10 @@ import 'package:musicroom/screens/search.dart';
 import 'package:musicroom/styles.dart';
 import 'package:musicroom/utils/apiServices.dart';
 import 'package:musicroom/utils/models.dart';
+import 'package:musicroom/widgets.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:http/http.dart' as http;
 import '../routes.dart';
 import 'events.dart';
 
@@ -25,13 +26,16 @@ class EventOrganizerHome extends StatefulWidget {
 
 class _EventOrganizerHome extends State<EventOrganizerHome>{
   bool showFab = true;
+  bool loadingEvents = false;
   String? display_name = "PartyMixers";
   TextEditingController _searchContoller = TextEditingController();
+  List<Event> _events = [];
 
   @override
   void initState() {
     super.initState();
     _loadData();
+    _loadEvents();
   }
 
   _loadData() async {
@@ -202,134 +206,123 @@ class _EventOrganizerHome extends State<EventOrganizerHome>{
                                       )))
                             ],
                           ))),
-                  SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                            (BuildContext context, int index) {
-                          return Container(
-                            height: 300,
-                            width: 300,
-                            padding: EdgeInsets.all(10.0),
-                            margin: EdgeInsets.only(top: 20, bottom: 20),
-                            child: Stack(
-                              children: [
-                                Positioned.fill(
-                                    child: Align(
-                                        alignment: Alignment.topRight,
-                                        child: Container(
-                                            padding: EdgeInsets.all(10.0),
-                                            decoration: BoxDecoration(
-                                              color:
-                                              Colors.white.withOpacity(0.2),
-                                              borderRadius:
-                                              BorderRadius.circular(10),
-                                            ),
-                                            child: Column(
-                                                mainAxisSize: MainAxisSize
-                                                    .min,
-                                                children: [
-                                                  Text("Starts in"),
-                                                  Text("24h: 30m")
-                                                ])))),
-                                Positioned.fill(
-                                    child: Align(
-                                        alignment: Alignment.bottomCenter,
-                                        child: Container(
-                                            padding: EdgeInsets.only(
-                                                top: 20,
-                                                bottom: 20,
-                                                left: 20,
-                                                right: 20),
-                                            decoration: BoxDecoration(
-                                              color:
-                                              Colors.white.withOpacity(0.2),
-                                              borderRadius:
-                                              BorderRadius.circular(10),
-                                            ),
-                                            child: Row(
-                                                mainAxisAlignment:
-                                                MainAxisAlignment
-                                                    .spaceBetween,
-                                                children: [
-                                                  Flexible(
-                                                      child: Column(
-                                                          mainAxisSize:
-                                                          MainAxisSize.min,
-                                                          mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                          crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                          children: [
-                                                            Text(
-                                                                "Owambe Party",
-                                                                style: TextStyle(
-                                                                    fontSize: 15,
-                                                                    fontWeight:
-                                                                    FontWeight
-                                                                        .w900)),
-                                                            SizedBox(
-                                                                height: 10),
-                                                            Text(
-                                                                "Hosted by - Owambe Hitz",
-                                                                style: TextStyle(
-                                                                    fontSize: 10))
-                                                          ])),
-                                                  Flexible(
-                                                      child: Container(
-                                                        width: MediaQuery
-                                                            .of(context)
-                                                            .size
-                                                            .width *
-                                                            0.3,
-                                                        height: 35,
-                                                        child: Stack(
-                                                          children: [
-                                                            Positioned(
-                                                                right: 50,
-                                                                child: CircleAvatar(
-                                                                  backgroundImage:
-                                                                  AssetImage(
-                                                                      "assets/images/circle_avatar_2.png"),
-                                                                )),
-                                                            Positioned(
-                                                                right: 25,
-                                                                child: CircleAvatar(
-                                                                  backgroundImage:
-                                                                  AssetImage(
-                                                                      "assets/images/circle_avatar_3.png"),
-                                                                )),
-                                                            Positioned(
-                                                                right: 0,
-                                                                child: Container(
-                                                                  height: 35,
-                                                                  decoration:
-                                                                  BoxDecoration(
-                                                                    shape: BoxShape
-                                                                        .circle,
-                                                                    gradient: DarkPalette
-                                                                        .borderGradient1,
-                                                                  ),
-                                                                  child: Center(
-                                                                      child: Text(
-                                                                          "+500")),
-                                                                ))
-                                                          ],
-                                                        ),
-                                                      ))
-                                                ]))))
-                              ],
-                            ),
-                            decoration: BoxDecoration(
-                                image: DecorationImage(
-                                    fit: BoxFit.cover,
-                                    image: AssetImage(
-                                        "assets/images/party_people_${index +
-                                            1}.png"))),
-                          );
-                        },
-                        childCount: 4, // 1000 list items
-                      )
+                  Visibility(
+                      child: _eventSkeleton(count: 4),
+                      visible: loadingEvents,
+                      replacement: SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                                (BuildContext context, int index) {
+                                  Event event = _events[index];
+
+                              return InkWell(
+                                child: Container(
+                                  height: 300,
+                                  width: 300,
+                                  padding: EdgeInsets.all(10.0),
+                                  margin: EdgeInsets.only(top: 20, bottom: 20),
+                                  child: Stack(
+                                    children: [
+                                      Positioned.fill(
+                                          child: Align(
+                                              alignment: Alignment.topRight,
+                                              child: Container(
+                                                  padding: EdgeInsets.all(10.0),
+                                                  decoration: BoxDecoration(
+                                                    color:
+                                                    Colors.white.withOpacity(0.2),
+                                                    borderRadius:
+                                                    BorderRadius.circular(10),
+                                                  ),
+                                                  child: Column(
+                                                      mainAxisSize: MainAxisSize
+                                                          .min,
+                                                      children: [
+                                                        Text("Starts in"),
+                                                        Text("24h: 30m")
+                                                      ])))),
+                                      Positioned.fill(
+                                          child: Align(
+                                              alignment: Alignment.bottomCenter,
+                                              child: Container(
+                                                  padding: EdgeInsets.only(
+                                                      top: 20,
+                                                      bottom: 20,
+                                                      left: 20,
+                                                      right: 20),
+                                                  decoration: BoxDecoration(
+                                                    color:
+                                                    Colors.white.withOpacity(0.2),
+                                                    borderRadius:
+                                                    BorderRadius.circular(10),
+                                                  ),
+                                                  child: Row(
+                                                      mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                      children: [
+                                                        Flexible(
+                                                            child: Column(
+                                                                mainAxisSize:
+                                                                MainAxisSize.min,
+                                                                mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .center,
+                                                                crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                                children: [
+                                                                  Text(
+                                                                      "${event.name}",
+                                                                      style: TextStyle(
+                                                                          fontSize: 15,
+                                                                          fontWeight:
+                                                                          FontWeight
+                                                                              .w900)),
+                                                                  SizedBox(
+                                                                      height: 10),
+                                                                  Text(
+                                                                      "Hosted by - ${event.organizer}",
+                                                                      style: TextStyle(
+                                                                          fontSize: 10))
+                                                                ])),
+                                                        Flexible(
+                                                            child: Container(
+                                                              width: MediaQuery
+                                                                  .of(context)
+                                                                  .size
+                                                                  .width *
+                                                                  0.3,
+                                                              height: 35,
+                                                              child: Stack(
+                                                                children: event.attendees.map((e) => Positioned(
+                                                                    right: 50,
+                                                                    child: CircleAvatar(
+                                                                      backgroundImage:NetworkImage(e['display_picture'] ?? '')
+                                                                    ))).toList(),
+                                                              ),
+                                                            ))
+                                                      ]
+                                                  )
+                                              )
+                                          )
+                                      )
+                                    ],
+                                  ),
+                                  decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                          fit: BoxFit.cover,
+                                          image: NetworkImage(event.image??'')
+                                      )
+                                  ),
+                                ),
+                                onTap: (){
+                                  _gotoEventPage(event);
+                                },
+                              );
+                            },
+                            childCount: _events.length, // 1000 list items
+                          )
+                      ),
                   )
                 ]))),
         floatingActionButton: Visibility(
@@ -348,10 +341,10 @@ class _EventOrganizerHome extends State<EventOrganizerHome>{
                                 topLeft: const Radius.circular(40.0),
                                 topRight: const Radius.circular(40.0),
                               )),
-                          padding: EdgeInsets.only(
-                              top: 30, left: 20, right: 20, bottom: 20),
+                          padding: EdgeInsets.only(top: 10, left: 20, right: 20, bottom: 20),
                           height: MediaQuery.of(context).size.height * 0.6,
-                          child: CreateEventForm()),
+                          child: CreateEventForm()
+                      ),
                       backgroundColor: Colors.transparent,
                       context: context)
                       .whenComplete(() => setState(() {
@@ -360,6 +353,58 @@ class _EventOrganizerHome extends State<EventOrganizerHome>{
                 },
                 label: Text("Create an Event",
                     style: TextStyle(color: Colors.black)))));
+  }
+
+  _gotoEventPage(eventItem){
+    Navigator.pushReplacement(
+        context,PageTransition(type: PageTransitionType.bottomToTop,
+        child: EventDetail(
+          event: eventItem!,
+          userType: UserType.partyGuest,
+        ))
+    );
+  }
+
+  _loadEvents() async{
+    setState(() {
+      loadingEvents = true;
+    });
+
+    List response = await ApiBaseHelper().get('/events/');
+    print(response);
+    setState(() {
+      _events = response.map((e) => Event.fromJson(e)).toList();
+      loadingEvents = false;
+    });
+  }
+
+  Widget _eventSkeleton({int count = 1}){
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+              (BuildContext context, int index) {
+                return Column(
+                  children: [
+                    MRSkeletonLoader(
+                        width: MediaQuery.of(context).size.width,
+                        height: 180
+                    ),
+                    Padding(padding: EdgeInsets.only(top: 5)),
+                    MRSkeletonLoader(
+                        width: MediaQuery.of(context).size.width,
+                        height: 5
+                    ),
+                    Padding(padding: EdgeInsets.only(top: 5)),
+                    MRSkeletonLoader(
+                        width: MediaQuery.of(context).size.width,
+                        height: 5
+                    ),
+                    Padding(padding: EdgeInsets.only(bottom: 40)),
+                  ],
+                );
+              },
+          childCount: count
+      ),
+    );
   }
 }
 

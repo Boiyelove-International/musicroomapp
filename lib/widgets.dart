@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:skeleton_loader/skeleton_loader.dart';
 
 class LongButtonWidget extends StatelessWidget {
   final String buttonText;
@@ -64,6 +65,28 @@ class LongButtonWidget extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class MRSkeletonLoader extends StatelessWidget {
+  double width;
+  double height;
+
+  MRSkeletonLoader({
+    required this.width,
+    required this.height,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return SkeletonLoader(
+        builder: Container(
+          width: width,
+          height: height,
+          color: Colors.grey.withOpacity(0.1),
+        )
     );
   }
 }

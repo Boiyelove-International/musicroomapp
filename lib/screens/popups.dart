@@ -475,29 +475,57 @@ class _CreateEventForm extends State<CreateEventForm> {
   final TextEditingController _eventDateController = TextEditingController();
   var _selectedDate;
   Event?  eventItem;
+  int _currentPage = 0;
 
   void _changePage(int curr_page) {
+    if(curr_page < 0) return;
+
     if (_pageController.hasClients) {
       _pageController.animateToPage(
         curr_page,
         duration: Duration(milliseconds: 350),
         curve: Curves.easeIn,
       );
+      setState(() {
+        _currentPage = curr_page;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
 
-    return PageView(
-        physics: NeverScrollableScrollPhysics(),
-        controller: _pageController,
-        children: [
-          _createEventForm,
-          _eventTimeForm,
-          _eventImageFormPopup,
-          _eventCreatedPopup,
-        ]);
+    return Column(
+      children: [
+        SizedBox(
+          height: 40,
+          child: Visibility(
+            visible: 0 < _currentPage && _currentPage < 3,
+            child: Row(
+              children: [
+                IconButton(
+                  icon: Icon(Icons.arrow_back, color: Colors.white,),
+                  onPressed:(){
+                    _changePage(--_currentPage);
+                  },
+                )
+              ],
+            ),
+          ),
+        ),
+        Flexible(
+          child: PageView(
+              physics: NeverScrollableScrollPhysics(),
+              controller: _pageController,
+              children: [
+                _createEventForm,
+                _eventTimeForm,
+                _eventImageFormPopup,
+                _eventCreatedPopup,
+              ]),
+        ),
+      ],
+    );
   }
 
 
@@ -879,8 +907,10 @@ class _CreateEventForm extends State<CreateEventForm> {
       );
 
       var response = await request.send();
-      // var data = await response.stream.bytesToString();
       if(response.statusCode == 201){
+        String data = await response.stream.bytesToString();
+        var item = jsonDecode(data);
+        eventItem = Event.fromJson(item);
         _changePage(3);
         return;
       }
@@ -932,15 +962,7 @@ class _CreateEventForm extends State<CreateEventForm> {
                     // elevation: MaterialStateProperty.all(3),
                     shadowColor: MaterialStateProperty.all(Colors.transparent),
                   ),
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                        context,PageTransition(type: PageTransitionType.bottomToTop,
-                        child: EventDetail(
-                          event: eventItem,
-                          userType: UserType.partyGuest,
-                        )));
-
-                  },
+                  onPressed: _gotoEventPage,
                   child: Padding(
                     padding: const EdgeInsets.only(
                       top: 10,
@@ -954,6 +976,16 @@ class _CreateEventForm extends State<CreateEventForm> {
               ))
         ])
       ]));
+
+  _gotoEventPage(){
+    Navigator.pushReplacement(
+        context,PageTransition(type: PageTransitionType.bottomToTop,
+        child: EventDetail(
+          event: eventItem!,
+          userType: UserType.partyGuest,
+        ))
+    );
+  }
 }
 
 
@@ -1248,766 +1280,462 @@ class _JoinEventForm extends State<JoinEventForm>{
   TextEditingController _codeBox4 = TextEditingController();
   ApiBaseHelper _api = ApiBaseHelper();
   Event? eventData;
+  TextStyle? subtitle2;
+
+  @override
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+    subtitle2 = Theme.of(context).textTheme.subtitle2!;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final TextStyle subtitle2 = Theme.of(context).textTheme.subtitle2!;
-    void _changePage(int curr_page, {skip = false}) {
-      if (_pageController.hasClients) {
-        if (skip){
-          _pageController.jumpToPage(curr_page);
-        } else{
-          _pageController.animateToPage(
-            curr_page,
-            duration: Duration(milliseconds: 350),
-            curve: Curves.easeIn,
-          );
-        }
+    return PageView(
+      physics: NeverScrollableScrollPhysics(),
+        controller: _pageController,
+        children: [
+          _eventChoice,
+          _partyCodeForm,
+          _qrScan,
+          _partyDetail ,
+          _joinEventDone ,
+        ]);
+  }
 
+  void _changePage(int curr_page, {skip = false}) {
+    if (_pageController.hasClients) {
+      if (skip){
+        _pageController.jumpToPage(curr_page);
+      } else{
+        _pageController.animateToPage(
+          curr_page,
+          duration: Duration(milliseconds: 350),
+          curve: Curves.easeIn,
+        );
       }
+
     }
+  }
 
-    // Create Event FLow
-    Widget _createEventForm = Form(
-        child: Column(
-          children: [
-            Text("Let's create the event!",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900)),
-            SizedBox(height: 30),
-            TextFormField(
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(7.0),
-                    borderSide: BorderSide(color: Colors.white)),
-                enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(7.0),
-                    borderSide: BorderSide(color: Colors.white)),
-                focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(7.0),
-                    borderSide: BorderSide(color: Colors.white)),
-                filled: true,
-                floatingLabelBehavior: FloatingLabelBehavior.always,
-                fillColor: Colors.transparent,
-                labelText: "Name of the Event",
-                labelStyle: TextStyle(fontSize: 13, color: Colors.white),
-                contentPadding:
-                EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
-              ),
+  Widget get _createEventForm => Form(
+      child: Column(
+        children: [
+          Text("Let's create the event!",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900)),
+          SizedBox(height: 30),
+          TextFormField(
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(7.0),
+                  borderSide: BorderSide(color: Colors.white)),
+              enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(7.0),
+                  borderSide: BorderSide(color: Colors.white)),
+              focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(7.0),
+                  borderSide: BorderSide(color: Colors.white)),
+              filled: true,
+              floatingLabelBehavior: FloatingLabelBehavior.always,
+              fillColor: Colors.transparent,
+              labelText: "Name of the Event",
+              labelStyle: TextStyle(fontSize: 13, color: Colors.white),
+              contentPadding:
+              EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
             ),
-            SizedBox(height: 30),
-            TextFormField(
-              keyboardType: TextInputType.multiline,
-              maxLines: 5,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(7.0),
-                    borderSide: BorderSide(color: Colors.white)),
-                enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(7.0),
-                    borderSide: BorderSide(color: Colors.white)),
-                focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(7.0),
-                    borderSide: BorderSide(color: Colors.white)),
-                filled: true,
-                fillColor: Colors.transparent,
-                floatingLabelBehavior: FloatingLabelBehavior.always,
-                labelText: "About the Event",
-                labelStyle: TextStyle(fontSize: 13, color: Colors.white),
-                contentPadding:
-                EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
-              ),
+          ),
+          SizedBox(height: 30),
+          TextFormField(
+            keyboardType: TextInputType.multiline,
+            maxLines: 5,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(7.0),
+                  borderSide: BorderSide(color: Colors.white)),
+              enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(7.0),
+                  borderSide: BorderSide(color: Colors.white)),
+              focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(7.0),
+                  borderSide: BorderSide(color: Colors.white)),
+              filled: true,
+              fillColor: Colors.transparent,
+              floatingLabelBehavior: FloatingLabelBehavior.always,
+              labelText: "About the Event",
+              labelStyle: TextStyle(fontSize: 13, color: Colors.white),
+              contentPadding:
+              EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
             ),
-            SizedBox(height: 30),
-            Row(children: [
-              Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.black26,
-                            offset: Offset(0, 4),
-                            blurRadius: 5.0)
-                      ],
-                      gradient: DarkPalette.borderGradient1,
-                      // color: Colors.deepPurple.shade300,
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: ElevatedButton(
-                      style: ButtonStyle(
-                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5.0),
-                          ),
+          ),
+          SizedBox(height: 30),
+          Row(children: [
+            Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                          color: Colors.black26,
+                          offset: Offset(0, 4),
+                          blurRadius: 5.0)
+                    ],
+                    gradient: DarkPalette.borderGradient1,
+                    // color: Colors.deepPurple.shade300,
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: ElevatedButton(
+                    style: ButtonStyle(
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5.0),
                         ),
-                        minimumSize: MaterialStateProperty.all(Size(50, 50)),
-                        backgroundColor: MaterialStateProperty.all(Colors.transparent),
-                        // elevation: MaterialStateProperty.all(3),
-                        shadowColor: MaterialStateProperty.all(Colors.transparent),
                       ),
-                      onPressed: () {
-                        _changePage(1);
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                          top: 10,
-                          bottom: 10,
-                        ),
-                        child: Text("Proceed",
-                            style: TextStyle(
-                                color: Colors.black, fontWeight: FontWeight.bold)),
-                      ),
+                      minimumSize: MaterialStateProperty.all(Size(50, 50)),
+                      backgroundColor: MaterialStateProperty.all(Colors.transparent),
+                      // elevation: MaterialStateProperty.all(3),
+                      shadowColor: MaterialStateProperty.all(Colors.transparent),
                     ),
-                  ))
-            ])
-          ],
-        ));
-
-
-    Widget _eventChoice = Column(
-      children: [
-        Text("Yay!! We partying soon.", style: GoogleFonts.workSans(
-            fontWeight: FontWeight.w700,
-            fontSize: 20,
-            height:2
-        ), textAlign: TextAlign.center,),
-        SizedBox(height:10),
-        Text("Choose your preferred method to join this event",
-            style: GoogleFonts.workSans(
-                fontWeight: FontWeight.w300,
-                fontSize: 16,
-                height:1.8
-            ), textAlign: TextAlign.center,),
-        SizedBox(height:30),
-        Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  if (_selectedUserType == 0){
-                    _changePage(1);
-                  }
-                  setState(() {
-                    _selectedUserType = 0;
-
-                  });
-                },
-                child: Stack(
-                  children: [
-                    Container(
-                        width: MediaQuery.of(context).size.width *
-                            0.43,
-                        height:
-                        MediaQuery.of(context).size.width *
-                            0.55,
-                        decoration: BoxDecoration(
-                            color: DarkPalette.darkYellow,
-                            border: _selectedUserType ==
-                                0
-                                ? GradientBorder.uniform(
-                                width: 3.0,
-                                gradient: DarkPalette
-                                    .borderGradient1)
-                                : null,
-                            borderRadius:
-                            BorderRadius.circular(8)),
-                        child: Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(10),
-                            child: Image.asset(
-                                "assets/images/code_icon.png"),
-                          ),
-                        )),
-                    Positioned.fill(
-                      child: Align(
-                          alignment: Alignment.bottomCenter,
-                          child: Padding(
-                              padding: EdgeInsets.all(15),
-                              child: Text("Unique Code",
-                                  style: GoogleFonts.workSans(
-                                      textStyle: subtitle2,
-                                      color: DarkPalette.darkDark,
-                                      fontWeight:
-                                      FontWeight.w400
-                                  )))),
-                    ),
-                    Visibility(
-                      visible: _selectedUserType ==
-                          0
-                          ? true
-                          : false,
-                      child: Positioned.fill(
-                        child: Align(
-                            alignment: Alignment.topRight,
-                            child: Padding(
-                                padding: EdgeInsets.all(8),
-                                child: Icon(Icons.check_circle,
-                                    color: DarkPalette.darkGold,
-                                    size: 20))),
+                    onPressed: () {
+                      _changePage(1);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        top: 10,
+                        bottom: 10,
                       ),
-                    )
-                  ],
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  if (_selectedUserType == 1){
-                    _changePage(2);
-                  }
-                  setState(() {
-                    _selectedUserType = 1;
-
-                  });
-                },
-                child: Stack(
-                  children: [
-                    Container(
-                        width: MediaQuery.of(context).size.width *
-                            0.43,
-                        height:
-                        MediaQuery.of(context).size.width *
-                            0.55,
-                        decoration: BoxDecoration(
-                            color: DarkPalette.darkYellow,
-                            border: _selectedUserType ==
-                                1
-                                ? GradientBorder.uniform(
-                                width: 3.0,
-                                gradient: DarkPalette
-                                    .borderGradient1)
-                                : null,
-                            borderRadius:
-                            BorderRadius.circular(8)),
-                        child: Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(10),
-                            child: Image.asset(
-                                "assets/images/scan_icon.png"),
-                          ),
-                        )),
-                    Positioned.fill(
-                      child: Align(
-                          alignment: Alignment.bottomCenter,
-                          child: Padding(
-                              padding: EdgeInsets.all(15),
-                              child: Text("Scan QR Code",
-                                  style: GoogleFonts.workSans(
-                                      textStyle: subtitle2,
-                                      color: DarkPalette.darkDark,
-                                      fontWeight:
-                                      FontWeight.w400
-                                  )))),
+                      child: Text("Proceed",
+                          style: TextStyle(
+                              color: Colors.black, fontWeight: FontWeight.bold)),
                     ),
-                    Visibility(
-                      visible: _selectedUserType ==
-                          1
-                          ? true
-                          : false,
-                      child: Positioned.fill(
-                        child: Align(
-                            alignment: Alignment.topRight,
-                            child: Padding(
-                                padding: EdgeInsets.all(8),
-                                child: Icon(Icons.check_circle,
-                                    color: DarkPalette.darkGold,
-                                    size: 20))),
-                      ),
-                    )
-                  ],
-                ),
-              ),
+                  ),
+                ))
+          ])
+        ],
+      ));
 
-            ]),
-      ],
-    );
-    final _eventCodeForm = GlobalKey<FormState>();
-    Widget _partyCodeForm = Column(
-      children: [
-        Text("Provide a code", style: GoogleFonts.workSans(
-        fontWeight: FontWeight.w700,
-        fontSize: 20,
-        height:2
-    ), textAlign: TextAlign.center,),
-        SizedBox(height:20),
-        Text("Kindly enter the party code to join the party of your choice",style: GoogleFonts.workSans(
+  Widget get _eventChoice => Column(
+    children: [
+      Text("Yay!! We partying soon.", style: GoogleFonts.workSans(
+          fontWeight: FontWeight.w700,
+          fontSize: 20,
+          height:2
+      ), textAlign: TextAlign.center,),
+      SizedBox(height:10),
+      Text("Choose your preferred method to join this event",
+        style: GoogleFonts.workSans(
             fontWeight: FontWeight.w300,
             fontSize: 16,
             height:1.8
         ), textAlign: TextAlign.center,),
-        SizedBox(height:20),
-        Form(
-          key: _eventCodeForm,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                height:70,
-                width: 70,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(5),
-                    border: Border.all(color: Colors.amber)
+      SizedBox(height:30),
+      Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            GestureDetector(
+              onTap: () {
+                if (_selectedUserType == 0){
+                  _changePage(1);
+                }
+                setState(() {
+                  _selectedUserType = 0;
 
-                ),
-                child: TextFormField(
-                  controller: _codeBox1,
-                  textInputAction: TextInputAction.next,
-                  inputFormatters: [
-                    new LengthLimitingTextInputFormatter(1),
-                  ],
-                  textCapitalization: TextCapitalization.characters,
-                  validator: (value){
-                    if( value == null || value.isEmpty){
-                      return'required';
-                    }
-                  },
-                  textAlignVertical: TextAlignVertical.center,
-                  textAlign: TextAlign.center,
-                  cursorColor: Colors.amber,
-                  style: TextStyle(
-                      color: Colors.amber,
-                      height: 2
-                  ),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                  ),
-
-                ),
-              ),
-              Container(
-                height:70,
-                width: 70,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(5),
-                    border: Border.all(color: Colors.amber)
-
-                ),
-                child:  TextFormField(
-                  controller: _codeBox2,
-                  textInputAction: TextInputAction.next,
-                  textCapitalization: TextCapitalization.characters,
-                  inputFormatters: [
-                    new LengthLimitingTextInputFormatter(1),
-                  ],
-                  validator: (value){
-                    if( value == null || value.isEmpty){
-                      return'required';
-                    }
-                  },
-                  textAlignVertical: TextAlignVertical.center,
-                  textAlign: TextAlign.center,
-                  cursorColor: Colors.amber,
-                  style: TextStyle(
-                      color: Colors.amber,
-                      height: 2
-                  ),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                  ),
-
-                ),
-              ),
-              Container(
-                height:70,
-                width: 70,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(5),
-                    border: Border.all(color: Colors.amber)
-
-                ),
-                child:  TextFormField(
-                  controller: _codeBox3,
-                  textInputAction: TextInputAction.next,
-                  textCapitalization: TextCapitalization.characters,
-
-                  validator: (value){
-                    if( value == null || value.isEmpty){
-                      return'required';
-                    }
-                  },
-                  inputFormatters: [
-                    new LengthLimitingTextInputFormatter(1),
-                  ],
-                  textAlignVertical: TextAlignVertical.center,
-                  textAlign: TextAlign.center,
-                  cursorColor: Colors.amber,
-                  style: TextStyle(
-                      color: Colors.amber,
-                      height: 2
-                  ),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                  ),
-
-                ),
-              ),
-              Container(
-                height:70,
-                width: 70,
-
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(5),
-                    border: Border.all(color: Colors.amber)
-
-                ),
-                child:  TextFormField(
-                  controller: _codeBox4,
-                  textCapitalization: TextCapitalization.characters,
-                  validator: (value){
-                    if( value == null || value.isEmpty){
-                      return'required';
-                    }
-                  },
-                  inputFormatters: [
-                    new LengthLimitingTextInputFormatter(1),
-                  ],
-                  textAlignVertical: TextAlignVertical.center,
-                  textAlign: TextAlign.center,
-                  cursorColor: Colors.amber,
-                  style: TextStyle(
-                      color: Colors.amber,
-                      height: 2
-                  ),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                  ),
-
-                ),
-              )
-            ],
-          ),
-        ),
-        SizedBox(height:40),
-        Row(children: [
-          Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.black26,
-                        offset: Offset(0, 4),
-                        blurRadius: 5.0)
-                  ],
-                  gradient: DarkPalette.borderGradient1,
-                  // color: Colors.deepPurple.shade300,
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                child: ElevatedButton(
-                  style: ButtonStyle(
-                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5.0),
-                      ),
-                    ),
-                    minimumSize: MaterialStateProperty.all(Size(50, 50)),
-                    backgroundColor: MaterialStateProperty.all(Colors.transparent),
-                    // elevation: MaterialStateProperty.all(3),
-                    shadowColor: MaterialStateProperty.all(Colors.transparent),
-                  ),
-                  onPressed: () {
-                      if(_eventCodeForm.currentState!.validate()) {
-                        String q = _codeBox1.text + _codeBox2.text + _codeBox3.text + _codeBox4.text;
-
-                        _api.get("/event/join/?q=$q")
-                        .then((value){
-                            setState(() {
-                              eventData = Event.fromJson(value);
-                            });
-                            _changePage(3, skip:true);
-                        });
-                      }
-                      },
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                      top: 10,
-                      bottom: 10,
-                    ),
-                    child: Text("Let's get going",
-                        style: TextStyle(
-                            color: Colors.black, fontWeight: FontWeight.bold)),
-                  ),
-                ),
-              ))
-        ])
-      ],
-    );
-
-    Widget _qrScan = Column(
-      children: [
-        Text("Scan the QR Code", style: GoogleFonts.workSans(
-            fontWeight: FontWeight.w700,
-            fontSize: 20,
-            height:2
-        ), textAlign: TextAlign.center,),
-        SizedBox(height:20),
-        Text("Place your phone camera over the QR Code provides and scan it", style: GoogleFonts.workSans(
-        fontWeight: FontWeight.w300,
-        fontSize: 16,
-        height:1.8
-        ), textAlign: TextAlign.center,),
-        Padding(
-          padding: EdgeInsets.all(20),
-          child: Center(
-              child: AspectRatio(aspectRatio: 1/1,
-                child: Container(
-                    decoration: BoxDecoration(
-                        image: DecorationImage(
-                            image: AssetImage(
-                                "assets/images/qr_bounding_box.png"
-                            ),
-                            fit: BoxFit.contain
-                        )
-                    ),
-                  child: Center(
-                    child: QrImage(
-                      data: "QYL!",
-                      version: QrVersions.auto,
-                      size: 00.0,
-                    ),
-                  ),
-                ),)
-          )
-        )
-      ]
-    );
-
-    Widget _partyDetail =  eventData != null ? Column(
-        children: [
-          Container(
-            padding: EdgeInsets.only(top: 50, left: 5, right: 5),
-            height: MediaQuery.of(context).size.height * 0.35,
-            decoration: BoxDecoration(
-                image: DecorationImage(
-                    fit: BoxFit.cover,
-                    image: AssetImage("assets/images/party_people_3.png"))),
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Positioned.fill(
+                });
+              },
+              child: Stack(
+                children: [
+                  Container(
+                      width: MediaQuery.of(context).size.width *
+                          0.43,
+                      height:
+                      MediaQuery.of(context).size.width *
+                          0.55,
+                      decoration: BoxDecoration(
+                          color: DarkPalette.darkYellow,
+                          border: _selectedUserType ==
+                              0
+                              ? GradientBorder.uniform(
+                              width: 3.0,
+                              gradient: DarkPalette
+                                  .borderGradient1)
+                              : null,
+                          borderRadius:
+                          BorderRadius.circular(8)),
+                      child: Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(10),
+                          child: Image.asset(
+                              "assets/images/code_icon.png"),
+                        ),
+                      )),
+                  Positioned.fill(
                     child: Align(
-                        alignment: Alignment.bottomRight,
-                        child: Container(
-                            padding: EdgeInsets.symmetric(vertical: 8.0, horizontal:20.0),
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(30),
-                                color: DarkPalette.darkYellow
-                            ),
-                            child: Text("Starts in 4hr:25m:20s", style: GoogleFonts.workSans(
-                                fontWeight: FontWeight.w300,
-                                fontSize: 12,
-                              color: Colors.black
-                            ),)
-                        ))),
-                Positioned.fill(
-                    child: Align(
-                        alignment: Alignment.bottomLeft,
-                        child: Row(
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text("${eventData!.name}", style: GoogleFonts.workSans(
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 25,
-                                    )),
-                                SizedBox(height:15),
-                                Text("20th August 2021", style: GoogleFonts.workSans(
-                                fontWeight: FontWeight.w300,
-                                fontSize: 16,
-                                )),
-                              ],
-                            )
-                          ],
-                        ))),
-              ],
+                        alignment: Alignment.bottomCenter,
+                        child: Padding(
+                            padding: EdgeInsets.all(15),
+                            child: Text("Unique Code",
+                                style: GoogleFonts.workSans(
+                                    textStyle: subtitle2,
+                                    color: DarkPalette.darkDark,
+                                    fontWeight:
+                                    FontWeight.w400
+                                )))),
+                  ),
+                  Visibility(
+                    visible: _selectedUserType ==
+                        0
+                        ? true
+                        : false,
+                    child: Positioned.fill(
+                      child: Align(
+                          alignment: Alignment.topRight,
+                          child: Padding(
+                              padding: EdgeInsets.all(8),
+                              child: Icon(Icons.check_circle,
+                                  color: DarkPalette.darkGold,
+                                  size: 20))),
+                    ),
+                  )
+                ],
+              ),
             ),
-          ),
-          SizedBox(height: 30),
-          Padding(
-              padding: EdgeInsets.only(left: 10, right: 10),
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 25,
-                          backgroundImage:
-                          AssetImage("assets/images/circle_avatar_1.png"),
+            GestureDetector(
+              onTap: () {
+                if (_selectedUserType == 1){
+                  _changePage(2);
+                }
+                setState(() {
+                  _selectedUserType = 1;
+
+                });
+              },
+              child: Stack(
+                children: [
+                  Container(
+                      width: MediaQuery.of(context).size.width *
+                          0.43,
+                      height:
+                      MediaQuery.of(context).size.width *
+                          0.55,
+                      decoration: BoxDecoration(
+                          color: DarkPalette.darkYellow,
+                          border: _selectedUserType ==
+                              1
+                              ? GradientBorder.uniform(
+                              width: 3.0,
+                              gradient: DarkPalette
+                                  .borderGradient1)
+                              : null,
+                          borderRadius:
+                          BorderRadius.circular(8)),
+                      child: Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(10),
+                          child: Image.asset(
+                              "assets/images/scan_icon.png"),
                         ),
-                        SizedBox(
-                          width: 20,
-                        ),
-                        Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                "${eventData!.organizer}",
-                                style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              SizedBox(height: 3),
-                              Text("Organizer",
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                  ))
-                            ])
-                      ],
+                      )),
+                  Positioned.fill(
+                    child: Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Padding(
+                            padding: EdgeInsets.all(15),
+                            child: Text("Scan QR Code",
+                                style: GoogleFonts.workSans(
+                                    textStyle: subtitle2,
+                                    color: DarkPalette.darkDark,
+                                    fontWeight:
+                                    FontWeight.w400
+                                )))),
+                  ),
+                  Visibility(
+                    visible: _selectedUserType ==
+                        1
+                        ? true
+                        : false,
+                    child: Positioned.fill(
+                      child: Align(
+                          alignment: Alignment.topRight,
+                          child: Padding(
+                              padding: EdgeInsets.all(8),
+                              child: Icon(Icons.check_circle,
+                                  color: DarkPalette.darkGold,
+                                  size: 20))),
                     ),
-                    SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Flexible(
-                            child: Container(
-                              width: MediaQuery.of(context).size.width * 0.26,
-                              height: 20,
-                              child: Stack(
-                                clipBehavior: Clip.none,
-                                children: [
-                                  Positioned(
-                                      left: 0,
-                                      child: CircleAvatar(
-                                        radius: 25,
-                                        backgroundImage: AssetImage(
-                                            "assets/images/circle_avatar_1.png"),
-                                      )),
-                                  Positioned(
-                                      left: 15,
-                                      child: CircleAvatar(
-                                        radius: 25,
-                                        backgroundImage: AssetImage(
-                                            "assets/images/circle_avatar_2.png"),
-                                      )),
-                                  Positioned(
-                                      left: 35,
-                                      child: CircleAvatar(
-                                        radius: 25,
-                                        backgroundImage: AssetImage(
-                                            "assets/images/circle_avatar_3.png"),
-                                      )),
-                                  Positioned(
-                                      left: 55,
-                                      child: CircleAvatar(
-                                        radius: 25,
-                                        backgroundImage: AssetImage(
-                                            "assets/images/circle_avatar_1.png"),
-                                      )),
-                                ],
-                              ),
-                            )),
-                        SizedBox(
-                          width: 20,
-                        ),
-                        Text(
-                          "will be attending",
-                          style: GoogleFonts.workSans(
-                              fontSize: 18,
-                            fontWeight: FontWeight.w300
-                          ),
-                        )
-                      ],
-                    ),
-                    SizedBox(height: 80),
-                    Text("About", style: GoogleFonts.workSans(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold
-                    )),
-                    SizedBox(height:20),
-                    Text("${eventData!.about}",
-                        style: GoogleFonts.workSans(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w300
-                        )),
-                    SizedBox(height:40),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              boxShadow: [
-                                BoxShadow(
-                                    color: Colors.black26,
-                                    offset: Offset(0, 4),
-                                    blurRadius: 5.0)
-                              ],
-                              gradient: DarkPalette.borderGradient1,
-                              // color: Colors.deepPurple.shade300,
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                            child: ElevatedButton(
-                              style: ButtonStyle(
-                                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                                  RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(5.0),
-                                  ),
-                                ),
-                                minimumSize: MaterialStateProperty.all(Size(50, 50)),
-                                backgroundColor: MaterialStateProperty.all(Colors.transparent),
-                                // elevation: MaterialStateProperty.all(3),
-                                shadowColor: MaterialStateProperty.all(Colors.transparent),
-                              ),
-                              onPressed: () async {
-                               bool joined = await eventData!.joinEvent();
-                               if (joined ) {
-                                 _changePage(5);
-                               }
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                  top: 10,
-                                  bottom: 10,
-                                ),
-                                child: Text("Attend this Event",
-                                    style: GoogleFonts.workSans(
-                                        color: DarkPalette.darkDark,
-                                        fontWeight: FontWeight.bold
-                                    )),
-                              ),
-                            ),
-                          ),
-                        )
-                      ],
-                    )
-                  ]))
-        ],
-    ) : Center(
-      child: CircularProgressIndicator(
-        color: Colors.amber,
-        strokeWidth: 1,
-      )
-    );
-    Widget _joinEventDone =  Column(children: [
-      Container(
-        child: Image.asset("assets/images/event_created_success.png"),
+                  )
+                ],
+              ),
+            ),
+
+          ]),
+    ],
+  );
+
+  final _eventCodeForm = GlobalKey<FormState>();
+  Widget get _partyCodeForm => Column(
+    children: [
+      Text("Provide a code", style: GoogleFonts.workSans(
+          fontWeight: FontWeight.w700,
+          fontSize: 20,
+          height:2
+      ), textAlign: TextAlign.center,),
+      SizedBox(height:20),
+      Text("Kindly enter the party code to join the party of your choice",style: GoogleFonts.workSans(
+          fontWeight: FontWeight.w300,
+          fontSize: 16,
+          height:1.8
+      ), textAlign: TextAlign.center,),
+      SizedBox(height:20),
+      Form(
+        key: _eventCodeForm,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(
+              height:70,
+              width: 70,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(5),
+                  border: Border.all(color: Colors.amber)
+
+              ),
+              child: TextFormField(
+                controller: _codeBox1,
+                textInputAction: TextInputAction.next,
+                inputFormatters: [
+                  new LengthLimitingTextInputFormatter(1),
+                ],
+                textCapitalization: TextCapitalization.characters,
+                validator: (value){
+                  if( value == null || value.isEmpty){
+                    return'required';
+                  }
+                },
+                textAlignVertical: TextAlignVertical.center,
+                textAlign: TextAlign.center,
+                cursorColor: Colors.amber,
+                style: TextStyle(
+                    color: Colors.amber,
+                    height: 2
+                ),
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                ),
+
+              ),
+            ),
+            Container(
+              height:70,
+              width: 70,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(5),
+                  border: Border.all(color: Colors.amber)
+
+              ),
+              child:  TextFormField(
+                controller: _codeBox2,
+                textInputAction: TextInputAction.next,
+                textCapitalization: TextCapitalization.characters,
+                inputFormatters: [
+                  new LengthLimitingTextInputFormatter(1),
+                ],
+                validator: (value){
+                  if( value == null || value.isEmpty){
+                    return'required';
+                  }
+                },
+                textAlignVertical: TextAlignVertical.center,
+                textAlign: TextAlign.center,
+                cursorColor: Colors.amber,
+                style: TextStyle(
+                    color: Colors.amber,
+                    height: 2
+                ),
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                ),
+
+              ),
+            ),
+            Container(
+              height:70,
+              width: 70,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(5),
+                  border: Border.all(color: Colors.amber)
+
+              ),
+              child:  TextFormField(
+                controller: _codeBox3,
+                textInputAction: TextInputAction.next,
+                textCapitalization: TextCapitalization.characters,
+
+                validator: (value){
+                  if( value == null || value.isEmpty){
+                    return'required';
+                  }
+                },
+                inputFormatters: [
+                  new LengthLimitingTextInputFormatter(1),
+                ],
+                textAlignVertical: TextAlignVertical.center,
+                textAlign: TextAlign.center,
+                cursorColor: Colors.amber,
+                style: TextStyle(
+                    color: Colors.amber,
+                    height: 2
+                ),
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                ),
+
+              ),
+            ),
+            Container(
+              height:70,
+              width: 70,
+
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(5),
+                  border: Border.all(color: Colors.amber)
+
+              ),
+              child:  TextFormField(
+                controller: _codeBox4,
+                textCapitalization: TextCapitalization.characters,
+                validator: (value){
+                  if( value == null || value.isEmpty){
+                    return'required';
+                  }
+                },
+                inputFormatters: [
+                  new LengthLimitingTextInputFormatter(1),
+                ],
+                textAlignVertical: TextAlignVertical.center,
+                textAlign: TextAlign.center,
+                cursorColor: Colors.amber,
+                style: TextStyle(
+                    color: Colors.amber,
+                    height: 2
+                ),
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                ),
+
+              ),
+            )
+          ],
+        ),
       ),
-      SizedBox(height: 20),
-      Text(
-        "Yay!! You're through the door.",
-          style: GoogleFonts.workSans(
-              fontSize: 23,
-              fontWeight: FontWeight.bold
-          )
-      ),
-      SizedBox(height: 20),
-      Text(
-          "Proceed to the event page to start suggesting songs or you can always do that later.",
-          style: GoogleFonts.workSans(
-              fontSize: 15,
-              fontWeight: FontWeight.w300,
-              height:1.5
-          ),
-          textAlign: TextAlign.center),
-      SizedBox(height: 20),
+      SizedBox(height:40),
       Row(children: [
         Expanded(
             child: Container(
               decoration: BoxDecoration(
                 boxShadow: [
                   BoxShadow(
-                      color: Colors.black26, offset: Offset(0, 4), blurRadius: 5.0)
+                      color: Colors.black26,
+                      offset: Offset(0, 4),
+                      blurRadius: 5.0)
                 ],
                 gradient: DarkPalette.borderGradient1,
                 // color: Colors.deepPurple.shade300,
@@ -2026,40 +1754,332 @@ class _JoinEventForm extends State<JoinEventForm>{
                   shadowColor: MaterialStateProperty.all(Colors.transparent),
                 ),
                 onPressed: () {
+                  if(_eventCodeForm.currentState!.validate()) {
+                    String q = _codeBox1.text + _codeBox2.text + _codeBox3.text + _codeBox4.text;
 
-                  Navigator.pushReplacement(
-                    context,PageTransition(type: PageTransitionType.bottomToTop,
-                            child: EventDetailPartyGuest(
-                              event: eventData!,
-                              userType: UserType.partyGuest,
-                            )));
+                    _api.get("/event/join/?q=$q")
+                        .then((value){
+                      setState(() {
+                        eventData = Event.fromJson(value);
+                      });
+                      _changePage(3, skip:true);
+                    });
+                  }
                 },
                 child: Padding(
                   padding: const EdgeInsets.only(
                     top: 10,
                     bottom: 10,
                   ),
-                  child: Text("Start Suggesting",
+                  child: Text("Let's get going",
                       style: TextStyle(
                           color: Colors.black, fontWeight: FontWeight.bold)),
                 ),
               ),
             ))
       ])
-    ]);
+    ],
+  );
 
+  Widget get _qrScan => Column(
+      children: [
+        Text("Scan the QR Code", style: GoogleFonts.workSans(
+            fontWeight: FontWeight.w700,
+            fontSize: 20,
+            height:2
+        ), textAlign: TextAlign.center,),
+        SizedBox(height:20),
+        Text("Place your phone camera over the QR Code provides and scan it", style: GoogleFonts.workSans(
+            fontWeight: FontWeight.w300,
+            fontSize: 16,
+            height:1.8
+        ), textAlign: TextAlign.center,),
+        Padding(
+            padding: EdgeInsets.all(20),
+            child: Center(
+                child: AspectRatio(aspectRatio: 1/1,
+                  child: Container(
+                    decoration: BoxDecoration(
+                        image: DecorationImage(
+                            image: AssetImage(
+                                "assets/images/qr_bounding_box.png"
+                            ),
+                            fit: BoxFit.contain
+                        )
+                    ),
+                    child: Center(
+                      child: QrImage(
+                        data: "QYL!",
+                        version: QrVersions.auto,
+                        size: 00.0,
+                      ),
+                    ),
+                  ),)
+            )
+        )
+      ]
+  );
 
+  Widget get _partyDetail =>  eventData != null ? Column(
+    children: [
+      Container(
+        padding: EdgeInsets.only(top: 50, left: 5, right: 5),
+        height: MediaQuery.of(context).size.height * 0.35,
+        decoration: BoxDecoration(
+            image: DecorationImage(
+                fit: BoxFit.cover,
+                image: NetworkImage("${eventData?.image}"))),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Positioned.fill(
+                child: Align(
+                    alignment: Alignment.bottomRight,
+                    child: Container(
+                        padding: EdgeInsets.symmetric(vertical: 8.0, horizontal:20.0),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(30),
+                            color: DarkPalette.darkYellow
+                        ),
+                        child: Text("Starts in 4hr:25m:20s", style: GoogleFonts.workSans(
+                            fontWeight: FontWeight.w300,
+                            fontSize: 12,
+                            color: Colors.black
+                        ),)
+                    ))),
+            Positioned.fill(
+                child: Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Row(
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text("${eventData!.name}", style: GoogleFonts.workSans(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 25,
+                            )),
+                            SizedBox(height:15),
+                            Text("${DateFormat("dd MMMM, yyyy").format(eventData!.event_date)}",
+                                style: GoogleFonts.workSans(
+                                  fontWeight: FontWeight.w300,
+                                  fontSize: 16,
+                                )),
+                          ],
+                        )
+                      ],
+                    ))),
+          ],
+        ),
+      ),
+      SizedBox(height: 30),
+      Padding(
+          padding: EdgeInsets.only(left: 10, right: 10),
+          child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 25,
+                      backgroundImage: NetworkImage(eventData?.organizer_display_picture ?? ''),
+                    ),
+                    SizedBox(
+                      width: 20,
+                    ),
+                    Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            "${eventData!.organizer}",
+                            style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(height: 3),
+                          Text("Organizer",
+                              style: TextStyle(
+                                fontSize: 10,
+                              ))
+                        ])
+                  ],
+                ),
+                SizedBox(height: 20),
+                Visibility(
+                  visible: eventData!.attendees.length > 0 ,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Flexible(
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.26,
+                            height: 20,
+                            child: Stack(
+                                clipBehavior: Clip.none,
+                                children: eventData?.attendees.map((e) => Positioned(
+                                    right: 50,
+                                    child: CircleAvatar(
+                                        backgroundImage:NetworkImage(e['display_picture'] ?? '')
+                                    ))).toList() ?? []
+                            ),
+                          )),
+                      SizedBox(
+                        width: 20,
+                      ),
+                      Text(
+                        "will be attending",
+                        style: GoogleFonts.workSans(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w300
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                SizedBox(height: 80),
+                Text("About", style: GoogleFonts.workSans(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold
+                )),
+                SizedBox(height:20),
+                Text("${eventData!.about}",
+                    style: GoogleFonts.workSans(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w300
+                    )),
+                SizedBox(height:40),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.black26,
+                                offset: Offset(0, 4),
+                                blurRadius: 5.0)
+                          ],
+                          gradient: DarkPalette.borderGradient1,
+                          // color: Colors.deepPurple.shade300,
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: ElevatedButton(
+                          style: ButtonStyle(
+                            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5.0),
+                              ),
+                            ),
+                            minimumSize: MaterialStateProperty.all(Size(50, 50)),
+                            backgroundColor: MaterialStateProperty.all(Colors.transparent),
+                            // elevation: MaterialStateProperty.all(3),
+                            shadowColor: MaterialStateProperty.all(Colors.transparent),
+                          ),
+                          onPressed: _joinEvent,
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                              top: 10,
+                              bottom: 10,
+                            ),
+                            child: Text("Attend this Event",
+                                style: GoogleFonts.workSans(
+                                    color: DarkPalette.darkDark,
+                                    fontWeight: FontWeight.bold
+                                )),
+                          ),
+                        ),
+                      ),
+                    )
+                  ],
+                )
+              ])
+      )
+    ],
+  ) : Center(
+      child: CircularProgressIndicator(
+        color: Colors.amber,
+        strokeWidth: 1,
+      )
+  );
 
-    return PageView(
-      physics: NeverScrollableScrollPhysics(),
-        controller: _pageController,
-        children: [
-          _eventChoice,
-          _partyCodeForm,
-          _qrScan,
-          _partyDetail ,
-          _joinEventDone ,
-        ]);
+  Widget get _joinEventDone =>  Column(children: [
+    Container(
+      child: Image.asset("assets/images/event_created_success.png"),
+    ),
+    SizedBox(height: 20),
+    Text(
+        "Yay!! You're through the door.",
+        style: GoogleFonts.workSans(
+            fontSize: 23,
+            fontWeight: FontWeight.bold
+        )
+    ),
+    SizedBox(height: 20),
+    Text(
+        "Proceed to the event page to start suggesting songs or you can always do that later.",
+        style: GoogleFonts.workSans(
+            fontSize: 15,
+            fontWeight: FontWeight.w300,
+            height:1.5
+        ),
+        textAlign: TextAlign.center),
+    SizedBox(height: 20),
+    Row(children: [
+      Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black26, offset: Offset(0, 4), blurRadius: 5.0)
+              ],
+              gradient: DarkPalette.borderGradient1,
+              // color: Colors.deepPurple.shade300,
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: ElevatedButton(
+              style: ButtonStyle(
+                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                  ),
+                ),
+                minimumSize: MaterialStateProperty.all(Size(50, 50)),
+                backgroundColor: MaterialStateProperty.all(Colors.transparent),
+                // elevation: MaterialStateProperty.all(3),
+                shadowColor: MaterialStateProperty.all(Colors.transparent),
+              ),
+              onPressed: () {
+
+                Navigator.pushReplacement(
+                    context,PageTransition(type: PageTransitionType.bottomToTop,
+                    child: EventDetailPartyGuest(
+                      event: eventData!,
+                      userType: UserType.partyGuest,
+                    )));
+              },
+              child: Padding(
+                padding: const EdgeInsets.only(
+                  top: 10,
+                  bottom: 10,
+                ),
+                child: Text("Start Suggesting",
+                    style: TextStyle(
+                        color: Colors.black, fontWeight: FontWeight.bold)),
+              ),
+            ),
+          ))
+    ])
+  ]);
+
+  _joinEvent() async {
+      bool joined = await eventData!.joinEvent();
+      print(joined);
+      if (joined ) {
+        _changePage(5);
+      }
   }
 }
 

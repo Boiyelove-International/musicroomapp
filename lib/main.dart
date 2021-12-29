@@ -48,7 +48,7 @@ class MyApp extends StatelessWidget {
               fontFamily: GoogleFonts.workSans().fontFamily,
             )),
         debugShowCheckedModeBanner: false,
-        home: LoginScreen(),
+        home: OnBoardingPage(),
         routes: <String, WidgetBuilder>{
           Routes.guestHome: (BuildContext context) => PartyGuestHome(),
           Routes.organizerHome: (BuildContext context) => EventOrganizerHome(),
@@ -60,7 +60,6 @@ class MyApp extends StatelessWidget {
           Routes.notifications: (BuildContext context) => NotificationScreen(),
           Routes.search: (BuildContext context) => SearchResultScreen(),
           Routes.profile: (BuildContext context) => ProfileScreen(),
-          Routes.eventDetail: (BuildContext context) => EventDetail(),
           Routes.allSuggestions: (BuildContext context) => SuggestionScreen(title: "All Suggestions", suggestionType: SuggestionType.All,),
           Routes.acceptedSuggestions: (BuildContext context) => SuggestionScreen(suggestionType: SuggestionType.Accepted, title: "Accepted Suggestions"),
           Routes.partyPlaylist: (BuildContext context) => PartyPlayList(),

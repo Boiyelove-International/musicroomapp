@@ -67,16 +67,16 @@ class SongModel{
 class Event{
   int id;
   String? organizer_display_picture;
-  String created;
-  String modified;
-  String name;
-  String about;
+  String? created;
+  String? modified;
+  String? name;
+  String? about;
   TimeOfDay event_time;
   DateTime event_date;
-  String image;
-  String code;
-  String organizer;
-  List? attendees =  [];
+  String? image;
+  String? code;
+  String? organizer;
+  List attendees =  [];
   List? suggestions =[];
 
   Event({
@@ -84,14 +84,14 @@ class Event{
     this.organizer_display_picture,
     required this.about,
     required this.name,
-    required this.modified,
+    this.modified,
     required this.created,
     required this.event_time,
     required this.event_date,
     required this.image,
     required this.code,
     required this.organizer,
-    this.attendees,
+    required this.attendees,
     this.suggestions,
   });
   String renderDate(){
@@ -123,7 +123,7 @@ class Event{
       about: data["about"],
       organizer_display_picture: data["organizer_display_picture"],
       name: data["name"],
-      modified: data["modified"],
+      // modified: data["modified"],
       created: data["created"],
       event_time: _event_time,
       event_date: _event_date,
@@ -137,12 +137,14 @@ class Event{
 
   Future<bool> joinEvent() async{
     ApiBaseHelper _api = ApiBaseHelper();
+    print('jjdkfjfkdjfkdjfkj');
     Map<String, dynamic> response = await _api.post("/event/join/",
         {"event_code": this.code});
+    print(response);
     if (response["joined"] == true ){
       return true;
     }
     return false;
-    }
+  }
 
 }
