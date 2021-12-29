@@ -863,7 +863,6 @@ class _CreateEventForm extends State<CreateEventForm> {
         "filename": result!.files.single.path!.split("/").last
       };
 
-      print('building payload');
 
       var request= new http.MultipartRequest("POST",Uri.parse("${_api.baseurl}/events/"));
 
@@ -879,11 +878,8 @@ class _CreateEventForm extends State<CreateEventForm> {
         await http.MultipartFile.fromPath('image', "${result!.files.single.path}")
       );
 
-      print('will send request');
-      print(Uri.parse("${_api.baseurl}/events/"));
-
       var response = await request.send();
-      var data = await response.stream.bytesToString();
+      // var data = await response.stream.bytesToString();
       if(response.statusCode == 201){
         _changePage(3);
         return;
