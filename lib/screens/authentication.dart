@@ -766,6 +766,7 @@ class _RegisterPartyGuest extends State<RegisterPartyGuest>{
 
                           api.post("/register/guest/", data).then((data) async {
                             SharedPreferences prefs = await SharedPreferences.getInstance();
+                            prefs.remove("token");
                             prefs.setString("display_name", _displayNameController.text);
                             Navigator.pushReplacementNamed(context, Routes.guestHome);
                           });
