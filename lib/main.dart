@@ -48,7 +48,7 @@ class MyApp extends StatelessWidget {
               fontFamily: GoogleFonts.workSans().fontFamily,
             )),
         debugShowCheckedModeBanner: false,
-        home: SplashScreen(),
+        home: LoginScreen(),
         routes: <String, WidgetBuilder>{
           Routes.guestHome: (BuildContext context) => PartyGuestHome(),
           Routes.organizerHome: (BuildContext context) => EventOrganizerHome(),

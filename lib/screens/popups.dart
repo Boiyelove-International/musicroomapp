@@ -17,7 +17,8 @@ import 'package:musicroom/utils/models.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:intl/intl.dart';
-
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../routes.dart';
 import '../utils.dart';
 import 'events.dart';
@@ -474,461 +475,22 @@ class _CreateEventForm extends State<CreateEventForm> {
   final TextEditingController _eventDateController = TextEditingController();
   var _selectedDate;
   Event?  eventItem;
+
+  void _changePage(int curr_page) {
+    if (_pageController.hasClients) {
+      _pageController.animateToPage(
+        curr_page,
+        duration: Duration(milliseconds: 350),
+        curve: Curves.easeIn,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    void _changePage(int curr_page) {
-      if (_pageController.hasClients) {
-        _pageController.animateToPage(
-          curr_page,
-          duration: Duration(milliseconds: 350),
-          curve: Curves.easeIn,
-        );
-      }
-    }
-
-
-    // Create Event FLow
-    Widget _createEventForm = Form(
-      key: _aboutEventFormKey,
-        child: Column(
-      children: [
-        Text("Let's create the event!",
-            textAlign: TextAlign.center,
-            style: GoogleFonts.workSans(fontSize: 20, fontWeight: FontWeight.bold)),
-        SizedBox(height: 50),
-        TextFormField(
-          controller: _eventNameController,
-          style: GoogleFonts.workSans(color: Colors.white),
-          cursorColor: Colors.amber,
-          validator: (value){
-            if (value == null || value.isEmpty){
-              return "Please enter an event name";
-            }
-          },
-          decoration: InputDecoration(
-            border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(7.0),
-                borderSide: BorderSide(color: Colors.white)),
-            enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(7.0),
-                borderSide: BorderSide(color: Colors.white)),
-            focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(7.0),
-                borderSide: BorderSide(color: Colors.white)),
-            filled: true,
-            floatingLabelBehavior: FloatingLabelBehavior.always,
-            fillColor: Colors.transparent,
-            labelText: "Name of the Event",
-            labelStyle: GoogleFonts.workSans(fontSize: 15, color: Colors.grey),
-            contentPadding:
-                EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
-          ),
-        ),
-        SizedBox(height: 50),
-        TextFormField(
-          controller: _aboutEventController,
-          keyboardType: TextInputType.multiline,
-          maxLines: 4,
-          style: GoogleFonts.workSans(color: Colors.white, height:1.8),
-          cursorColor: Colors.amber,
-          validator: (value){
-            if (value == null || value.isEmpty){
-              return "Evter details about the event";
-            }
-          },
-          decoration: InputDecoration(
-            border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(7.0),
-                borderSide: BorderSide(color: Colors.white)),
-            enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(7.0),
-                borderSide: BorderSide(color: Colors.white)),
-            focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(7.0),
-                borderSide: BorderSide(color: Colors.white)),
-            filled: true,
-            fillColor: Colors.transparent,
-            floatingLabelBehavior: FloatingLabelBehavior.always,
-            labelText: "About the Event",
-            labelStyle: GoogleFonts.workSans(fontSize: 15, color: Colors.grey),
-            contentPadding:
-                EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
-          ),
-        ),
-        SizedBox(height: 30),
-        Row(children: [
-          Expanded(
-              child: Container(
-            decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                    color: Colors.black26,
-                    offset: Offset(0, 4),
-                    blurRadius: 5.0)
-              ],
-              gradient: DarkPalette.borderGradient1,
-              // color: Colors.deepPurple.shade300,
-              borderRadius: BorderRadius.circular(5),
-            ),
-            child: ElevatedButton(
-              style: ButtonStyle(
-                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5.0),
-                  ),
-                ),
-                minimumSize: MaterialStateProperty.all(Size(50, 50)),
-                backgroundColor: MaterialStateProperty.all(Colors.transparent),
-                // elevation: MaterialStateProperty.all(3),
-                shadowColor: MaterialStateProperty.all(Colors.transparent),
-              ),
-              onPressed: () {
-                if (_aboutEventFormKey.currentState!.validate()){
-                  _changePage(1);
-                }
-              },
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  top: 10,
-                  bottom: 10,
-                ),
-                child: Text("Proceed",
-                    style: TextStyle(
-                        color: Colors.black, fontWeight: FontWeight.bold)),
-              ),
-            ),
-          ))
-        ])
-      ],
-    ));
-
-    Widget _eventTimeForm = Form(
-      key:  _eventDateFormKey,
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-      Text(
-        "Time & Date for this event",
-        textAlign: TextAlign.center,
-          style: GoogleFonts.workSans(fontSize: 20, fontWeight: FontWeight.bold)
-      ),
-          SizedBox(height: 50),
-      TextFormField(
-        controller: _eventTimeController,
-        readOnly: true,  //set it true, so that user will not able to edit text
-        style: TextStyle(color: Colors.white),
-        validator: (value){
-          if (value == null || value.isEmpty){
-            return "Select the time of this event";
-          }
-        },
-        onTap: () async {
-          TimeOfDay? pickedTime =  await showTimePicker(
-            initialTime: TimeOfDay.now(),
-            context: context,
-          );
-
-          if(pickedTime != null ){
-            print(pickedTime.format(context));   //output 10:51 PM
-            // DateTime parsedTime = DateFormat.jm().parse(pickedTime.format(context).toString());
-            // //converting to DateTime so that we can further format on different pattern.
-            // print(parsedTime); //output 1970-01-01 22:53:00.000
-            // String formattedTime = DateFormat('HH:mm:ss').format(parsedTime);
-            // print(formattedTime); //output 14:59:00
-            // //DateFormat() is from intl package, you can format the time on any pattern you need.
-
-            setState(() {
-              _eventTimeController.text = pickedTime.format(context); //set the value of text field.
-              print("the time is set");
-            });
-          }else{
-            print("Time is not selected");
-          }
-        },
-        decoration: InputDecoration(
-          border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(7.0),
-              borderSide: BorderSide(color: Colors.white)),
-          enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(7.0),
-              borderSide: BorderSide(color: Colors.white)),
-          focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(7.0),
-              borderSide: BorderSide(color: Colors.white)),
-          filled: true,
-          fillColor: Colors.transparent,
-          floatingLabelBehavior: FloatingLabelBehavior.always,
-          labelText: "Time of this event",
-          labelStyle: TextStyle(fontSize: 13, color: Colors.white),
-          contentPadding:
-              EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
-          prefixIcon: Icon(
-            IconlyBold.time_circle,
-            color: DarkPalette.darkGold,
-          ),
-        ),
-      ),
-      SizedBox(height: 30),
-      TextFormField(
-        controller: _eventDateController,
-        readOnly: true,
-        validator: (value){
-          if (value == null || value.isEmpty){
-            return "Select the date of this event";
-          }
-        },
-        onTap: () async {
-          DateFormat dateFormat = new DateFormat("dd MMMM, yyyy");
-          DateTime? pickedDate =  await showDatePicker(
-              context: context,
-              initialDate: DateTime.now(),
-              firstDate: DateTime.now(),
-              lastDate: DateTime(2101));
-
-          if(pickedDate != null ){
-             //output 10:51 PM
-            // DateTime parsedDate = DateFormat.jm().parse(pickedDate.toString());
-            // //converting to DateTime so that we can further format on different pattern.
-            print("date is $pickedDate"); //output 1970-01-01 22:53:00.000
-
-
-            setState(() {
-              _eventDateController.text = dateFormat.format(pickedDate);
-              _selectedDate = "${pickedDate.year}-${pickedDate.month}-${pickedDate.day}";
-            });
-          }else{
-            print("Time is not selected");
-          }
-        },
-        decoration: InputDecoration(
-          border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(7.0),
-              borderSide: BorderSide(color: Colors.white)),
-          enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(7.0),
-              borderSide: BorderSide(color: Colors.white)),
-          focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(7.0),
-              borderSide: BorderSide(color: Colors.white)),
-          filled: true,
-          fillColor: Colors.transparent,
-          labelText: "Name of the Event",
-          floatingLabelBehavior: FloatingLabelBehavior.always,
-          labelStyle: TextStyle(fontSize: 13, color: Colors.white),
-          contentPadding:
-              EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
-          prefixIcon: Icon(
-            IconlyBold.calendar,
-            color: DarkPalette.darkGold,
-          ),
-        ),
-      ),
-      SizedBox(height: 50),
-      Row(children: [
-        Expanded(
-            child: Container(
-          decoration: BoxDecoration(
-            boxShadow: [
-              BoxShadow(
-                  color: Colors.black26, offset: Offset(0, 4), blurRadius: 5.0)
-            ],
-            gradient: DarkPalette.borderGradient1,
-            // color: Colors.deepPurple.shade300,
-            borderRadius: BorderRadius.circular(5),
-          ),
-          child: ElevatedButton(
-            style: ButtonStyle(
-              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5.0),
-                ),
-              ),
-              minimumSize: MaterialStateProperty.all(Size(50, 50)),
-              backgroundColor: MaterialStateProperty.all(Colors.transparent),
-              // elevation: MaterialStateProperty.all(3),
-              shadowColor: MaterialStateProperty.all(Colors.transparent),
-            ),
-            onPressed: () {
-              if (_eventDateFormKey.currentState!.validate()){
-                _changePage(2);
-              }
-            },
-            child: Padding(
-              padding: const EdgeInsets.only(
-                top: 10,
-                bottom: 10,
-              ),
-              child: Text("Proceed",
-                  style: TextStyle(
-                      color: Colors.black, fontWeight: FontWeight.bold)),
-            ),
-          ),
-        ))
-      ])
-    ]));
-
-    File? _selectedImage;
-    Widget _eventImageFormPopup = Form(
-        child: Column(children: [
-      Text(
-        "Time for some imagery",
-        textAlign: TextAlign.center,
-          style: GoogleFonts.workSans(fontSize: 20, fontWeight: FontWeight.bold)
-      ),
-      SizedBox(height: 30),
-      GestureDetector(
-          onTap: () async {
-            result = await FilePicker.platform.pickFiles(
-                type: FileType.image
-            );
-            if (result != null) {
-              File file = File("${result!.files.single.path}");
-              setState(() {
-
-              });
-            } else {
-              // User canceled the picker
-            }
-          },
-          child:Container(
-        child: result == null ? Image.asset("assets/images/upload_image_banner.png") :
-            Image.file( File("${result!.files.single.path}"),
-              fit: BoxFit.cover,
-              width: double.infinity,),
-      )),
-      SizedBox(height: 20),
-      Text(
-        "Click to upload the banner image for this event",
-        textAlign: TextAlign.center,
-      ),
-          SizedBox(height: 20),
-      Row(children: [
-        Expanded(
-            child: Container(
-          decoration: BoxDecoration(
-            boxShadow: [
-              BoxShadow(
-                  color: Colors.black26, offset: Offset(0, 4), blurRadius: 5.0)
-            ],
-            gradient: DarkPalette.borderGradient1,
-            // color: Colors.deepPurple.shade300,
-            borderRadius: BorderRadius.circular(5),
-          ),
-          child: ElevatedButton(
-            style: ButtonStyle(
-              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5.0),
-                ),
-              ),
-              minimumSize: MaterialStateProperty.all(Size(50, 50)),
-              backgroundColor: MaterialStateProperty.all(Colors.transparent),
-              // elevation: MaterialStateProperty.all(3),
-              shadowColor: MaterialStateProperty.all(Colors.transparent),
-            ),
-            onPressed: () {
-              if(result != null ){
-                ApiBaseHelper _api = ApiBaseHelper();
-                Map image = {
-                  "file": base64Encode(File("${result!.files.single.path}").readAsBytesSync()),
-                  "filename": result!.files.single.path!.split("/").last
-                 };
-
-                _api.post(
-                  "/events/", {
-                    "name": _eventNameController.text,
-                  "about": _aboutEventController.text,
-                  "event_time": _eventTimeController.text,
-                  "event_date": _selectedDate,
-                  "image": image
-                }).then((value){
-                  setState(() {
-                    // eventItem = Event.fromJson(value);
-                  });
-                  _changePage(3);
-                });
-
-              }
-            },
-            child: Padding(
-              padding: const EdgeInsets.only(
-                top: 10,
-                bottom: 10,
-              ),
-              child: Text("Proceed",
-                  style: TextStyle(
-                      color: Colors.black, fontWeight: FontWeight.bold)),
-            ),
-          ),
-        ))
-      ])
-    ]));
-
-    Widget _eventCreatedPopup = Form(
-        child: Column(children: [
-      Container(
-        child: Image.asset("assets/images/event_created_success.png"),
-      ),
-      SizedBox(height: 20),
-      Text(
-        "Yay!! Your event has been created.",
-        textAlign: TextAlign.center,
-          style: GoogleFonts.workSans(fontSize: 25, fontWeight: FontWeight.bold, height:1.5)
-      ),
-      SizedBox(height: 20),
-      Text(
-          "Proceed to the event page to share and see all suggested songs for this event",
-          textAlign: TextAlign.center,
-          style: GoogleFonts.workSans(fontSize: 15, fontWeight: FontWeight.w300, height:1.5)
-      ),
-      SizedBox(height: 20),
-      Row(children: [
-        Expanded(
-            child: Container(
-          decoration: BoxDecoration(
-            boxShadow: [
-              BoxShadow(
-                  color: Colors.black26, offset: Offset(0, 4), blurRadius: 5.0)
-            ],
-            gradient: DarkPalette.borderGradient1,
-            // color: Colors.deepPurple.shade300,
-            borderRadius: BorderRadius.circular(5),
-          ),
-          child: ElevatedButton(
-            style: ButtonStyle(
-              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5.0),
-                ),
-              ),
-              minimumSize: MaterialStateProperty.all(Size(50, 50)),
-              backgroundColor: MaterialStateProperty.all(Colors.transparent),
-              // elevation: MaterialStateProperty.all(3),
-              shadowColor: MaterialStateProperty.all(Colors.transparent),
-            ),
-            onPressed: () {
-              Navigator.pushReplacement(
-                  context,PageTransition(type: PageTransitionType.bottomToTop,
-                  child: EventDetail(
-                    event: eventItem,
-                    userType: UserType.partyGuest,
-                  )));
-
-            },
-            child: Padding(
-              padding: const EdgeInsets.only(
-                top: 10,
-                bottom: 10,
-              ),
-              child: Text("Go to Event",
-                  style: TextStyle(
-                      color: Colors.black, fontWeight: FontWeight.bold)),
-            ),
-          ),
-        ))
-      ])
-    ]));
 
     return PageView(
-        // physics: NeverScrollableScrollPhysics(),
+        physics: NeverScrollableScrollPhysics(),
         controller: _pageController,
         children: [
           _createEventForm,
@@ -937,6 +499,465 @@ class _CreateEventForm extends State<CreateEventForm> {
           _eventCreatedPopup,
         ]);
   }
+
+
+  // Create Event FLow
+  Widget get _createEventForm => Form(
+      key: _aboutEventFormKey,
+      child: Column(
+        children: [
+          Text("Let's create the event!",
+              textAlign: TextAlign.center,
+              style: GoogleFonts.workSans(fontSize: 20, fontWeight: FontWeight.bold)),
+          SizedBox(height: 50),
+          TextFormField(
+            controller: _eventNameController,
+            style: GoogleFonts.workSans(color: Colors.white),
+            cursorColor: Colors.amber,
+            validator: (value){
+              if (value == null || value.isEmpty){
+                return "Please enter an event name";
+              }
+            },
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(7.0),
+                  borderSide: BorderSide(color: Colors.white)),
+              enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(7.0),
+                  borderSide: BorderSide(color: Colors.white)),
+              focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(7.0),
+                  borderSide: BorderSide(color: Colors.white)),
+              filled: true,
+              floatingLabelBehavior: FloatingLabelBehavior.always,
+              fillColor: Colors.transparent,
+              labelText: "Name of the Event",
+              labelStyle: GoogleFonts.workSans(fontSize: 15, color: Colors.grey),
+              contentPadding:
+              EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
+            ),
+          ),
+          SizedBox(height: 50),
+          TextFormField(
+            controller: _aboutEventController,
+            keyboardType: TextInputType.multiline,
+            maxLines: 4,
+            style: GoogleFonts.workSans(color: Colors.white, height:1.8),
+            cursorColor: Colors.amber,
+            validator: (value){
+              if (value == null || value.isEmpty){
+                return "Enter details about the event";
+              }
+            },
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(7.0),
+                  borderSide: BorderSide(color: Colors.white)),
+              enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(7.0),
+                  borderSide: BorderSide(color: Colors.white)),
+              focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(7.0),
+                  borderSide: BorderSide(color: Colors.white)),
+              filled: true,
+              fillColor: Colors.transparent,
+              floatingLabelBehavior: FloatingLabelBehavior.always,
+              labelText: "About the Event",
+              labelStyle: GoogleFonts.workSans(fontSize: 15, color: Colors.grey),
+              contentPadding:
+              EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
+            ),
+          ),
+          SizedBox(height: 30),
+          Row(children: [
+            Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                          color: Colors.black26,
+                          offset: Offset(0, 4),
+                          blurRadius: 5.0)
+                    ],
+                    gradient: DarkPalette.borderGradient1,
+                    // color: Colors.deepPurple.shade300,
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: ElevatedButton(
+                    style: ButtonStyle(
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5.0),
+                        ),
+                      ),
+                      minimumSize: MaterialStateProperty.all(Size(50, 50)),
+                      backgroundColor: MaterialStateProperty.all(Colors.transparent),
+                      // elevation: MaterialStateProperty.all(3),
+                      shadowColor: MaterialStateProperty.all(Colors.transparent),
+                    ),
+                    onPressed: () {
+                      if (_aboutEventFormKey.currentState!.validate()){
+                        _changePage(1);
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        top: 10,
+                        bottom: 10,
+                      ),
+                      child: Text("Proceed",
+                          style: TextStyle(
+                              color: Colors.black, fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ))
+          ])
+        ],
+      ));
+
+  Widget get _eventTimeForm => Form(
+      key:  _eventDateFormKey,
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        Text(
+            "Time & Date for this event",
+            textAlign: TextAlign.center,
+            style: GoogleFonts.workSans(fontSize: 20, fontWeight: FontWeight.bold)
+        ),
+        SizedBox(height: 50),
+        TextFormField(
+          controller: _eventTimeController,
+          readOnly: true,  //set it true, so that user will not able to edit text
+          style: TextStyle(color: Colors.white),
+          validator: (value){
+            if (value == null || value.isEmpty){
+              return "Select the time of this event";
+            }
+          },
+          onTap: () async {
+            TimeOfDay? pickedTime =  await showTimePicker(
+              initialTime: TimeOfDay.now(),
+              context: context,
+            );
+
+            if(pickedTime != null ){
+              print(pickedTime.format(context));   //output 10:51 PM
+              // DateTime parsedTime = DateFormat.jm().parse(pickedTime.format(context).toString());
+              // //converting to DateTime so that we can further format on different pattern.
+              // print(parsedTime); //output 1970-01-01 22:53:00.000
+              // String formattedTime = DateFormat('HH:mm:ss').format(parsedTime);
+              // print(formattedTime); //output 14:59:00
+              // //DateFormat() is from intl package, you can format the time on any pattern you need.
+
+              setState(() {
+                _eventTimeController.text = pickedTime.format(context); //set the value of text field.
+                print("the time is set");
+              });
+            }else{
+              print("Time is not selected");
+            }
+          },
+          decoration: InputDecoration(
+            border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(7.0),
+                borderSide: BorderSide(color: Colors.white)),
+            enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(7.0),
+                borderSide: BorderSide(color: Colors.white)),
+            focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(7.0),
+                borderSide: BorderSide(color: Colors.white)),
+            filled: true,
+            fillColor: Colors.transparent,
+            floatingLabelBehavior: FloatingLabelBehavior.always,
+            labelText: "Time of this event",
+            labelStyle: TextStyle(fontSize: 13, color: Colors.white),
+            contentPadding:
+            EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
+            prefixIcon: Icon(
+              IconlyBold.time_circle,
+              color: DarkPalette.darkGold,
+            ),
+          ),
+        ),
+        SizedBox(height: 30),
+        TextFormField(
+          controller: _eventDateController,
+          readOnly: true,
+          validator: (value){
+            if (value == null || value.isEmpty){
+              return "Select the date of this event";
+            }
+          },
+          onTap: () async {
+            DateFormat dateFormat = new DateFormat("dd MMMM, yyyy");
+            DateTime? pickedDate =  await showDatePicker(
+                context: context,
+                initialDate: DateTime.now(),
+                firstDate: DateTime.now(),
+                lastDate: DateTime(2101));
+
+            if(pickedDate != null ){
+              //output 10:51 PM
+              // DateTime parsedDate = DateFormat.jm().parse(pickedDate.toString());
+              // //converting to DateTime so that we can further format on different pattern.
+              print("date is $pickedDate"); //output 1970-01-01 22:53:00.000
+
+
+              setState(() {
+                _eventDateController.text = dateFormat.format(pickedDate);
+                _selectedDate = "${pickedDate.year}-${pickedDate.month}-${pickedDate.day}";
+              });
+            }else{
+              print("Time is not selected");
+            }
+          },
+          decoration: InputDecoration(
+            border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(7.0),
+                borderSide: BorderSide(color: Colors.white)),
+            enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(7.0),
+                borderSide: BorderSide(color: Colors.white)),
+            focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(7.0),
+                borderSide: BorderSide(color: Colors.white)),
+            filled: true,
+            fillColor: Colors.transparent,
+            labelText: "Name of the Event",
+            floatingLabelBehavior: FloatingLabelBehavior.always,
+            labelStyle: TextStyle(fontSize: 13, color: Colors.white),
+            contentPadding:
+            EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
+            prefixIcon: Icon(
+              IconlyBold.calendar,
+              color: DarkPalette.darkGold,
+            ),
+          ),
+        ),
+        SizedBox(height: 50),
+        Row(children: [
+          Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.black26, offset: Offset(0, 4), blurRadius: 5.0)
+                  ],
+                  gradient: DarkPalette.borderGradient1,
+                  // color: Colors.deepPurple.shade300,
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: ElevatedButton(
+                  style: ButtonStyle(
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                    ),
+                    minimumSize: MaterialStateProperty.all(Size(50, 50)),
+                    backgroundColor: MaterialStateProperty.all(Colors.transparent),
+                    // elevation: MaterialStateProperty.all(3),
+                    shadowColor: MaterialStateProperty.all(Colors.transparent),
+                  ),
+                  onPressed: () {
+                    if (_eventDateFormKey.currentState!.validate()){
+                      _changePage(2);
+                    }
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      top: 10,
+                      bottom: 10,
+                    ),
+                    child: Text("Proceed",
+                        style: TextStyle(
+                            color: Colors.black, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+              ))
+        ])
+      ]));
+
+  File? _selectedImage;
+  Widget get _eventImageFormPopup => Form(
+      child: Column(children: [
+        Text(
+            "Time for some imagery",
+            textAlign: TextAlign.center,
+            style: GoogleFonts.workSans(fontSize: 20, fontWeight: FontWeight.bold)
+        ),
+        SizedBox(height: 30),
+        GestureDetector(
+            onTap: () async {
+              result = await FilePicker.platform.pickFiles(
+                  type: FileType.image
+              );
+              if (result != null) {
+                File file = File("${result!.files.single.path}");
+                setState(() {
+
+                });
+              } else {
+                // User canceled the picker
+              }
+            },
+            child:Container(
+              child: result == null ? Image.asset("assets/images/upload_image_banner.png") :
+              Image.file( File("${result!.files.single.path}"),
+                fit: BoxFit.cover,
+                width: double.infinity,),
+            )),
+        SizedBox(height: 20),
+        Text(
+          "Click to upload the banner image for this event",
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(height: 20),
+        Row(children: [
+          Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.black26, offset: Offset(0, 4), blurRadius: 5.0)
+                  ],
+                  gradient: DarkPalette.borderGradient1,
+                  // color: Colors.deepPurple.shade300,
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: ElevatedButton(
+                  style: ButtonStyle(
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                    ),
+                    minimumSize: MaterialStateProperty.all(Size(50, 50)),
+                    backgroundColor: MaterialStateProperty.all(Colors.transparent),
+                    // elevation: MaterialStateProperty.all(3),
+                    shadowColor: MaterialStateProperty.all(Colors.transparent),
+                  ),
+                  onPressed: _submit,
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      top: 10,
+                      bottom: 10,
+                    ),
+                    child: Text("Proceed",
+                        style: TextStyle(
+                            color: Colors.black, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+              ))
+        ])
+      ]));
+
+  _submit() async {
+    if(result != null ){
+      SharedPreferences pref  = await SharedPreferences.getInstance();
+      String? token = await pref.getString("token");
+      ApiBaseHelper _api = ApiBaseHelper();
+      Map image = {
+        "file": base64Encode(File("${result!.files.single.path}").readAsBytesSync()),
+        "filename": result!.files.single.path!.split("/").last
+      };
+
+      print('building payload');
+
+      var request= new http.MultipartRequest("POST",Uri.parse("${_api.baseurl}/events/"));
+
+      request.headers.addAll({
+        HttpHeaders.authorizationHeader:
+        'Token $token',
+      });
+      request.fields["name"] =  _eventNameController.text;
+      request.fields["about"] =  _aboutEventController.text;
+      request.fields["event_time"] =  _eventTimeController.text;
+      request.fields["event_date"] =  _selectedDate;
+      request.files.add(
+        await http.MultipartFile.fromPath('image', "${result!.files.single.path}")
+      );
+
+      print('will send request');
+      print(Uri.parse("${_api.baseurl}/events/"));
+
+      var response = await request.send();
+      var data = await response.stream.bytesToString();
+      if(response.statusCode == 201){
+        _changePage(3);
+        return;
+      }
+
+      // print(response.statusCode);
+      // print(response.body);
+    }
+  }
+
+  Widget get _eventCreatedPopup => Form(
+      child: Column(children: [
+        Container(
+          child: Image.asset("assets/images/event_created_success.png"),
+        ),
+        SizedBox(height: 20),
+        Text(
+            "Yay!! Your event has been created.",
+            textAlign: TextAlign.center,
+            style: GoogleFonts.workSans(fontSize: 25, fontWeight: FontWeight.bold, height:1.5)
+        ),
+        SizedBox(height: 20),
+        Text(
+            "Proceed to the event page to share and see all suggested songs for this event",
+            textAlign: TextAlign.center,
+            style: GoogleFonts.workSans(fontSize: 15, fontWeight: FontWeight.w300, height:1.5)
+        ),
+        SizedBox(height: 20),
+        Row(children: [
+          Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.black26, offset: Offset(0, 4), blurRadius: 5.0)
+                  ],
+                  gradient: DarkPalette.borderGradient1,
+                  // color: Colors.deepPurple.shade300,
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: ElevatedButton(
+                  style: ButtonStyle(
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                    ),
+                    minimumSize: MaterialStateProperty.all(Size(50, 50)),
+                    backgroundColor: MaterialStateProperty.all(Colors.transparent),
+                    // elevation: MaterialStateProperty.all(3),
+                    shadowColor: MaterialStateProperty.all(Colors.transparent),
+                  ),
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                        context,PageTransition(type: PageTransitionType.bottomToTop,
+                        child: EventDetail(
+                          event: eventItem,
+                          userType: UserType.partyGuest,
+                        )));
+
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      top: 10,
+                      bottom: 10,
+                    ),
+                    child: Text("Go to Event",
+                        style: TextStyle(
+                            color: Colors.black, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+              ))
+        ])
+      ]));
 }
 
 

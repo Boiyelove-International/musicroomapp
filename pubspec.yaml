@@ -26,7 +26,7 @@ dependencies:
     sdk: flutter
   intl:
   provider: ^5.0.0
-  change_notifier:
+#  change_notifier:
   google_fonts: ^2.1.0
   iconly: ^1.0.1
   file_picker:

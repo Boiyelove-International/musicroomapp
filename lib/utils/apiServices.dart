@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-
-
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:musicroom/utils.dart';
@@ -52,6 +50,7 @@ enum Status { LOADING, COMPLETED, ERROR }
 class ApiBaseHelper {
   // final String _baseUrl = "http://127.0.0.1:8000/api";
   final String _baseUrl = "https://musicroomweb.herokuapp.com/api";
+  String get baseurl => _baseUrl;
 
   Future<dynamic> get(String url) async {
     print('Api Get, url $url');
