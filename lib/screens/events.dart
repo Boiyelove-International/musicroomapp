@@ -6,6 +6,7 @@ import 'package:iconly/iconly.dart';
 import 'package:intl/intl.dart';
 import 'package:musicroom/screens/popups.dart';
 import 'package:musicroom/screens/suggestion_list.dart';
+import 'package:musicroom/screens/yourRoom.dart';
 import 'package:musicroom/utils.dart';
 import 'package:musicroom/utils/apiServices.dart';
 import 'package:musicroom/utils/models.dart';
@@ -210,6 +211,9 @@ class _EventDetail extends State<EventDetail> {
   bool _showPartyStats = false;
   ApiBaseHelper _api = ApiBaseHelper();
   Event get _event => widget.event;
+  set _event(Event value){
+    widget.event = value;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1552,57 +1556,7 @@ class _EventDetail extends State<EventDetail> {
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _event.attendees.length > 0 ?
-                                Row(
-                                  children: [
-                                    CircleAvatar(
-                                      radius: 25,
-                                      backgroundImage: AssetImage(
-                                          "assets/images/circle_avatar_1.png"),
-                                    ),
-                                    SizedBox(
-                                      width: 20,
-                                    ),
-                                    Column(
-                                        crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            "Sandra",
-                                            style: TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                          SizedBox(height: 3),
-                                          Text("Attendee",
-                                              style: TextStyle(
-                                                fontSize: 10,
-                                              ))
-                                        ]
-                                    ),
-                                    Spacer(),
-                                    Visibility(
-                                      visible: _event.attendees.length >= 2,
-                                      child: InkWell(
-                                        onTap: () {
-                                          setState(() {
-                                            _showAttendees = true;
-                                          });
-                                        },
-                                        child: Container(
-                                          height: 50,
-                                          width: 50,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            gradient: DarkPalette.borderGradient1,
-                                          ),
-                                          child: Center(child: Text("+${_event.attendees.length - 1}")),
-                                        ),
-                                      ),
-                                    )
-                                  ],
-                                ) : Container(),
+                                _buildAttendeeToggle(),
                                 SizedBox(height: 70),
                                 Text(
                                   "Party Stats",
@@ -1729,8 +1683,61 @@ class _EventDetail extends State<EventDetail> {
         ),
       ),
     );
+
   }
 
+  Widget _buildAttendeeToggle(){
+    if(_event.attendees.length == 0) return Container();
+
+    Map attendee = _event.attendees[0];
+
+    return Row(
+      children: [
+        CircleAvatar(
+          radius: 25,
+          backgroundImage: NetworkImage("${attendee['profile_picture']}"),
+        ),
+        SizedBox(
+          width: 20,
+        ),
+        Column(
+            crossAxisAlignment:
+            CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "${attendee['display_name']}",
+                style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 3),
+              Text("Attendee",
+                  style: TextStyle(
+                    fontSize: 10,
+                  ))
+            ]
+        ),
+        Spacer(),
+        InkWell(
+          onTap: () {
+            setState(() {
+              _showAttendees = true;
+            });
+          },
+          child: Container(
+            height: 50,
+            width: 50,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: DarkPalette.borderGradient1,
+            ),
+            child: Center(child: Text("+${_event.attendees.length - 1}")),
+          ),
+        )
+      ],
+    );
+  }
 
   Widget get _attendees => ListView.separated(
       shrinkWrap: true,
@@ -1741,7 +1748,7 @@ class _EventDetail extends State<EventDetail> {
           children: [
             CircleAvatar(
               radius: 25,
-              backgroundImage:NetworkImage(attendee['display_picture']?? ''),
+              backgroundImage:NetworkImage(attendee['profile_photo']?? ''),
             ),
             SizedBox(
               width: 20,
@@ -1751,7 +1758,7 @@ class _EventDetail extends State<EventDetail> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    "${attendee['name']}",
+                    "${attendee['display_name']}",
                     style:
                     TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                   ),
@@ -1792,14 +1799,24 @@ class _EventDetail extends State<EventDetail> {
                   style: TextStyle(color: Colors.black),
                 )),
             onPressed: () {
-              Navigator.of(context).pushNamed(Routes.yourRoom);
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                    builder: (context)=> YourRoom(
+                      code: _event.code!,
+                    )
+                )
+              );
             }),
         FocusedMenuItem(
             title: Text("Edit Event", style: TextStyle(color: Colors.black)),
-            onPressed: () {}),
+            onPressed: () {
+              toggleEditEvent();
+            }
+        ),
         FocusedMenuItem(
             title: Text("Delete Event", style: TextStyle(color: Colors.red)),
-            onPressed: () {})
+            onPressed: _deleteEvent
+        )
       ]);
 
   Widget get _backButton => IconButton(
@@ -1820,6 +1837,37 @@ class _EventDetail extends State<EventDetail> {
       });
     },
   );
+
+  toggleEditEvent(){
+    showModalBottomSheet<void>(
+        builder: (BuildContext context) => Container(
+            decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: new BorderRadius.only(
+                  topLeft: const Radius.circular(40.0),
+                  topRight: const Radius.circular(40.0),
+                )),
+            padding: EdgeInsets.only(top: 10, left: 20, right: 20, bottom: 20),
+            height: MediaQuery.of(context).size.height * 0.6,
+            child: CreateEventForm(
+                event: _event,
+                callback: (Event updateEvent){
+                  setState(() { _event = updateEvent;   });
+                  Navigator.pop(context);
+                },
+            )
+        ),
+        backgroundColor: Colors.transparent,
+        context: context
+    ).whenComplete((){
+
+    });
+  }
+  _deleteEvent()async {
+    ApiBaseHelper _api = ApiBaseHelper();
+    _api.delete("/event/${_event.id}/", {});
+    Navigator.pop(context, {"rm_event":_event.id});
+  }
 }
 
 class EventDetailPartyGuest extends StatefulWidget {
@@ -1827,12 +1875,12 @@ class EventDetailPartyGuest extends StatefulWidget {
 
   EventDetailPartyGuest({Key? key,
     this.userType = UserType.partyGuest,
-    this.eventStatus = EventStatus.EventPending, this.event})
+    this.eventStatus = EventStatus.EventPending, required this.event})
       : super(key: key);
 
   UserType? userType;
   EventStatus? eventStatus;
-  Event? event;
+  Event event;
 
   @override
   _EventDetailPartyGuest createState() => _EventDetailPartyGuest();
@@ -1843,6 +1891,7 @@ class _EventDetailPartyGuest extends State<EventDetailPartyGuest> {
   bool _showAbout = false;
   List<Widget> _suggestionPlaylist = [];
   late String _timingTitle;
+  Event get event=> widget.event;
 
   @override
   void initState(){
@@ -1900,12 +1949,10 @@ class _EventDetailPartyGuest extends State<EventDetailPartyGuest> {
         }
         break;
       }
-
-
-
-
     });
 }
+
+
   @override
   Widget build(BuildContext context) {
     Widget _attendees = ListView.separated(
@@ -1917,7 +1964,7 @@ class _EventDetailPartyGuest extends State<EventDetailPartyGuest> {
               CircleAvatar(
                 radius: 25,
                 backgroundImage:
-                AssetImage("assets/images/circle_avatar_1.png"),
+                NetworkImage("${event.organizer_display_picture}"),
               ),
               SizedBox(
                 width: 20,
@@ -1927,7 +1974,7 @@ class _EventDetailPartyGuest extends State<EventDetailPartyGuest> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      "Sandra",
+                      "${event.organizer}",
                       style:
                       TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                     ),
@@ -1999,7 +2046,9 @@ class _EventDetailPartyGuest extends State<EventDetailPartyGuest> {
               decoration: BoxDecoration(
                   image: DecorationImage(
                       fit: BoxFit.cover,
-                      image: AssetImage("assets/images/party_people_3.png"))),
+                      image: NetworkImage("${event.image}")
+                  )
+              ),
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
@@ -2086,12 +2135,12 @@ class _EventDetailPartyGuest extends State<EventDetailPartyGuest> {
                     children: [
                       ListTile(
                         title: Text(
-                          '${widget.event!.name}'.capitalize(),
+                          '${event.name}'.capitalize(),
                           style: TextStyle(
                               fontSize: 25, fontWeight: FontWeight.w900),
                         ),
                         subtitle: Text(
-                          "${widget.event!.renderDate()}",
+                          "${event.renderDate()}",
                           style: TextStyle(fontSize: 10),
                         ),
                       ),
@@ -2101,7 +2150,7 @@ class _EventDetailPartyGuest extends State<EventDetailPartyGuest> {
                           CircleAvatar(
                             radius: 25,
                             backgroundImage:
-                            AssetImage("assets/images/circle_avatar_1.png"),
+                            NetworkImage("${event.organizer_display_picture}"),
                           ),
                           SizedBox(
                             width: 20,
@@ -2111,7 +2160,7 @@ class _EventDetailPartyGuest extends State<EventDetailPartyGuest> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  '${widget.event!.organizer}',
+                                  '${event.organizer}',
                                   style: TextStyle(
 
                                       fontSize: 15,
@@ -2133,52 +2182,7 @@ class _EventDetailPartyGuest extends State<EventDetailPartyGuest> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 25,
-                                backgroundImage: AssetImage(
-                                    "assets/images/circle_avatar_1.png"),
-                              ),
-                              SizedBox(
-                                width: 20,
-                              ),
-                              Column(
-                                  crossAxisAlignment:
-                                  CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      "Sandra",
-                                      style: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    SizedBox(height: 3),
-                                    Text("Organizer",
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                        ))
-                                  ]),
-                              Spacer(),
-                              InkWell(
-                                onTap: () {
-                                  setState(() {
-                                    _showAttendees = true;
-                                  });
-                                },
-                                child: Container(
-                                  height: 50,
-                                  width: 50,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    gradient: DarkPalette.borderGradient1,
-                                  ),
-                                  child: Center(child: Text("+500")),
-                                ),
-                              )
-                            ],
-                          ),
+                          _buildAttendeeToggle(),
                           Visibility(visible: _showAbout,
                           child: SizedBox(height: 50)),
                           Visibility(visible: _showAbout,
@@ -2192,7 +2196,7 @@ class _EventDetailPartyGuest extends State<EventDetailPartyGuest> {
                           child:SizedBox(height: 20)),
                           Visibility(visible: _showAbout,
                           child:Text(
-                              "${widget.event!.about}".capitalize())),
+                              "${event.about}".capitalize())),
                           SizedBox(height: 30),
                           Visibility(
                               visible: !_showAbout,
@@ -2206,6 +2210,59 @@ class _EventDetailPartyGuest extends State<EventDetailPartyGuest> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildAttendeeToggle(){
+    if(event.attendees.length == 0) return Container();
+
+    Map attendee = event.attendees[0];
+
+    return Row(
+      children: [
+        CircleAvatar(
+          radius: 25,
+          backgroundImage: NetworkImage("${attendee['profile_picture']}"),
+        ),
+        SizedBox(
+          width: 20,
+        ),
+        Column(
+            crossAxisAlignment:
+            CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "${attendee['display_name']}",
+                style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 3),
+              Text("Attendee",
+                  style: TextStyle(
+                    fontSize: 10,
+                  ))
+            ]
+        ),
+        Spacer(),
+        InkWell(
+          onTap: () {
+            setState(() {
+              _showAttendees = true;
+            });
+          },
+          child: Container(
+            height: 50,
+            width: 50,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: DarkPalette.borderGradient1,
+            ),
+            child: Center(child: Text("+${event.attendees.length - 1}")),
+          ),
+        )
+      ],
     );
   }
 }
@@ -2277,8 +2334,8 @@ class _EventListScreen extends State<EventListScreen> {
                             // Navigator.push(context, PageTransition(type: PageTransitionType.bottomToTop,
                             //     child: EventDetail()));
 
-                            Navigator.push(context, PageTransition(type: PageTransitionType.bottomToTop,
-                                child: EventDetailPartyGuest()));
+                            // Navigator.push(context, PageTransition(type: PageTransitionType.bottomToTop,
+                            //     child: EventDetailPartyGuest()));
                           },
                           child: EventCard());
                       ;

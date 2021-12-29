@@ -136,10 +136,8 @@ class Event{
 
   Future<bool> joinEvent() async{
     ApiBaseHelper _api = ApiBaseHelper();
-    print('jjdkfjfkdjfkdjfkj');
     Map<String, dynamic> response = await _api.post("/event/join/",
         {"event_code": this.code});
-    print(response);
     if (response["joined"] == true ){
       return true;
     }

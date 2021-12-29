@@ -7,6 +7,7 @@ import 'package:iconly/iconly.dart';
 import 'package:musicroom/screens/popups.dart';
 import 'package:musicroom/screens/search.dart';
 import 'package:musicroom/styles.dart';
+import 'package:musicroom/utils.dart';
 import 'package:musicroom/utils/apiServices.dart';
 import 'package:musicroom/utils/models.dart';
 import 'package:musicroom/widgets.dart';
@@ -294,11 +295,7 @@ class _EventOrganizerHome extends State<EventOrganizerHome>{
                                                                   0.3,
                                                               height: 35,
                                                               child: Stack(
-                                                                children: event.attendees.map((e) => Positioned(
-                                                                    right: 50,
-                                                                    child: CircleAvatar(
-                                                                      backgroundImage:NetworkImage(e['display_picture'] ?? '')
-                                                                    ))).toList(),
+                                                                children: MRbuildAttendeeIcons(event, alignment: "right"),
                                                               ),
                                                             ))
                                                       ]
@@ -324,7 +321,9 @@ class _EventOrganizerHome extends State<EventOrganizerHome>{
                           )
                       ),
                   )
-                ]))),
+                ])
+            )
+        ),
         floatingActionButton: Visibility(
             visible: showFab,
             child: FloatingActionButton.extended(
@@ -346,8 +345,9 @@ class _EventOrganizerHome extends State<EventOrganizerHome>{
                           child: CreateEventForm()
                       ),
                       backgroundColor: Colors.transparent,
-                      context: context)
-                      .whenComplete(() => setState(() {
+                      context: context
+                  )
+                  .whenComplete(() => setState(() {
                     showFab = true;
                   }));
                 },
@@ -356,13 +356,25 @@ class _EventOrganizerHome extends State<EventOrganizerHome>{
   }
 
   _gotoEventPage(eventItem){
-    Navigator.pushReplacement(
+    Navigator.push(
         context,PageTransition(type: PageTransitionType.bottomToTop,
         child: EventDetail(
           event: eventItem!,
           userType: UserType.partyGuest,
         ))
-    );
+    ).then((value) {
+      Map data = value;
+
+      if(data.isNotEmpty){
+        if(data.containsKey("rm_event")){
+          int id = data['rm_event'];
+          setState(() {
+            _events.removeWhere((element) => element.id == id);
+          });
+        }
+      }
+
+    });
   }
 
   _loadEvents() async{
@@ -371,7 +383,7 @@ class _EventOrganizerHome extends State<EventOrganizerHome>{
     });
 
     List response = await ApiBaseHelper().get('/events/');
-    print(response);
+    response.forEach((e) => print(e['code']));
     setState(() {
       _events = response.map((e) => Event.fromJson(e)).toList();
       loadingEvents = false;
@@ -563,7 +575,9 @@ class _PartyGuestHome extends State<PartyGuestHome> {
                                         ),
                                       ),
                                     ),
-                                  ]))),
+                                  ])
+                          )
+                      ),
                       Container(
                         child: Column(
                             mainAxisSize: MainAxisSize.min,
@@ -752,10 +766,11 @@ class _PartyGuestHome extends State<PartyGuestHome> {
                               SizedBox(height:30),
                             ]
                         ),
-                      ),
-
-
-                ]))),
+                      )
+                   ]
+                )
+            )
+        ),
         floatingActionButton: Visibility(
             visible: showFab,
             child: FloatingActionButton.extended(
@@ -788,6 +803,7 @@ class _PartyGuestHome extends State<PartyGuestHome> {
                           }));
                 },
                 label: Text("Join an Event",
-                    style: TextStyle(color: Colors.black)))));
+                    style: TextStyle(color: Colors.black))))
+      );
   }
 }

@@ -459,6 +459,10 @@ class _PopupWidget extends State<PopupWidget> {
 
 
 class CreateEventForm extends StatefulWidget {
+  Event? event;
+  Function(Event)? callback;
+  CreateEventForm({this.event, this.callback});
+
   @override
   _CreateEventForm createState() => _CreateEventForm();
 }
@@ -489,6 +493,22 @@ class _CreateEventForm extends State<CreateEventForm> {
       setState(() {
         _currentPage = curr_page;
       });
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+
+    if(widget.event != null){
+      Event event = widget.event!;
+      var pickedDate = event.event_date;
+      _eventNameController.text = event.name!;
+      _aboutEventController.text = event.about!;
+      _eventTimeController.text = event.event_time.format(context);
+      _eventDateController.text = DateFormat("dd MMMM, yyyy").format(event.event_date);
+      _selectedDate = "${pickedDate.year}-${pickedDate.month}-${pickedDate.day}";
     }
   }
 
@@ -534,7 +554,11 @@ class _CreateEventForm extends State<CreateEventForm> {
       key: _aboutEventFormKey,
       child: Column(
         children: [
+          widget.event == null ?
           Text("Let's create the event!",
+              textAlign: TextAlign.center,
+              style: GoogleFonts.workSans(fontSize: 20, fontWeight: FontWeight.bold)):
+          Text("Edit event!",
               textAlign: TextAlign.center,
               style: GoogleFonts.workSans(fontSize: 20, fontWeight: FontWeight.bold)),
           SizedBox(height: 50),
@@ -752,7 +776,7 @@ class _CreateEventForm extends State<CreateEventForm> {
                 borderSide: BorderSide(color: Colors.white)),
             filled: true,
             fillColor: Colors.transparent,
-            labelText: "Name of the Event",
+            labelText: "Date of the Event",
             floatingLabelBehavior: FloatingLabelBehavior.always,
             labelStyle: TextStyle(fontSize: 13, color: Colors.white),
             contentPadding:
@@ -882,17 +906,18 @@ class _CreateEventForm extends State<CreateEventForm> {
       ]));
 
   _submit() async {
-    if(result != null ){
+    if(result == null && widget.event == null) return;
+
       SharedPreferences pref  = await SharedPreferences.getInstance();
       String? token = await pref.getString("token");
       ApiBaseHelper _api = ApiBaseHelper();
-      Map image = {
-        "file": base64Encode(File("${result!.files.single.path}").readAsBytesSync()),
-        "filename": result!.files.single.path!.split("/").last
-      };
 
+      var request = new http.MultipartRequest("POST",Uri.parse("${_api.baseurl}/events/"));
 
-      var request= new http.MultipartRequest("POST",Uri.parse("${_api.baseurl}/events/"));
+      if(widget.event != null){
+        request = new http.MultipartRequest("PUT",Uri.parse("${_api.baseurl}/event/${widget.event?.id}/"));
+        print('Putting');
+      }
 
       request.headers.addAll({
         HttpHeaders.authorizationHeader:
@@ -902,12 +927,16 @@ class _CreateEventForm extends State<CreateEventForm> {
       request.fields["about"] =  _aboutEventController.text;
       request.fields["event_time"] =  _eventTimeController.text;
       request.fields["event_date"] =  _selectedDate;
-      request.files.add(
-        await http.MultipartFile.fromPath('image', "${result!.files.single.path}")
-      );
+
+      if(result != null){
+        request.files.add(
+            await http.MultipartFile.fromPath('image', "${result!.files.single.path}")
+        );
+      }
 
       var response = await request.send();
-      if(response.statusCode == 201){
+      print(response.statusCode);
+      if(response.statusCode == 201){ //Event created
         String data = await response.stream.bytesToString();
         var item = jsonDecode(data);
         eventItem = Event.fromJson(item);
@@ -915,8 +944,13 @@ class _CreateEventForm extends State<CreateEventForm> {
         return;
       }
 
-      // print(response.statusCode);
-      // print(response.body);
+    if(response.statusCode == 200){ //Event updated
+      String data = await response.stream.bytesToString();
+      var item = jsonDecode(data);
+      // if(widget.callback != null){
+        widget.callback!(Event.fromJson(item));
+      // }
+      return;
     }
   }
 
@@ -1287,6 +1321,7 @@ class _JoinEventForm extends State<JoinEventForm>{
     // TODO: implement didChangeDependencies
     super.didChangeDependencies();
     subtitle2 = Theme.of(context).textTheme.subtitle2!;
+
   }
 
   @override
@@ -1919,11 +1954,7 @@ class _JoinEventForm extends State<JoinEventForm>{
                             height: 20,
                             child: Stack(
                                 clipBehavior: Clip.none,
-                                children: eventData?.attendees.map((e) => Positioned(
-                                    right: 50,
-                                    child: CircleAvatar(
-                                        backgroundImage:NetworkImage(e['display_picture'] ?? '')
-                                    ))).toList() ?? []
+                                children: MRbuildAttendeeIcons(eventData!)
                             ),
                           )),
                       SizedBox(
@@ -2004,6 +2035,8 @@ class _JoinEventForm extends State<JoinEventForm>{
         strokeWidth: 1,
       )
   );
+
+
 
   Widget get _joinEventDone =>  Column(children: [
     Container(

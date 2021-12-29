@@ -57,73 +57,23 @@ class YourRoom extends StatelessWidget {
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
+              children: code.split("").map((e) =>
                   Container(
                     height:90,
                     width: 90,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5),
-                      border: Border.all(color: DarkPalette.darkYellow)
+                        borderRadius: BorderRadius.circular(5),
+                        border: Border.all(color: DarkPalette.darkYellow)
 
                     ),
                     child: Center(
-                      child: Text("Q", style: GoogleFonts.workSans(
-                        fontSize: 50,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.amber
-                      ))
+                        child: Text(e, style: GoogleFonts.workSans(
+                            fontSize: 50,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.amber
+                        ))
                     ),
-                  ),
-                Container(
-                  height:90,
-                  width: 90,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5),
-                      border: Border.all(color: DarkPalette.darkYellow)
-
-                  ),
-                  child:  Center(
-                      child: Text("Y", style: GoogleFonts.workSans(
-                          fontSize: 50,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.amber
-                      ))
-                  ),
-                ),
-                Container(
-
-                  height:90,
-                  width: 90,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5),
-                      border: Border.all(color: DarkPalette.darkYellow)
-
-                  ),
-                  child:  Center(
-                      child: Text("L", style: GoogleFonts.workSans(
-                          fontSize: 50,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.amber
-                      ))
-                  ),
-                ),
-                Container(
-                  height:90,
-                  width: 90,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5),
-                      border: Border.all(color: DarkPalette.darkYellow)
-
-                  ),
-                  child:  Center(
-                      child: Text("1", style: GoogleFonts.workSans(
-                          fontSize: 50,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.amber
-                      ))
-                  ),
-                )
-              ],
+                  )).toList(),
             ),
             Spacer(),
             Text("QR Code", style: GoogleFonts.workSans(
@@ -142,7 +92,7 @@ class YourRoom extends StatelessWidget {
                 ),
               child: Center(
                 child: QrImage(
-                  data: 'TQYL1',
+                  data: '${code}',
                   version: QrVersions.auto,
                   size: 200,
                   gapless: false,

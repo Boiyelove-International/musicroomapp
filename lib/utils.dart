@@ -1,8 +1,11 @@
 import 'dart:io';
 
 import 'package:device_info/device_info.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
+import 'package:musicroom/utils/models.dart';
 
 class GradientBorder extends Border {
   final Gradient borderGradient;
@@ -90,7 +93,6 @@ class GradientBorder extends Border {
         width = width;
 }
 
-
 Future<String> getDeviceId() async {
 String deviceName;
 String deviceVersion;
@@ -114,6 +116,35 @@ print('Failed to get platform version');
 
 //if (!mounted) return;
 return identifier;
+}
+
+List<Widget> MRbuildAttendeeIcons(Event event, {String alignment = 'left'}){
+  List<Widget> icons = [];
+  double count = 0;
+
+  List temp = event.attendees;
+  if(temp.length >= 2 ){
+    temp = temp.sublist(0, 3);
+  }
+  temp.forEach((e){
+    Widget avatar = CircleAvatar(
+        backgroundImage:NetworkImage(e['profile_photo'] ?? '')
+    );
+    if(alignment == 'right'){
+      icons.add(Positioned(
+          right: count,
+          child:avatar
+      ));
+    }else{
+      icons.add(Positioned(
+          left: count,
+          child:avatar
+      ));
+    }
+
+    count+=15;
+  });
+  return icons;
 }
 
 extension StringExtension on String {
