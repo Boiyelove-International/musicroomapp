@@ -85,6 +85,7 @@ class ApiBaseHelper {
       throw FetchDataException('No Internet connection');
     }
     print('api get received!');
+    print('response get $responseJson');
     return responseJson;
   }
 
