@@ -1636,7 +1636,7 @@ class _EventDetail extends State<EventDetail> {
                                               height: 30,
                                             ),
                                             SizedBox(height: 15),
-                                            Text("${_event.suggestions?.length}",
+                                            Text("${_event.suggestions?.length ?? 0}",
                                                 textAlign: TextAlign.center,
                                                 style: TextStyle(
                                                     fontSize: 30,
