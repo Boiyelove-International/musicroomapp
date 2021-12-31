@@ -383,6 +383,7 @@ class SongSuggestionList extends StatelessWidget{
   @override
   Widget build(context){
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Visibility(
             visible: trailing,

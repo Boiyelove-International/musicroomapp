@@ -199,7 +199,7 @@ class _EventOrganizerHome extends State<EventOrganizerHome>{
                                             Colors.transparent,
                                             builder: (context){
                                               return PopupWidget(
-                                                popup: Popup.searchFilter,
+                                                popup: Popup.eventFilter,
                                               );
                                             }).whenComplete(() => setState((){
                                           showFab = true;

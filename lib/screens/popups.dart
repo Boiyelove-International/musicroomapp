@@ -28,7 +28,7 @@ import '../routes.dart';
 import '../utils.dart';
 import 'events.dart';
 
-enum Popup { searchFilter, nowPlayingFilter, eventFilter, resultFilter, suggestionFilter }
+enum Popup { searchFilter, nowPlayingFilter, eventFilter, resultFilter, playlistFilter }
 
 class PopupWidget extends StatefulWidget{
 
@@ -49,6 +49,7 @@ class _PopupWidget extends State<PopupWidget> {
   late Widget _selected;
   UserType? get userType => widget.userType;
   Popup get popup => widget.popup;
+
   SongModel get song=> widget.song!;
 
 // Filter Widgets
@@ -110,43 +111,108 @@ class _PopupWidget extends State<PopupWidget> {
   ]);
 
   final Widget _filterEventPopup = Column(children: [
-    Text("Filter Search Results"),
+    Padding(
+        padding:EdgeInsets.all(30),
+        child: Text("Filter Event Results", style: GoogleFonts.workSans(
+            fontSize: 18,
+            fontWeight: FontWeight.bold
+        ),)
+    ),
     Row(children: [
-      Icon(IconlyBold.arrow_up, color: DarkPalette.darkGold),
-      Text("Already Started")
+      Padding(
+          padding: EdgeInsets.all(1),
+          child: Icon(IconlyBold.arrow_up, size:35, color: DarkPalette.darkGold)
+      ),
+      SizedBox(width:20),
+      Text("Already Started", style: GoogleFonts.workSans(
+          fontSize: 18,
+          fontWeight: FontWeight.w300
+      ))
+    ]),
+    SizedBox(height: 20),
+
+    Row(children: [
+      Padding(
+          padding: EdgeInsets.all(1),
+          child: Icon(IconlyBold.arrow_down,  size:35, color: DarkPalette.darkYellow),
+      ),
+       SizedBox(width:20),
+      Text("Concluded Events", style: GoogleFonts.workSans(
+          fontSize: 18,
+          fontWeight: FontWeight.w300
+      ))
     ]),
     SizedBox(height: 20),
     Row(children: [
-      Icon(IconlyBold.arrow_down, color: DarkPalette.darkYellow),
-      Text("Concluded Events")
+      Padding(
+        padding: EdgeInsets.all(1),
+        child: Icon(IconlyBold.arrow_up,  size:35, color: DarkPalette.darkGold),
+      ),
+     SizedBox(width:20),
+      Text("Most Attendees",style: GoogleFonts.workSans(
+          fontSize: 18,
+          fontWeight: FontWeight.w300
+      ) )
     ]),
     SizedBox(height: 20),
     Row(children: [
-      Icon(IconlyBold.arrow_up, color: DarkPalette.darkGold),
-      Text("Most Attendees")
-    ]),
-    SizedBox(height: 20),
-    Row(children: [
-      Icon(IconlyBold.arrow_down, color: DarkPalette.darkYellow),
-      Text("Least TIme Left")
+      Padding(
+        padding: EdgeInsets.all(1),
+        child: Icon(IconlyBold.arrow_down,  size:35, color: DarkPalette.darkYellow),
+      ),
+     SizedBox(width:20),
+      Text("Least TIme Left", style: GoogleFonts.workSans(
+          fontSize: 18,
+          fontWeight: FontWeight.w300
+      ))
     ])
   ]);
 
-  final Widget _filterResultPopup = Column(children: [
-    Text("Filter Search Results"),
+  final Widget _filterPlaylistPopup = Column(children: [
+    Padding(
+        padding:EdgeInsets.all(30),
+        child: Text("Select the results you want", style: GoogleFonts.workSans(
+            fontSize: 18,
+            fontWeight: FontWeight.bold
+        ),)
+    ),
     Row(children: [
-      Icon(IconlyBold.arrow_up, color: DarkPalette.darkGold),
-      Text("Party Playlist")
+      Padding(
+        padding: EdgeInsets.all(1),
+        child: Icon(IconlyBold.arrow_up, size:35, color: DarkPalette.darkGold),
+      ),
+      SizedBox(width:20),
+      Text("Party Playlist", style: GoogleFonts.workSans(
+          fontSize: 18,
+          fontWeight: FontWeight.w300
+      ))
     ]),
+     SizedBox(height: 20),
     Row(children: [
-      Icon(IconlyBold.arrow_up, color: DarkPalette.white),
-      Text("Accepted Suggestions")
+      Padding(
+        padding: EdgeInsets.all(1),
+        child: Icon(IconlyBold.arrow_up, size:35, color: Colors.greenAccent),
+      ),
+      SizedBox(width:20),
+      Text("Accepted Suggestions", style: GoogleFonts.workSans(
+          fontSize: 18,
+          fontWeight: FontWeight.w300
+      ))
     ]),
+     SizedBox(height: 20),
     Row(children: [
-      Icon(IconlyBold.arrow_up, color: DarkPalette.darkGold),
-      Text("Newly Suggested")
+      Padding(
+        padding: EdgeInsets.all(1),
+        child: Icon(IconlyBold.arrow_up, size:35, color: DarkPalette.darkGold),
+      ),
+      SizedBox(width:20),
+      Text("Newly Suggested", style: GoogleFonts.workSans(
+          fontSize: 18,
+          fontWeight: FontWeight.w300
+      ))
     ]),
   ]);
+
   double sliderValue = 0.0;
 
   @override
@@ -169,11 +235,11 @@ class _PopupWidget extends State<PopupWidget> {
       case Popup.eventFilter:
         _selected = _filterEventPopup;
         break;
-      case Popup.nowPlayingFilter:
-        _selected = _nowPlayingPopup;
+      case Popup.playlistFilter:
+        _selected = _filterPlaylistPopup;
         break;
       case Popup.nowPlayingFilter:
-        _selected = _nowPlayingPopup;
+        _selected = _nowPlayingPopup ;
         break;
       default:
         _selected = _filterSearchPopup;

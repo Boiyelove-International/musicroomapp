@@ -1293,14 +1293,9 @@ class _EventDetail extends State<EventDetail> {
                             gradient: DarkPalette.borderGradient1,
                           ),
                           child: Center(
-                              child: widget.userType == UserType.partyOrganizer
-                                  ? Image.asset("assets/images/music.png",
+                              child: Image.asset("assets/images/music.png",
                                   height: 100, width: 100)
-                                  : Icon(
-                                IconlyBold.plus,
-                                color: Colors.white,
-                                size: 40,
-                              )),
+                          ),
                         )),
                   ),
                   Positioned.fill(
@@ -1483,23 +1478,6 @@ class _EventDetail extends State<EventDetail> {
                           Text(
                               "${_event.about}"),
                           SizedBox(height: 20),
-                          SongSuggestionList(
-                            title: "Currently Playing",
-                            event: _event,
-                            suggestions: _getList('playing'),
-                          ),
-                          SizedBox(height: 30),
-                          SongSuggestionList(
-                            title: "Up Next",
-                            event: _event,
-                            suggestions: _getList('next'),
-                          ),
-                          SizedBox(height: 30),
-                          SongSuggestionList(
-                            title: "Queued",
-                            event: _event,
-                            suggestions: _getList('queued'),
-                          )
                         ],
                       )
                     ]))
