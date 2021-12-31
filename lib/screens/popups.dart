@@ -191,7 +191,7 @@ class _PopupWidget extends State<PopupWidget> {
     Row(children: [
       Padding(
         padding: EdgeInsets.all(1),
-        child: Icon(IconlyBold.arrow_up, size:35, color: Colors.greenAccent),
+        child: Icon(IconlyBold.arrow_up, size:35, color: StateColor.success),
       ),
       SizedBox(width:20),
       Text("Accepted Suggestions", style: GoogleFonts.workSans(

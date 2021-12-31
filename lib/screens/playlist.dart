@@ -84,7 +84,7 @@ class _PartyPlayList extends State<PartyPlayList> {
                                   showModalBottomSheet(
                                       backgroundColor: Colors.transparent,
                                       context: context, builder:(context) => PopupWidget(
-                                    popup: Popup.resultFilter,
+                                    popup: Popup.playlistFilter,
                                   ));
 
                                 },
