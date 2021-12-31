@@ -170,12 +170,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           // elevation: MaterialStateProperty.all(3),
                           shadowColor: MaterialStateProperty.all(Colors.transparent),
                         ),
-                        onPressed: () {
+                        onPressed: () async {
                           // var formData = <String, String>{
                           //   "organizer_name":  _organizerName.text,
                           //   "email": _emailController.text,
                           //   "password": _passwordController.text
                           // };
+                          SharedPreferences prefs = await SharedPreferences.getInstance();
+                          prefs.remove("token");
                           ApiBaseHelper api = ApiBaseHelper();
                           try{
                             api.post("/register/", <String, String>{
@@ -183,7 +185,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               "email": _emailController.text,
                               "username": _emailController.text,
                               "password": _passwordController.text
-                            }).then((value){
+                            }, context: context).then((value){
                               Navigator.of(context).pushNamed(Routes.login);
                               print("value is $value");
                             });
@@ -414,18 +416,17 @@ class _LoginScreenState extends State<LoginScreen> {
               onPressed: () async {
                 ApiBaseHelper api = ApiBaseHelper();
                 SharedPreferences prefs = await SharedPreferences.getInstance();
+                prefs.remove("token");
                 try{
                   api.post("/login/", <String, String>{
                     "username": _emailController.text.toLowerCase(),
                     "password": _passwordController.text
-                  }).then((data) async {
+                  }, context: context).then((data) async {
                     print("value is $data");
                     await prefs.setString("token", data["token"]);
                     await prefs.setString("email", data["email"]);
                     await prefs.setString("display_name", data["display_name"]);
                     Navigator.pushReplacementNamed(context, Routes.organizerHome);
-
-
 
 
                   });
