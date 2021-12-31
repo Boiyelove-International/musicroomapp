@@ -332,9 +332,9 @@ class _PartyPlayList extends State<PartyPlayList> {
             SongSuggestionList(
               title: "Queued",
               event: event,
-
               suggestions: _getList('queued'),
               color: DarkPalette.darkGrey1,
+              userType: UserType.partyOrganizer,
             )
 
           ],
@@ -351,6 +351,7 @@ class _PartyPlayList extends State<PartyPlayList> {
               event: event,
               suggestions: _getList('accepted'),
               color: DarkPalette.lightFushia,
+              userType: UserType.partyOrganizer,
             )
           ],
         );
@@ -366,6 +367,7 @@ class _PartyPlayList extends State<PartyPlayList> {
               event: event,
               suggestions: _getList('accepted'),
               color: DarkPalette.lightFushia,
+              userType: UserType.partyOrganizer,
             )
           ],
         );

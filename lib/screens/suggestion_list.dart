@@ -267,6 +267,47 @@ class SongSuggestion extends StatelessWidget{
       }
       break;
       case SuggestionType.New:{
+        if (userType == UserType.partyOrganizer){
+          menuItems = <FocusedMenuItem>[
+            FocusedMenuItem(
+                title: Text(
+                  "Playing Song now",
+                  style: TextStyle(
+                      color: Colors.black),
+                ),
+                onPressed: () {}),
+            FocusedMenuItem(
+                title: Text(
+                    "Playing Song Next",
+                    style: TextStyle(
+                        color: Colors.black)),
+                onPressed: () {}),
+            FocusedMenuItem(
+                title: Text(
+                    "I'll add this Song to the Queue",
+                    style: TextStyle(
+                        color: Colors.black)),
+                onPressed: () {}),
+            FocusedMenuItem(
+                title: Text(
+                    "Remove this suggestion",
+                    style: TextStyle(
+                        color: Colors.red)),
+                onPressed: () {})
+          ];
+        }
+        if (userType == UserType.partyGuest){
+          menuIcon = IconlyBold.plus;
+          menuItems = <FocusedMenuItem>[
+            FocusedMenuItem(
+                title: Text(
+                  "Remove this song",
+                  style: TextStyle(
+                      color: Colors.white),
+                ),
+                onPressed: () {}),
+          ];
+        }
       }
       break;
       default:{}
@@ -372,7 +413,8 @@ class SongSuggestionList extends StatelessWidget{
     this.color=DarkPalette.darkGrey1,
     this.trailing = false,
     required this.suggestions,
-    required this.event
+    required this.event,
+    this.userType = UserType.partyGuest
   });
   bool isScrollable;
   String? title;
@@ -380,6 +422,7 @@ class SongSuggestionList extends StatelessWidget{
   bool trailing;
   Event event;
   List suggestions;
+  UserType userType;
 
   @override
   Widget build(context){
@@ -437,10 +480,23 @@ class SongSuggestionList extends StatelessWidget{
               physics: !isScrollable ? NeverScrollableScrollPhysics() : null,
                 itemBuilder: (context, index){
                 Map suggestion = suggestions[index];
+                switch(suggestion['accepted']){
+                  case true: {
+                  SuggestionType suggestion_type = SuggestionType.Accepted;
+                  break;}
+                  case false: {
+                    SuggestionType suggestion_type = SuggestionType.Accepted;
+                  break; }
+                  case null: {
+                    SuggestionType suggestion_type = SuggestionType.New;
+                    break; }
+                }
                   return SongSuggestion(
                     color: color,
                     event: event,
                     suggestion: suggestion,
+                    userType: this.userType,
+                    suggestionType: SuggestionType.New,
                   );
                 },
                 separatorBuilder: (context, index){
