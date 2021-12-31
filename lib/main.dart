@@ -8,10 +8,8 @@ import 'package:musicroom/routes.dart';
 import 'package:musicroom/screens/advert.dart';
 import 'package:musicroom/screens/authentication.dart';
 import 'package:musicroom/screens/event_list.dart';
-import 'package:musicroom/screens/events.dart';
 import 'package:musicroom/screens/home.dart';
 import 'package:musicroom/screens/notifications.dart';
-import 'package:musicroom/screens/playlist.dart';
 import 'package:musicroom/screens/premium.dart';
 import 'package:musicroom/screens/profile.dart';
 import 'package:musicroom/screens/search.dart';
@@ -158,7 +156,7 @@ class OnBoardingPage extends StatefulWidget {
 }
 
 class _OnBoardingPageState extends State<OnBoardingPage> {
-  int curr_page = 0;
+  int currPage = 0;
   PageController _onboardPagesController = PageController(initialPage: 0);
   late Timer _timer;
 
@@ -185,13 +183,13 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
   void initState() {
     super.initState();
     _timer = Timer.periodic(Duration(seconds: 5), (Timer time) {
-      if (curr_page < 2) {
-        curr_page++;
+      if (currPage < 2) {
+        currPage++;
       } else {
-        curr_page = 0;
+        currPage = 0;
       }
       _onboardPagesController.animateToPage(
-        curr_page,
+        currPage,
         duration: Duration(milliseconds: 350),
         curve: Curves.easeIn,
       );

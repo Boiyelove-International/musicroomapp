@@ -1,9 +1,7 @@
 import 'package:musicroom/main.dart';
 import 'package:musicroom/screens/advert.dart';
 import 'package:musicroom/screens/authentication.dart';
-import 'package:musicroom/screens/event_details.dart';
 import 'package:musicroom/screens/event_list.dart';
-import 'package:musicroom/screens/events.dart';
 import 'package:musicroom/screens/home.dart';
 import 'package:musicroom/screens/notifications.dart';
 import 'package:musicroom/screens/playlist.dart';

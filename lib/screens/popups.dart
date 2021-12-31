@@ -1,7 +1,5 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
-
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:file_picker/file_picker.dart';
@@ -14,7 +12,6 @@ import 'package:iconly/iconly.dart';
 import 'package:musicroom/screens/event_card_gold.dart';
 import 'package:musicroom/screens/event_details.dart';
 import 'package:musicroom/screens/event_party_guest.dart';
-import 'package:musicroom/screens/home.dart';
 import 'package:musicroom/screens/search.dart';
 import 'package:musicroom/styles.dart';
 import 'package:musicroom/utils/apiServices.dart';
@@ -24,21 +21,20 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../routes.dart';
 import '../utils.dart';
-import 'events.dart';
 
 enum Popup { searchFilter, nowPlayingFilter, eventFilter, resultFilter, playlistFilter }
 
 class PopupWidget extends StatefulWidget{
-
-  PopupWidget({Key? key, required this.popup, this.event, this.userType, this.height = 0.6, this.song}) : super(key: key);
 
   UserType? userType;
   Popup popup;
   double? height;
   SongModel? song;
   Event? event;
+  Function? callback;
+
+  PopupWidget({Key? key, required this.popup, this.callback, this.event, this.userType, this.height = 0.6, this.song}) : super(key: key);
 
   @override
   _PopupWidget createState() => _PopupWidget();
@@ -168,51 +164,6 @@ class _PopupWidget extends State<PopupWidget> {
     ])
   ]);
 
-  final Widget _filterPlaylistPopup = Column(children: [
-    Padding(
-        padding:EdgeInsets.all(30),
-        child: Text("Select the results you want", style: GoogleFonts.workSans(
-            fontSize: 18,
-            fontWeight: FontWeight.bold
-        ),)
-    ),
-    Row(children: [
-      Padding(
-        padding: EdgeInsets.all(1),
-        child: Icon(IconlyBold.arrow_up, size:35, color: DarkPalette.darkGold),
-      ),
-      SizedBox(width:20),
-      Text("Party Playlist", style: GoogleFonts.workSans(
-          fontSize: 18,
-          fontWeight: FontWeight.w300
-      ))
-    ]),
-     SizedBox(height: 20),
-    Row(children: [
-      Padding(
-        padding: EdgeInsets.all(1),
-        child: Icon(IconlyBold.arrow_up, size:35, color: StateColor.success),
-      ),
-      SizedBox(width:20),
-      Text("Accepted Suggestions", style: GoogleFonts.workSans(
-          fontSize: 18,
-          fontWeight: FontWeight.w300
-      ))
-    ]),
-     SizedBox(height: 20),
-    Row(children: [
-      Padding(
-        padding: EdgeInsets.all(1),
-        child: Icon(IconlyBold.arrow_up, size:35, color: DarkPalette.darkGold),
-      ),
-      SizedBox(width:20),
-      Text("Newly Suggested", style: GoogleFonts.workSans(
-          fontSize: 18,
-          fontWeight: FontWeight.w300
-      ))
-    ]),
-  ]);
-
   double sliderValue = 0.0;
 
   @override
@@ -226,7 +177,6 @@ class _PopupWidget extends State<PopupWidget> {
   }
 
 
-
   @override
   Widget build(BuildContext context) {
 
@@ -236,7 +186,7 @@ class _PopupWidget extends State<PopupWidget> {
         _selected = _filterEventPopup;
         break;
       case Popup.playlistFilter:
-        _selected = _filterPlaylistPopup;
+        _selected = _filterPlaylistPopup();
         break;
       case Popup.nowPlayingFilter:
         _selected = _nowPlayingPopup ;
@@ -260,6 +210,73 @@ class _PopupWidget extends State<PopupWidget> {
         ));
   }
 
+  Widget _filterPlaylistPopup(){
+    return  Column(children: [
+      Padding(
+          padding:EdgeInsets.all(30),
+          child: Text("Select the results you want", style: GoogleFonts.workSans(
+              fontSize: 18,
+              fontWeight: FontWeight.bold
+          ),)
+      ),
+      Row(children: [
+        Padding(
+          padding: EdgeInsets.all(1),
+          child: Icon(IconlyBold.arrow_up, size:35, color: DarkPalette.darkGold),
+        ),
+        SizedBox(width:20),
+        InkWell(
+          child: Text("Party Playlist", style: GoogleFonts.workSans(
+              fontSize: 18,
+              fontWeight: FontWeight.w300
+          )),
+          onTap: (){
+            if(widget.callback != null){
+              widget.callback!(SuggestionType.Playlist);
+            }
+          },
+        )
+      ]),
+      SizedBox(height: 20),
+      Row(children: [
+        Padding(
+          padding: EdgeInsets.all(1),
+          child: Icon(IconlyBold.arrow_up, size:35, color: StateColor.success),
+        ),
+        SizedBox(width:20),
+        InkWell(
+          child: Text("Accepted Suggestions", style: GoogleFonts.workSans(
+              fontSize: 18,
+              fontWeight: FontWeight.w300
+          )),
+          onTap: (){
+            if(widget.callback != null){
+              widget.callback!(SuggestionType.Accepted);
+            }
+          },
+        )
+      ]),
+      SizedBox(height: 20),
+      Row(children: [
+        Padding(
+          padding: EdgeInsets.all(1),
+          child: Icon(IconlyBold.arrow_up, size:35, color: DarkPalette.darkGold),
+        ),
+        SizedBox(width:20),
+        InkWell(
+          child: Text("Newly Suggested", style: GoogleFonts.workSans(
+              fontSize: 18,
+              fontWeight: FontWeight.w300
+          )),
+          onTap: (){
+            if(widget.callback != null){
+              widget.callback!(SuggestionType.New);
+            }
+          },
+        )
+      ]),
+    ]);
+  }
 
   Widget get _nowPlayingPopup => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -336,15 +353,6 @@ class _PopupWidget extends State<PopupWidget> {
             children: [
               GestureDetector(
                 onTap: ()async {
-                  int cur  = await audio.getCurrentPosition();
-                  // if (cur > 5){
-                  //   var val  = cur - 5;
-                  //   audio.seek(
-                  //     Duration(seconds: val)
-                  //   );
-                  // }
-
-
                 },
                 child: Container(
                   padding: EdgeInsets.all(13),
@@ -505,36 +513,6 @@ class _PopupWidget extends State<PopupWidget> {
             })
       ]
   );
-  Widget get _yaySuggestionPopup => Column(children: [
-    Container(
-      child: Image.asset("assets/images/suggesttion_created_Illustration.png"),
-    ),
-    SizedBox(height: 20),
-    Text(
-      "Yay!! Your song has been suggested for this event",
-      textAlign: TextAlign.center,
-    ),
-    SizedBox(height: 20),
-    Text(
-        "You will get updated on the status of your suggestion as soon as soon as the event organizer approves it",
-        textAlign: TextAlign.center),
-    SizedBox(height: 20),
-  ]);
-  Widget get _suggestionApprovedPopup => Column(children: [
-    Container(
-      child: Image.asset("assets/images/event_created_success.png"),
-    ),
-    SizedBox(height: 20),
-    Text(
-      "Cool Suggestion",
-      textAlign: TextAlign.center,
-    ),
-    SizedBox(height: 20),
-    Text(
-        "You seem to know your stuff, nice suggestion thanks for adding life to the party",
-        textAlign: TextAlign.center),
-    SizedBox(height: 20),
-  ]);
 
   suggest()async {
 
@@ -579,17 +557,17 @@ class _CreateEventForm extends State<CreateEventForm> {
   Event?  eventItem;
   int _currentPage = 0;
 
-  void _changePage(int curr_page) {
-    if(curr_page < 0) return;
+  void _changePage(int currPage) {
+    if(currPage < 0) return;
 
     if (_pageController.hasClients) {
       _pageController.animateToPage(
-        curr_page,
+        currPage,
         duration: Duration(milliseconds: 350),
         curve: Curves.easeIn,
       );
       setState(() {
-        _currentPage = curr_page;
+        _currentPage = currPage;
       });
     }
   }
@@ -937,7 +915,6 @@ class _CreateEventForm extends State<CreateEventForm> {
         ])
       ]));
 
-  File? _selectedImage;
   Widget get _eventImageFormPopup => Form(
       child: Column(children: [
         Text(
@@ -952,10 +929,7 @@ class _CreateEventForm extends State<CreateEventForm> {
                   type: FileType.image
               );
               if (result != null) {
-                File file = File("${result!.files.single.path}");
-                setState(() {
-
-                });
+                setState(() {});
               } else {
                 // User canceled the picker
               }
@@ -1015,7 +989,7 @@ class _CreateEventForm extends State<CreateEventForm> {
     if(result == null && widget.event == null) return;
 
       SharedPreferences pref  = await SharedPreferences.getInstance();
-      String? token = await pref.getString("token");
+      String? token = pref.getString("token");
       ApiBaseHelper _api = ApiBaseHelper();
 
       var request = new http.MultipartRequest("POST",Uri.parse("${_api.baseurl}/events/"));
@@ -1138,16 +1112,15 @@ _SuggestEventForm createState() => _SuggestEventForm();
 class _SuggestEventForm extends State<SuggestEventForm>{
 
   PageController _pageController = PageController(initialPage: 0);
-  UserType _selectedUserType = UserType.partyOrganizer;
   double sliderValue = 50.0;
 
 
   @override
   Widget build(BuildContext context){
-    void _changePage(int curr_page) {
+    void _changePage(int currPage) {
       if (_pageController.hasClients) {
         _pageController.animateToPage(
-          curr_page,
+          currPage,
           duration: Duration(milliseconds: 350),
           curve: Curves.easeIn,
         );
@@ -1444,13 +1417,13 @@ class _JoinEventForm extends State<JoinEventForm>{
         ]);
   }
 
-  void _changePage(int curr_page, {skip = false}) {
+  void _changePage(int currPage, {skip = false}) {
     if (_pageController.hasClients) {
       if (skip){
-        _pageController.jumpToPage(curr_page);
+        _pageController.jumpToPage(currPage);
       } else{
         _pageController.animateToPage(
-          curr_page,
+          currPage,
           duration: Duration(milliseconds: 350),
           curve: Curves.easeIn,
         );
@@ -1458,101 +1431,6 @@ class _JoinEventForm extends State<JoinEventForm>{
 
     }
   }
-
-  Widget get _createEventForm => Form(
-      child: Column(
-        children: [
-          Text("Let's create the event!",
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900)),
-          SizedBox(height: 30),
-          TextFormField(
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(7.0),
-                  borderSide: BorderSide(color: Colors.white)),
-              enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(7.0),
-                  borderSide: BorderSide(color: Colors.white)),
-              focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(7.0),
-                  borderSide: BorderSide(color: Colors.white)),
-              filled: true,
-              floatingLabelBehavior: FloatingLabelBehavior.always,
-              fillColor: Colors.transparent,
-              labelText: "Name of the Event",
-              labelStyle: TextStyle(fontSize: 13, color: Colors.white),
-              contentPadding:
-              EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
-            ),
-          ),
-          SizedBox(height: 30),
-          TextFormField(
-            keyboardType: TextInputType.multiline,
-            maxLines: 5,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(7.0),
-                  borderSide: BorderSide(color: Colors.white)),
-              enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(7.0),
-                  borderSide: BorderSide(color: Colors.white)),
-              focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(7.0),
-                  borderSide: BorderSide(color: Colors.white)),
-              filled: true,
-              fillColor: Colors.transparent,
-              floatingLabelBehavior: FloatingLabelBehavior.always,
-              labelText: "About the Event",
-              labelStyle: TextStyle(fontSize: 13, color: Colors.white),
-              contentPadding:
-              EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
-            ),
-          ),
-          SizedBox(height: 30),
-          Row(children: [
-            Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                          color: Colors.black26,
-                          offset: Offset(0, 4),
-                          blurRadius: 5.0)
-                    ],
-                    gradient: DarkPalette.borderGradient1,
-                    // color: Colors.deepPurple.shade300,
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  child: ElevatedButton(
-                    style: ButtonStyle(
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5.0),
-                        ),
-                      ),
-                      minimumSize: MaterialStateProperty.all(Size(50, 50)),
-                      backgroundColor: MaterialStateProperty.all(Colors.transparent),
-                      // elevation: MaterialStateProperty.all(3),
-                      shadowColor: MaterialStateProperty.all(Colors.transparent),
-                    ),
-                    onPressed: () {
-                      _changePage(1);
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                        top: 10,
-                        bottom: 10,
-                      ),
-                      child: Text("Proceed",
-                          style: TextStyle(
-                              color: Colors.black, fontWeight: FontWeight.bold)),
-                    ),
-                  ),
-                ))
-          ])
-        ],
-      ));
 
   Widget get _eventChoice => Column(
     children: [
@@ -2236,16 +2114,15 @@ class SuggestSongForm extends StatefulWidget{
 class _SuggestSongForm extends State<SuggestSongForm>{
 
   PageController _pageController = PageController(initialPage: 0);
-  UserType _selectedUserType = UserType.partyOrganizer;
   double sliderValue = 50.0;
   TextEditingController  _songSearchController = TextEditingController();
 
   @override
   Widget build(BuildContext context){
-    void _changePage(int curr_page) {
+    void _changePage(int currPage) {
       if (_pageController.hasClients) {
         _pageController.animateToPage(
-          curr_page,
+          currPage,
           duration: Duration(milliseconds: 350),
           curve: Curves.easeIn,
         );
@@ -2693,6 +2570,7 @@ class _SuggestSongForm extends State<SuggestSongForm>{
           ),
           textAlign: TextAlign.center),
     ]);
+
     return Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,

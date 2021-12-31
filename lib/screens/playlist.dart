@@ -5,9 +5,6 @@ import 'package:iconly/iconly.dart';
 import 'package:musicroom/screens/popups.dart';
 import 'package:musicroom/screens/suggestion_list.dart';
 import 'package:musicroom/utils/models.dart';
-import 'dart:math' as math;
-
-import '../routes.dart';
 import '../styles.dart';
 
 class PartyPlayList extends StatefulWidget {
@@ -26,14 +23,16 @@ class _PartyPlayList extends State<PartyPlayList> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       body: SafeArea(
         top: true,
         bottom: true,
-        child:  getPlaylist(playlistType),
-      ),
-    );
+        child:  Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15),
+          child: getPlaylist(),
+          ),
+        ),
+      );
   }
 
   List _getList(String type){
@@ -42,10 +41,12 @@ class _PartyPlayList extends State<PartyPlayList> {
       result = event.suggestions!.where((element) => element['is_playing'] == true).toList();
     }else if(type == 'queued'){
       result = event.suggestions!.where((element) => element['is_playing'] == null).toList();
+    }
+    else if(type == 'accepted'){
+      result = event.suggestions!.where((element) => element['accepted'] != null).toList();
     }else{
       result = event.suggestions!.where((element) => element['is_playing'] == null).toList();
-      print("results is $result");
-      result = result.isNotEmpty ? result[0] : result;
+      result = result.isNotEmpty ? [result[0]] : result;
     }
     return result;
   }
@@ -253,54 +254,64 @@ class _PartyPlayList extends State<PartyPlayList> {
         },
         itemCount: 10);
   }
-  Widget getPlaylist(playlistType){
+
+  Widget getPlaylist(){
     Widget playlist = Container();
+    Widget header = Container(
+      padding: EdgeInsets.only(top: 50, left: 5, right: 5),
+      height: MediaQuery.of(context).size.height * 0.35,
+      decoration: BoxDecoration(
+          image: DecorationImage(
+              fit: BoxFit.cover,
+              image: NetworkImage("${event.image}"))),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned.fill(
+              child: Align(
+                  alignment: Alignment.topLeft,
+                  child: IconButton(
+                    icon: Icon(IconlyBold.arrow_left, color: Colors.white,),
+                    iconSize: 30,
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ))),
+          Positioned.fill(
+              child: Align(
+                  alignment: Alignment.topRight,
+                  child: IconButton(
+                      onPressed: () {
+                        showModalBottomSheet(
+                            backgroundColor: Colors.transparent,
+                            context: context, builder:(context) => PopupWidget(
+                          popup: Popup.playlistFilter,
+                          height: 0.5,
+                          callback: (SuggestionType value){
+                            setState(() {
+                              playlistType = value;
+                            });
+                            Navigator.pop(context);
+                          },
+                        )
+                        );
+                      },
+                      icon: Icon(
+                          IconlyBold.filter,
+                          color: Colors.white,
+                          size: 25
+                      ))
+              )
+          )
+        ],
+      ),
+    );
     switch (playlistType){
       case SuggestionType.Playlist:
         playlist = ListView(
           padding: EdgeInsets.only(bottom: 50),
           children: [
-            Container(
-              padding: EdgeInsets.only(top: 50, left: 5, right: 5),
-              height: MediaQuery.of(context).size.height * 0.35,
-              decoration: BoxDecoration(
-                  image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: AssetImage("assets/images/party_people_3.png"))),
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Positioned.fill(
-                      child: Align(
-                          alignment: Alignment.topLeft,
-                          child: IconButton(
-                            icon: Icon(IconlyBold.arrow_left, color: Colors.white,),
-                            iconSize: 30,
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                          ))),
-                  Positioned.fill(
-                      child: Align(
-                          alignment: Alignment.topRight,
-                          child: IconButton(
-                              onPressed: () {
-                                showModalBottomSheet(
-                                    backgroundColor: Colors.transparent,
-                                    context: context, builder:(context) => PopupWidget(
-                                  popup: Popup.playlistFilter,
-                                  height: 0.4,
-                                ));
-                              },
-                              icon: Icon(
-                                  IconlyBold.filter,
-                                  color: Colors.white,
-                                  size: 25
-                              )))),
-
-                ],
-              ),
-            ),
+            header,
             SizedBox(height: 50),
             Text('Party Playlist'),
             SizedBox(height: 20),
@@ -321,29 +332,46 @@ class _PartyPlayList extends State<PartyPlayList> {
             SongSuggestionList(
               title: "Queued",
               event: event,
+
               suggestions: _getList('queued'),
               color: DarkPalette.darkGrey1,
             )
-
-
 
           ],
         );
         break;
       case SuggestionType.Accepted:
-        playlist = generatePlaylistWidget(StateColor.success);
+        playlist = ListView(
+          padding: EdgeInsets.only(bottom: 50),
+          children: [
+            header,
+            SizedBox(height: 30),
+            SongSuggestionList(
+              title: "Accepted Suggested",
+              event: event,
+              suggestions: _getList('accepted'),
+              color: DarkPalette.lightFushia,
+            )
+          ],
+        );
         break;
       case SuggestionType.New:
-        playlist = generatePlaylistWidget(DarkPalette.darkYellow);
+        playlist = ListView(
+          padding: EdgeInsets.only(bottom: 50),
+          children: [
+            header,
+            SizedBox(height: 30),
+            SongSuggestionList(
+              title: "Newly Suggested",
+              event: event,
+              suggestions: _getList('accepted'),
+              color: DarkPalette.lightFushia,
+            )
+          ],
+        );
         break;
     }
     return playlist;
-
   }
 
-  String _getAcceptedSuggestion(){
-    int accepted = 0;
-    accepted = event.suggestions!.where((element) => element['accepted'] == 'accepted').toList().length;
-    return accepted.toString();
-  }
 }

@@ -27,25 +27,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  late Widget _registrationForm;
+
 
   @override
   Widget build(BuildContext context) {
     final TextStyle headline4 = Theme.of(context).textTheme.headline4!;
-    final TextStyle subtitle2 = Theme.of(context).textTheme.subtitle2!;
-    final _userType = ModalRoute.of(context)!.settings.arguments;
-    switch (_userType) {
-      case UserType.partyOrganizer:
-        {
-          _registrationForm = Container();
-        }
-        break;
-      case UserType.partyGuest:
-        {
-          _registrationForm = Container();
-        }
-        break;
-    }
 
     return Scaffold(
         body: SafeArea(
@@ -185,11 +171,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           shadowColor: MaterialStateProperty.all(Colors.transparent),
                         ),
                         onPressed: () {
-                          var FormData = <String, String>{
-                            "organizer_name":  _organizerName.text,
-                            "email": _emailController.text,
-                            "password": _passwordController.text
-                          };
+                          // var formData = <String, String>{
+                          //   "organizer_name":  _organizerName.text,
+                          //   "email": _emailController.text,
+                          //   "password": _passwordController.text
+                          // };
                           ApiBaseHelper api = ApiBaseHelper();
                           try{
                             api.post("/register/", <String, String>{
@@ -302,7 +288,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final TextStyle headline4 = Theme.of(context).textTheme.headline4!;
-    final TextStyle subtitle2 = Theme.of(context).textTheme.subtitle2!;
+
 
     return Scaffold(
         body: SafeArea(
@@ -624,7 +610,6 @@ class _RegisterPartyGuest extends State<RegisterPartyGuest>{
   @override
   Widget build(BuildContext context){
     final TextStyle headline4 = Theme.of(context).textTheme.headline4!;
-    final TextStyle subtitle2 = Theme.of(context).textTheme.subtitle2!;
 
     return Scaffold(
         body: SafeArea(
@@ -652,9 +637,7 @@ class _RegisterPartyGuest extends State<RegisterPartyGuest>{
                             type: FileType.image
                         );
                         if (result != null) {
-                          File file = File("${result!.files.single.path}");
-                          setState(() {
-                          });
+                          setState(() {});
                         } else {
                           // User canceled the picker
                         }

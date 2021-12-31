@@ -1,20 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:focused_menu/focused_menu.dart';
-import 'package:focused_menu/modals.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:iconly/iconly.dart';
-import 'package:intl/intl.dart';
-import 'package:musicroom/screens/event_list.dart';
-import 'package:musicroom/screens/popups.dart';
-import 'package:musicroom/screens/suggestion_list.dart';
-import 'package:musicroom/screens/yourRoom.dart';
-import 'package:musicroom/utils.dart';
-import 'package:musicroom/utils/apiServices.dart';
-import 'package:musicroom/utils/models.dart';
-import 'package:page_transition/page_transition.dart';
-import 'dart:math' as math;
-import '../routes.dart';
-import '../styles.dart';
 
 class EmptyContent extends StatelessWidget {
   String message;

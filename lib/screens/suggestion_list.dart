@@ -267,10 +267,11 @@ class SongSuggestion extends StatelessWidget{
       }
       break;
       case SuggestionType.New:{
-
       }
       break;
+      default:{}
     }
+
     return Container(
         padding: EdgeInsets.all(10),
         decoration: BoxDecoration(
