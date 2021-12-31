@@ -1517,7 +1517,8 @@ class _EventDetail extends State<EventDetail> {
       result = _event.suggestions!.where((element) => element['is_playing'] == null).toList();
     }else{
       result = _event.suggestions!.where((element) => element['is_playing'] == null).toList();
-      result = result.sublist(0, 1);
+      print("results is $result");
+      result = result.isNotEmpty ? result[0] : result;
     }
     return result;
   }
