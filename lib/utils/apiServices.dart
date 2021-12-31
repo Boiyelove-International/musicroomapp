@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:musicroom/utils.dart';
@@ -51,6 +53,7 @@ class ApiBaseHelper {
   // final String _baseUrl = "http://127.0.0.1:8000/api";
   final String _baseUrl = "https://musicroomweb.herokuapp.com/api";
   String get baseurl => _baseUrl;
+  BuildContext? context;
 
   Future<dynamic> get(String url) async {
     print('Api Get, url $url');
@@ -90,7 +93,12 @@ class ApiBaseHelper {
   }
 
 
-  Future<dynamic> post(String url, Map<String, dynamic> data, ) async {
+  Future<dynamic> post(String url, Map<String, dynamic> data,
+      {BuildContext? context}) async {
+
+    if (context != null){
+      this.context = context;
+    }
     print('Api Post, url $url');
     var responseJson;
     SharedPreferences pref  = await SharedPreferences.getInstance();
@@ -122,6 +130,7 @@ class ApiBaseHelper {
       responseJson = _returnResponse(response);
     } on SocketException {
       print('No net');
+
       throw FetchDataException('No Internet connection');
     }
     print('api post received!');
@@ -242,8 +251,28 @@ class ApiBaseHelper {
     print('api post received!');
     return responseJson;
   }
+  void displayMessage(String message){
+    if (this.context != null){
+      ScaffoldMessenger.of(
+          this.context!)
+          .showSnackBar(
+          SnackBar(
+            content: Text(
+              '$message',
+              textAlign: TextAlign
+                  .center,
+            ),
+            backgroundColor:
+            Colors.red,
+          ));
+    }
+  }
   dynamic _returnResponse(http.Response response) {
     print("status is ${response.statusCode}");
+    if (response.statusCode >= 400  &&  response.statusCode <= 511){
+      print("it falls in line");
+      displayMessage('${response.body.toString()}');
+    }
     switch (response.statusCode) {
       case 200:
         var responseJson = json.decode(response.body.toString());
@@ -253,13 +282,14 @@ class ApiBaseHelper {
         var responseJson = json.decode(response.body.toString());
         return responseJson;
       case 400:
-        throw BadRequestException(response.body.toString());
+         throw BadRequestException(response.body.toString());
       case 401:
       case 403:
         throw UnauthorisedException(response.body.toString());
       case 500:
       default:
-        throw FetchDataException(
+      displayMessage('Error occured while Communication with Server with StatusCode : ${response.statusCode}');
+      throw FetchDataException(
             'Error occured while Communication with Server with StatusCode : ${response.statusCode}');
     }
   }
