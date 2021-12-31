@@ -320,6 +320,7 @@ class _PartyPlayList extends State<PartyPlayList> {
               event: event,
               suggestions: _getList('playing'),
               color: DarkPalette.lightBlue,
+              userType: UserType.partyOrganizer,
             ),
             SizedBox(height: 30),
             SongSuggestionList(
@@ -327,6 +328,7 @@ class _PartyPlayList extends State<PartyPlayList> {
               event: event,
               suggestions: _getList('next'),
               color: DarkPalette.lightFushia,
+              userType: UserType.partyOrganizer,
             ),
             SizedBox(height: 30),
             SongSuggestionList(
