@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
@@ -10,6 +11,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
+import 'package:musicroom/screens/event_card_gold.dart';
+import 'package:musicroom/screens/event_details.dart';
+import 'package:musicroom/screens/event_party_guest.dart';
+import 'package:musicroom/screens/home.dart';
 import 'package:musicroom/screens/search.dart';
 import 'package:musicroom/styles.dart';
 import 'package:musicroom/utils/apiServices.dart';
@@ -27,12 +32,13 @@ enum Popup { searchFilter, nowPlayingFilter, eventFilter, resultFilter, suggesti
 
 class PopupWidget extends StatefulWidget{
 
-  PopupWidget({Key? key, required this.popup, this.userType, this.height = 0.6, this.song}) : super(key: key);
+  PopupWidget({Key? key, required this.popup, this.event, this.userType, this.height = 0.6, this.song}) : super(key: key);
 
   UserType? userType;
   Popup popup;
   double? height;
   SongModel? song;
+  Event? event;
 
   @override
   _PopupWidget createState() => _PopupWidget();
@@ -41,6 +47,9 @@ class _PopupWidget extends State<PopupWidget> {
   var audio = AudioPlayer();
   bool playing = false;
   late Widget _selected;
+  UserType? get userType => widget.userType;
+  Popup get popup => widget.popup;
+  SongModel get song=> widget.song!;
 
 // Filter Widgets
   final Widget _filterSearchPopup = Column(children: [
@@ -100,7 +109,6 @@ class _PopupWidget extends State<PopupWidget> {
     ]),
   ]);
 
-
   final Widget _filterEventPopup = Column(children: [
     Text("Filter Search Results"),
     Row(children: [
@@ -150,219 +158,11 @@ class _PopupWidget extends State<PopupWidget> {
     // TODO: implement dispose
     super.dispose();
   }
+
+
+
   @override
   Widget build(BuildContext context) {
-    final userType = widget.userType;
-    final popup = widget.popup;
-    Widget _nowPlayingPopup = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        CachedNetworkImage(
-          imageUrl: widget.song!.album_art.replaceAll("300x300", "300x200"),
-          imageBuilder: (context, imageProvider) => Container(
-            height: MediaQuery.of(context).size.height * 0.292,
-            padding: EdgeInsets.all(20),
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                image: DecorationImage(
-                    image: imageProvider,
-                    fit: BoxFit.contain
-                )
-            ),
-          ),
-          placeholder: (context, url) =>
-    Container(
-    height: MediaQuery.of(context).size.height * 0.292,
-    padding: EdgeInsets.all(20),
-    child: Center(
-      child: CircularProgressIndicator(
-        color: Colors.amber,
-        strokeWidth: 1.0,
-      ),
-    ),
-    ),
-          errorWidget: (context, url, error) => const Icon(Icons.error),
-        ),
-        Text(widget.song!.title, style: GoogleFonts.workSans(
-          fontWeight: FontWeight.w700,
-          fontSize: 20,
-          height:2,
-        ),
-          overflow: TextOverflow.ellipsis,
-          maxLines: 1,
-          softWrap: true,
-        ),
-        Text(widget.song!.artist, style: GoogleFonts.workSans(
-            fontWeight: FontWeight.w300,
-            fontSize: 14,
-            height:2
-        )),
-        Row(
-    children: [
-    Text("0:12"),
-    Flexible(child: StreamBuilder(
-      initialData: 0.0,
-      stream: audio.onAudioPositionChanged,
-      builder: (BuildContext context,  snapshot){
-        return Slider(
-            value: 0.0,
-            activeColor: Colors.amber,
-            inactiveColor: Colors.white,
-            min: 0.0,
-            max:29.0,onChanged:(double value){
-              setState(() {
-                sliderValue = value;
-              });
-            });
-      },
-    )),
-    Text("0:29"),
-    ],
-    ),
-        Padding(
-         padding:EdgeInsets.only(left:30,top:10, bottom:10, right:30),
-         child: Row(
-           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-           children: [
-             GestureDetector(
-               onTap: ()async {
-                 int cur  = await audio.getCurrentPosition();
-                 // if (cur > 5){
-                 //   var val  = cur - 5;
-                 //   audio.seek(
-                 //     Duration(seconds: val)
-                 //   );
-                 // }
-
-
-               },
-               child: Container(
-                 padding: EdgeInsets.all(13),
-
-                 decoration: BoxDecoration(
-                     shape: BoxShape.circle,
-                     image: DecorationImage(
-                         image: AssetImage(
-                             "assets/images/backward_icon.png"
-                         ),
-                         fit: BoxFit.contain
-                     )
-                 ),
-                 child: Center(
-                   child: Text("5s", style:TextStyle(fontSize: 10), textAlign: TextAlign.center,),
-                 ),
-               ),
-             ),
-             GestureDetector(
-                onTap: (){
-                 if(!playing){
-                    audio.play(widget.song!.previewUrl);
-                    setState(() {
-                      playing = true;
-                    });
-                  } else {
-                    audio.pause();
-                    setState(() {
-                      playing = false;
-                    });
-                  }
-
-                },
-                 child: playing ? Icon(FeatherIcons.stopCircle,
-                   size: 30, color: Colors.amber,) :Container(
-                   margin: EdgeInsets.only(left:10),
-                   height: 50,
-                   width:50,
-                   decoration: BoxDecoration(
-                       image: DecorationImage(
-                           image: AssetImage(
-                               "assets/images/play_icon.png"
-                           ),
-                           fit: BoxFit.contain
-                       )
-                   ),
-                 )),
-             Container(
-               padding: EdgeInsets.all(13),
-
-               decoration: BoxDecoration(
-                   shape: BoxShape.circle,
-                   image: DecorationImage(
-                       image: AssetImage(
-                           "assets/images/forward_icon.png"
-                       ),
-                       fit: BoxFit.contain
-                   )
-               ),
-               child: Center(
-                 child: Text("5s", style:TextStyle(fontSize: 10), textAlign: TextAlign.center,),
-               ),
-             )
-           ],
-         )
-       ),
-        Visibility(
-          visible: userType == UserType.partyGuest ?
-          true : false,
-          child:
-          SizedBox(height: 30),
-        ),
-    Visibility(
-        visible: userType == UserType.partyGuest ?
-        true : false,
-        child:  Padding(
-      padding: EdgeInsets.all(2.0),
-      child: Row(
-        children: [
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                      color: Colors.black26,
-                      offset: Offset(0, 4),
-                      blurRadius: 5.0)
-                ],
-                gradient: DarkPalette.borderGradient1,
-                // color: Colors.deepPurple.shade300,
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: ElevatedButton(
-                style: ButtonStyle(
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                  ),
-                  minimumSize: MaterialStateProperty.all(Size(50, 50)),
-                  backgroundColor: MaterialStateProperty.all(Colors.transparent),
-                  // elevation: MaterialStateProperty.all(3),
-                  shadowColor: MaterialStateProperty.all(Colors.transparent),
-                ),
-                onPressed: () {
-                  Navigator.pushReplacementNamed(context, Routes.guestHome);
-                },
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                    top: 10,
-                    bottom: 10,
-                  ),
-                  child: Text("Suggest an event",
-                      style: GoogleFonts.workSans(
-                          color: DarkPalette.darkDark,
-                          fontWeight: FontWeight.bold
-                      )),
-                ),
-              ),
-            ),
-          )
-        ],
-      ),
-    ))
-
-      ],
-    );
 
 
     switch (popup) {
@@ -380,7 +180,233 @@ class _PopupWidget extends State<PopupWidget> {
     }
 
 
-    Widget suggestionList = Column(
+    return Container(
+        decoration: BoxDecoration(
+            color: Colors.black,
+            borderRadius: new BorderRadius.only(
+              topLeft: const Radius.circular(35.0),
+              topRight: const Radius.circular(35.0),
+            )),
+        padding: EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 20),
+        height: MediaQuery.of(context).size.height * widget.height!,
+        child: SingleChildScrollView(
+          child: _selected,
+        ));
+  }
+
+
+  Widget get _nowPlayingPopup => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      CachedNetworkImage(
+        imageUrl: widget.song!.album_art.replaceAll("300x300", "300x200"),
+        imageBuilder: (context, imageProvider) => Container(
+          height: MediaQuery.of(context).size.height * 0.292,
+          padding: EdgeInsets.all(20),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              image: DecorationImage(
+                  image: imageProvider,
+                  fit: BoxFit.contain
+              )
+          ),
+        ),
+        placeholder: (context, url) =>
+            Container(
+              height: MediaQuery.of(context).size.height * 0.292,
+              padding: EdgeInsets.all(20),
+              child: Center(
+                child: CircularProgressIndicator(
+                  color: Colors.amber,
+                  strokeWidth: 1.0,
+                ),
+              ),
+            ),
+        errorWidget: (context, url, error) => const Icon(Icons.error),
+      ),
+      Text(widget.song!.title, style: GoogleFonts.workSans(
+        fontWeight: FontWeight.w700,
+        fontSize: 20,
+        height:2,
+      ),
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
+        softWrap: true,
+      ),
+      Text(widget.song!.artist, style: GoogleFonts.workSans(
+          fontWeight: FontWeight.w300,
+          fontSize: 14,
+          height:2
+      )),
+      Row(
+        children: [
+          Text("0:12"),
+          Flexible(
+              child: StreamBuilder(
+                initialData: 0.0,
+                stream: audio.onAudioPositionChanged,
+                builder: (BuildContext context,  snapshot){
+                  return Slider(
+                      value: 0.0,
+                      activeColor: Colors.amber,
+                      inactiveColor: Colors.white,
+                      min: 0.0,
+                      max:29.0,onChanged:(double value){
+                    setState(() {
+                      sliderValue = value;
+                    });
+                  });
+                },
+              )
+          ),
+          Text("0:29"),
+        ],
+      ),
+      Padding(
+          padding:EdgeInsets.only(left:30,top:10, bottom:10, right:30),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              GestureDetector(
+                onTap: ()async {
+                  int cur  = await audio.getCurrentPosition();
+                  // if (cur > 5){
+                  //   var val  = cur - 5;
+                  //   audio.seek(
+                  //     Duration(seconds: val)
+                  //   );
+                  // }
+
+
+                },
+                child: Container(
+                  padding: EdgeInsets.all(13),
+
+                  decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                          image: AssetImage(
+                              "assets/images/backward_icon.png"
+                          ),
+                          fit: BoxFit.contain
+                      )
+                  ),
+                  child: Center(
+                    child: Text("5s", style:TextStyle(fontSize: 10), textAlign: TextAlign.center,),
+                  ),
+                ),
+              ),
+              GestureDetector(
+                  onTap: (){
+                    if(!playing){
+                      audio.play(widget.song!.previewUrl);
+                      setState(() {
+                        playing = true;
+                      });
+                    } else {
+                      audio.pause();
+                      setState(() {
+                        playing = false;
+                      });
+                    }
+
+                  },
+                  child: playing ? Icon(FeatherIcons.stopCircle,
+                    size: 30, color: Colors.amber,) :Container(
+                    margin: EdgeInsets.only(left:10),
+                    height: 50,
+                    width:50,
+                    decoration: BoxDecoration(
+                        image: DecorationImage(
+                            image: AssetImage(
+                                "assets/images/play_icon.png"
+                            ),
+                            fit: BoxFit.contain
+                        )
+                    ),
+                  )),
+              Container(
+                padding: EdgeInsets.all(13),
+
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                        image: AssetImage(
+                            "assets/images/forward_icon.png"
+                        ),
+                        fit: BoxFit.contain
+                    )
+                ),
+                child: Center(
+                  child: Text("5s", style:TextStyle(fontSize: 10), textAlign: TextAlign.center,),
+                ),
+              )
+            ],
+          )
+      ),
+      Visibility(
+        visible: userType == UserType.partyGuest ?
+        true : false,
+        child:
+        SizedBox(height: 30),
+      ),
+      Visibility(
+          visible: userType == UserType.partyGuest ?
+          true : false,
+          child:  Padding(
+            padding: EdgeInsets.all(2.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                            color: Colors.black26,
+                            offset: Offset(0, 4),
+                            blurRadius: 5.0)
+                      ],
+                      gradient: DarkPalette.borderGradient1,
+                      // color: Colors.deepPurple.shade300,
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: ElevatedButton(
+                      style: ButtonStyle(
+                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5.0),
+                          ),
+                        ),
+                        minimumSize: MaterialStateProperty.all(Size(50, 50)),
+                        backgroundColor: MaterialStateProperty.all(Colors.transparent),
+                        // elevation: MaterialStateProperty.all(3),
+                        shadowColor: MaterialStateProperty.all(Colors.transparent),
+                      ),
+                      onPressed: () {
+                        suggest() ;
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          top: 10,
+                          bottom: 10,
+                        ),
+                        child: Text("Suggest an event",
+                            style: GoogleFonts.workSans(
+                                color: DarkPalette.darkDark,
+                                fontWeight: FontWeight.bold
+                            )),
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ))
+
+    ],
+  );
+  Widget get suggestionList => Column(
       mainAxisSize: MainAxisSize.min,
       children:[
         Text("What event are you suggesting this song for?",  style: GoogleFonts.workSans(
@@ -412,48 +438,54 @@ class _PopupWidget extends State<PopupWidget> {
               );
             })
       ]
-    );
-    Widget _yaySuggestionPopup = Column(children: [
-      Container(
-        child: Image.asset("assets/images/suggesttion_created_Illustration.png"),
-      ),
-      SizedBox(height: 20),
-      Text(
-        "Yay!! Your song has been suggested for this event",
-        textAlign: TextAlign.center,
-      ),
-      SizedBox(height: 20),
-      Text(
-          "You will get updated on the status of your suggestion as soon as soon as the event organizer approves it",
-          textAlign: TextAlign.center),
-      SizedBox(height: 20),
-    ]);
-    Widget _suggestionApprovedPopup = Column(children: [
-      Container(
-        child: Image.asset("assets/images/event_created_success.png"),
-      ),
-      SizedBox(height: 20),
-      Text(
-        "Cool Suggestion",
-        textAlign: TextAlign.center,
-      ),
-      SizedBox(height: 20),
-      Text(
-          "You seem to know your stuff, nice suggestion thanks for adding life to the party",
-          textAlign: TextAlign.center),
-      SizedBox(height: 20),
-    ]);
+  );
+  Widget get _yaySuggestionPopup => Column(children: [
+    Container(
+      child: Image.asset("assets/images/suggesttion_created_Illustration.png"),
+    ),
+    SizedBox(height: 20),
+    Text(
+      "Yay!! Your song has been suggested for this event",
+      textAlign: TextAlign.center,
+    ),
+    SizedBox(height: 20),
+    Text(
+        "You will get updated on the status of your suggestion as soon as soon as the event organizer approves it",
+        textAlign: TextAlign.center),
+    SizedBox(height: 20),
+  ]);
+  Widget get _suggestionApprovedPopup => Column(children: [
+    Container(
+      child: Image.asset("assets/images/event_created_success.png"),
+    ),
+    SizedBox(height: 20),
+    Text(
+      "Cool Suggestion",
+      textAlign: TextAlign.center,
+    ),
+    SizedBox(height: 20),
+    Text(
+        "You seem to know your stuff, nice suggestion thanks for adding life to the party",
+        textAlign: TextAlign.center),
+    SizedBox(height: 20),
+  ]);
 
-    return Container(
-        decoration: BoxDecoration(
-            color: Colors.black,
-            borderRadius: new BorderRadius.only(
-              topLeft: const Radius.circular(35.0),
-              topRight: const Radius.circular(35.0),
-            )),
-        padding: EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 20),
-        height: MediaQuery.of(context).size.height * widget.height!,
-        child: _selected);
+  suggest()async {
+
+    if(widget.event != null){
+      ApiBaseHelper _api = ApiBaseHelper();
+      Map<String, dynamic> response = await _api.put("/event/${widget.event?.id}/suggestions/",
+          {
+            "apple_song_id": song.apple_song_id,
+            "pk": widget.event?.id,
+          });
+
+      print(response);
+    }
+
+    // Navigator.pushReplacementNamed(context, Routes.guestHome);
+    Navigator.pushReplacement(context,
+        MaterialPageRoute(builder: (context)=> EventDetailPartyGuest(event: widget.event!)));
   }
 }
 
@@ -538,10 +570,18 @@ class _CreateEventForm extends State<CreateEventForm> {
               physics: NeverScrollableScrollPhysics(),
               controller: _pageController,
               children: [
-                _createEventForm,
-                _eventTimeForm,
-                _eventImageFormPopup,
-                _eventCreatedPopup,
+                SingleChildScrollView(
+                  child: _createEventForm,
+                ),
+                SingleChildScrollView(
+                  child: _eventTimeForm,
+                ),
+                SingleChildScrollView(
+                  child: _eventImageFormPopup,
+                ),
+                SingleChildScrollView(
+                  child: _eventCreatedPopup,
+                ),
               ]),
         ),
       ],
@@ -2086,7 +2126,7 @@ class _JoinEventForm extends State<JoinEventForm>{
               ),
               onPressed: () {
 
-                Navigator.pushReplacement(
+                Navigator.push(
                     context,PageTransition(type: PageTransitionType.bottomToTop,
                     child: EventDetailPartyGuest(
                       event: eventData!,
@@ -2119,6 +2159,10 @@ class _JoinEventForm extends State<JoinEventForm>{
 
 
 class SuggestSongForm extends StatefulWidget{
+  Event selectedEvent;
+
+  SuggestSongForm({required this.selectedEvent});
+
   @override
   _SuggestSongForm createState() => _SuggestSongForm();
 }
@@ -2238,7 +2282,8 @@ class _SuggestSongForm extends State<SuggestSongForm>{
                       Navigator.of(context)
                           .push(MaterialPageRoute(builder: (_){
                             return SearchResultScreen(
-                              url: "/search/?term=${_songSearchController.text}"
+                              url: "/search/?term=${_songSearchController.text}",
+                              event: widget.selectedEvent,
                             );
                       }));
                       // _changePage(1);
@@ -2604,7 +2649,9 @@ class _SuggestSongForm extends State<SuggestSongForm>{
             child: PageView(
               controller: _pageController,
               children: [
-                _songSearch,
+                SingleChildScrollView(
+                  child: _songSearch,
+                ),
                 _nowPlayingPopup,
                 _suggestionDone,
               ],

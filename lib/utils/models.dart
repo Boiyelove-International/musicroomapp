@@ -58,8 +58,14 @@ class SongModel{
   String previewUrl;
   String artist;
   String album_art;
+  String apple_song_id;
+
   SongModel({
-    required this.title, required this.artist, required this.album_art, required this.previewUrl
+    required this.title,
+    required this.artist,
+    required this.album_art,
+    required this.previewUrl,
+    required this.apple_song_id
     });
 }
 
@@ -77,6 +83,7 @@ class Event{
   String? organizer;
   List attendees =  [];
   List? suggestions =[];
+  int suggestersCount = 0;
 
   Event({
     required this.id,
@@ -92,6 +99,7 @@ class Event{
     required this.organizer,
     required this.attendees,
     this.suggestions,
+    required this.suggestersCount,
   });
   String renderDate(){
     return DateFormat("dd MMMM, yyy").format(this.event_date).toString();
@@ -131,6 +139,7 @@ class Event{
       organizer: data["organizer"],
       attendees: data["attendees"],
       suggestions: data["suggestions"],
+      suggestersCount: 0//int.parse(data["suggesters_count"].toString()),
     );
   }
 

@@ -5,6 +5,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
 import 'package:musicroom/screens/search.dart';
 import 'package:musicroom/styles.dart';
+import 'package:musicroom/utils.dart';
+import 'package:musicroom/utils/apiServices.dart';
 import 'package:musicroom/utils/models.dart';
 
 class SuggestionScreen extends StatefulWidget {
@@ -193,13 +195,17 @@ class SongSuggestion extends StatelessWidget{
     this.color=DarkPalette.darkGrey1,
     this.suggestionType = SuggestionType.All,
     this.showTrailing = true,
-    this.userType = UserType.partyGuest
+    this.userType = UserType.partyGuest,
+    required this.event,
+    required this.suggestion
   });
 
   Color color;
   SuggestionType suggestionType;
   bool showTrailing;
   UserType userType;
+  Event event;
+  Map suggestion;
   late List<FocusedMenuItem> menuItems;
   IconData menuIcon = Icons.more_vert;
 
@@ -277,8 +283,7 @@ class SongSuggestion extends StatelessWidget{
             decoration: BoxDecoration(
                 image: DecorationImage(
                     fit: BoxFit.cover,
-                    image: AssetImage(
-                        "assets/images/album_art_1.png"))),
+                    image: NetworkImage("${suggestion['song']['album_art']}"))),
           ),
           SizedBox(width: 10),
           Flexible(
@@ -290,7 +295,7 @@ class SongSuggestion extends StatelessWidget{
                 Row(
                   children: [
                     Text(
-                      "Implication",
+                      "${suggestion['song']['song_title']}",
                       style: TextStyle(
                           fontSize:
                           MediaQuery.of(context).size.width *
@@ -317,7 +322,7 @@ class SongSuggestion extends StatelessWidget{
                 ),
                 SizedBox(
                     height: MediaQuery.of(context).size.width * 0.02),
-                Text("Single - Burna Boy",
+                Text("${suggestion['song']['artist_name']}",
                     style: TextStyle(
                         fontSize: MediaQuery.of(context).size.width *
                             0.028)),
@@ -332,40 +337,13 @@ class SongSuggestion extends StatelessWidget{
                           height: 20,
                           child: Stack(
                             clipBehavior: Clip.none,
-                            children: [
-                              Positioned(
-                                  left: 0,
-                                  child: CircleAvatar(
-                                    radius: 12,
-                                    backgroundImage: AssetImage(
-                                        "assets/images/circle_avatar_1.png"),
-                                  )),
-                              Positioned(
-                                  left: 15,
-                                  child: CircleAvatar(
-                                    radius: 12,
-                                    backgroundImage: AssetImage(
-                                        "assets/images/circle_avatar_2.png"),
-                                  )),
-                              Positioned(
-                                  left: 35,
-                                  child: CircleAvatar(
-                                    radius: 12,
-                                    backgroundImage: AssetImage(
-                                        "assets/images/circle_avatar_3.png"),
-                                  )),
-                              Positioned(
-                                  left: 55,
-                                  child: CircleAvatar(
-                                    radius: 12,
-                                    backgroundImage: AssetImage(
-                                        "assets/images/circle_avatar_1.png"),
-                                  )),
-                            ],
+                            children: MRbuildAttendeeIcons(
+                                event, radius: 12
+                            )
                           ),
                         )),
                     Text(
-                      "3000+ people suggested",
+                      "${_buildSuggestedNumber()} people suggested",
                       style: TextStyle(fontSize: 10),
                     )
                   ],
@@ -375,31 +353,40 @@ class SongSuggestion extends StatelessWidget{
           )
         ]));
   }
+
+  String _buildSuggestedNumber(){
+    String amount = event.suggestersCount.toString();
+    if(event.suggestersCount > 3000){
+      amount = "${event.suggestersCount}+";
+    }
+    return amount;
+  }
 }
 
+
 class SongSuggestionList extends StatelessWidget{
-  SongSuggestionList({required this.itemCount,
+  SongSuggestionList({
     this.isScrollable = false,
     this.title,
     this.color=DarkPalette.darkGrey1,
-  this.trailing = false});
-  int itemCount;
+    this.trailing = false,
+    required this.suggestions,
+    required this.event
+  });
   bool isScrollable;
   String? title;
   Color color;
   bool trailing;
-
-
+  Event event;
+  List suggestions;
 
   @override
   Widget build(context){
-    return ListView.separated(
-      shrinkWrap: true,
-      physics: !isScrollable ? NeverScrollableScrollPhysics() : null,
-        itemBuilder: (context, index){
-        if (title != null && index==0){
-          if(trailing == true){
-            return Row(
+    return Column(
+      children: [
+        Visibility(
+            visible: trailing,
+            child: Row(
               children: [
                 Text("$title", style: GoogleFonts.workSans(
                     fontSize: 18,
@@ -428,18 +415,41 @@ class SongSuggestionList extends StatelessWidget{
                     )
                 )
               ],
-            );
-          }
-          return Text("$title", style: GoogleFonts.workSans(
-              fontSize: 18,
-              fontWeight: FontWeight.bold
-          ));
-        }
-      return SongSuggestion(
-        color: color,
-      );
-    }, separatorBuilder: (context, index){
-      return SizedBox(height:20);
-    }, itemCount: title != null ? itemCount + 1 : itemCount );
+            ),
+            replacement: Text("$title", style: GoogleFonts.workSans(
+                fontSize: 18,
+                fontWeight: FontWeight.bold
+            )),
+        ),
+        Padding(padding: EdgeInsets.only(top: 10)),
+        Column(
+          children: [
+            Visibility(
+                visible: suggestions.isEmpty,
+                child: Center(
+                  child: Text("List's empty", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w600, fontSize: 12),),
+                )
+            ),
+            ListView.separated(
+              shrinkWrap: true,
+              physics: !isScrollable ? NeverScrollableScrollPhysics() : null,
+                itemBuilder: (context, index){
+                Map suggestion = suggestions[index];
+                  return SongSuggestion(
+                    color: color,
+                    event: event,
+                    suggestion: suggestion,
+                  );
+                },
+                separatorBuilder: (context, index){
+                  return SizedBox(height:20);
+                },
+                itemCount: suggestions.length
+            ),
+          ],
+        ),
+        Padding(padding: EdgeInsets.only(top: 30)),
+      ],
+    );
   }
 }

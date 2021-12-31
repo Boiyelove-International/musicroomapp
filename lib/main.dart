@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:musicroom/routes.dart';
 import 'package:musicroom/screens/advert.dart';
 import 'package:musicroom/screens/authentication.dart';
+import 'package:musicroom/screens/event_list.dart';
 import 'package:musicroom/screens/events.dart';
 import 'package:musicroom/screens/home.dart';
 import 'package:musicroom/screens/notifications.dart';
@@ -62,7 +63,7 @@ class MyApp extends StatelessWidget {
           Routes.profile: (BuildContext context) => ProfileScreen(),
           Routes.allSuggestions: (BuildContext context) => SuggestionScreen(title: "All Suggestions", suggestionType: SuggestionType.All,),
           Routes.acceptedSuggestions: (BuildContext context) => SuggestionScreen(suggestionType: SuggestionType.Accepted, title: "Accepted Suggestions"),
-          Routes.partyPlaylist: (BuildContext context) => PartyPlayList(),
+          // Routes.partyPlaylist: (BuildContext context) => PartyPlayList(),
           Routes.premium:  (BuildContext context) => PremiumScreen(),
           Routes.subscription: (BuildContext context) => SubscriptionScreen(),
           Routes.yourRoom:  (BuildContext context) => YourRoom(),

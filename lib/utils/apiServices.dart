@@ -127,6 +127,45 @@ class ApiBaseHelper {
     print('api post received!');
     return responseJson;
   }
+
+  Future<dynamic> put(String url, Map<String, dynamic> data, ) async {
+    print('Api Put, url $url');
+    var responseJson;
+    SharedPreferences pref  = await SharedPreferences.getInstance();
+    String? token = await pref.getString("token");
+    String deviceId= await getDeviceId();
+
+
+    try {
+      Map<String, String> headers = {"Content-Type": "application/json",};
+      if (token != null && token.isNotEmpty){
+        headers.addAll(
+            {
+              HttpHeaders.authorizationHeader:
+              'Token $token',
+            }
+        );
+      } else {
+        headers.addAll({
+          "guest" : deviceId
+        });
+      }
+      print(data);
+      final response = await http.put(Uri.parse(_baseUrl + url),
+          headers: headers,
+          body: json.encode(data));
+
+      print("response is ${response.body}");
+
+
+      responseJson = _returnResponse(response);
+    } on SocketException {
+      print('No net');
+      throw FetchDataException('No Internet connection');
+    }
+    print('api post received!');
+    return responseJson;
+  }
   Future<dynamic> patch(String url, Map<String, dynamic>? data) async {
 
     print('Api Post, url $url');

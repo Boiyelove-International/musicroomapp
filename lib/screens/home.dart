@@ -4,6 +4,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
+import 'package:musicroom/screens/empty_content.dart';
+import 'package:musicroom/screens/event_card_gold.dart';
+import 'package:musicroom/screens/event_details.dart';
+import 'package:musicroom/screens/event_list.dart';
+import 'package:musicroom/screens/event_party_guest.dart';
 import 'package:musicroom/screens/popups.dart';
 import 'package:musicroom/screens/search.dart';
 import 'package:musicroom/styles.dart';
@@ -341,7 +346,7 @@ class _EventOrganizerHome extends State<EventOrganizerHome>{
                                 topRight: const Radius.circular(40.0),
                               )),
                           padding: EdgeInsets.only(top: 10, left: 20, right: 20, bottom: 20),
-                          height: MediaQuery.of(context).size.height * 0.6,
+                          height: MediaQuery.of(context).size.height * 0.8,
                           child: CreateEventForm()
                       ),
                       backgroundColor: Colors.transparent,

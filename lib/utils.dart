@@ -118,7 +118,10 @@ print('Failed to get platform version');
 return identifier;
 }
 
-List<Widget> MRbuildAttendeeIcons(Event event, {String alignment = 'left'}){
+List<Widget> MRbuildAttendeeIcons(Event event, {
+  String alignment = 'left',
+  double? radius
+}){
   List<Widget> icons = [];
   double count = 0;
 
@@ -128,7 +131,8 @@ List<Widget> MRbuildAttendeeIcons(Event event, {String alignment = 'left'}){
   }
   temp.forEach((e){
     Widget avatar = CircleAvatar(
-        backgroundImage:NetworkImage(e['profile_photo'] ?? '')
+        backgroundImage:NetworkImage(e['profile_photo'] ?? ''),
+        radius: radius ?? 19,
     );
     if(alignment == 'right'){
       icons.add(Positioned(

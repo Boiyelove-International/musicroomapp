@@ -258,7 +258,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           fontSize: 16
                       ),),
                       SizedBox(width: 10),
-
                       TextButton(
                           onPressed: () {
                             Navigator.pushReplacementNamed(context, Routes.login);
