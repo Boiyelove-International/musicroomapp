@@ -4,6 +4,7 @@ import 'package:focused_menu/modals.dart';
 import 'package:iconly/iconly.dart';
 import 'package:musicroom/screens/popups.dart';
 import 'package:musicroom/screens/suggestion_list.dart';
+import 'package:musicroom/utils/apiServices.dart';
 import 'package:musicroom/utils/models.dart';
 import '../styles.dart';
 
@@ -255,6 +256,43 @@ class _PartyPlayList extends State<PartyPlayList> {
         itemCount: 10);
   }
 
+  _suggestionActionHandler(int suggestion_id, dynamic action)async {
+    Map<String, dynamic> payload = _buildOptionsPayload(suggestion_id, action);
+    ApiBaseHelper _api = ApiBaseHelper();
+    Map<String, dynamic> response = await _api.patch("/event/${event.id}/suggestions/",
+        payload);
+
+    print(response);
+  }
+
+  Map<String, dynamic>  _buildOptionsPayload(int suggestion_id, dynamic action){
+    if(action == 'now'){
+      return {
+        "playing_song": true,
+        "suggestion_id":suggestion_id
+      };
+    }
+    else if(action == 'next'){
+      return {
+        "playing_song_next": true,
+        "suggestion_id":suggestion_id
+      };
+    }
+    else if(action == 'queued'){
+      return {
+        "accept_suggestion": true,
+        "suggestion_id":suggestion_id
+      };
+    }
+    else if(action == 'remove'){
+      return {
+        "accept_suggestion": true,
+        "suggestion_id":suggestion_id
+      };
+    }
+    return {};
+  }
+
   Widget getPlaylist(){
     Widget playlist = Container();
     Widget header = Container(
@@ -317,6 +355,7 @@ class _PartyPlayList extends State<PartyPlayList> {
             SizedBox(height: 20),
             SongSuggestionList(
               title: "Currently Playing",
+              callBack: _suggestionActionHandler,
               event: event,
               suggestions: _getList('playing'),
               color: DarkPalette.lightBlue,
@@ -325,6 +364,7 @@ class _PartyPlayList extends State<PartyPlayList> {
             SizedBox(height: 30),
             SongSuggestionList(
               title: "Up Next",
+              callBack: _suggestionActionHandler,
               event: event,
               suggestions: _getList('next'),
               color: DarkPalette.lightFushia,
@@ -333,6 +373,7 @@ class _PartyPlayList extends State<PartyPlayList> {
             SizedBox(height: 30),
             SongSuggestionList(
               title: "Queued",
+              callBack: _suggestionActionHandler,
               event: event,
               suggestions: _getList('queued'),
               color: DarkPalette.darkGrey1,
@@ -373,6 +414,9 @@ class _PartyPlayList extends State<PartyPlayList> {
             )
           ],
         );
+        break;
+      case SuggestionType.All:
+        // TODO: Handle this case.
         break;
     }
     return playlist;

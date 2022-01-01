@@ -197,7 +197,8 @@ class SongSuggestion extends StatelessWidget{
     this.showTrailing = true,
     this.userType = UserType.partyGuest,
     required this.event,
-    required this.suggestion
+    required this.suggestion,
+    this.callBack
   });
 
   Color color;
@@ -206,6 +207,7 @@ class SongSuggestion extends StatelessWidget{
   UserType userType;
   Event event;
   Map suggestion;
+  Function? callBack;
   late List<FocusedMenuItem> menuItems;
   IconData menuIcon = Icons.more_vert;
 
@@ -223,7 +225,11 @@ class SongSuggestion extends StatelessWidget{
                   style: TextStyle(
                       color: Colors.white),
                 ),
-                onPressed: () {}),
+                onPressed: () {
+                  if(callBack != null){
+                    callBack!();
+                  }
+                }),
           ];
         }
       }
@@ -237,13 +243,21 @@ class SongSuggestion extends StatelessWidget{
                   style: TextStyle(
                       color: Colors.black),
                 ),
-                onPressed: () {}),
+                onPressed: () {
+                  if(callBack != null){
+                    callBack!();
+                  }
+                }),
             FocusedMenuItem(
                 title: Text(
                     "Oops! can't play this song",
                     style: TextStyle(
                         color: Colors.black)),
-                onPressed: () {})
+                onPressed: () {
+                  if(callBack != null){
+                    callBack!();
+                  }
+                })
           ];
         }
         if (userType == UserType.partyGuest){
@@ -255,13 +269,21 @@ class SongSuggestion extends StatelessWidget{
                   style: TextStyle(
                       color: Colors.black),
                 ),
-                onPressed: () {}),
+                onPressed: () {
+                  if(callBack != null){
+                    callBack!();
+                  }
+                }),
             FocusedMenuItem(
                 title: Text(
                     "Oops! can't play this song",
                     style: TextStyle(
                         color: Colors.black)),
-                onPressed: () {})
+                onPressed: () {
+                  if(callBack != null){
+                    callBack!();
+                  }
+                })
           ];
         }
       }
@@ -275,25 +297,41 @@ class SongSuggestion extends StatelessWidget{
                   style: TextStyle(
                       color: Colors.black),
                 ),
-                onPressed: () {}),
+                onPressed: () {
+                  if(callBack != null){
+                    callBack!(suggestion['id'], 'now');
+                  }
+                }),
             FocusedMenuItem(
                 title: Text(
                     "Playing Song Next",
                     style: TextStyle(
                         color: Colors.black)),
-                onPressed: () {}),
+                onPressed: () {
+                  if(callBack != null){
+                    callBack!(suggestion['id'], 'next');
+                  }
+                }),
             FocusedMenuItem(
                 title: Text(
                     "I'll add this Song to the Queue",
                     style: TextStyle(
                         color: Colors.black)),
-                onPressed: () {}),
+                onPressed: () {
+                  if(callBack != null){
+                    callBack!(suggestion['id'], 'queued');
+                  }
+                }),
             FocusedMenuItem(
                 title: Text(
                     "Remove this suggestion",
                     style: TextStyle(
                         color: Colors.red)),
-                onPressed: () {})
+                onPressed: () {
+                  if(callBack != null){
+                    callBack!(suggestion['id'], 'remove');
+                  }
+                })
           ];
         }
         if (userType == UserType.partyGuest){
@@ -305,7 +343,11 @@ class SongSuggestion extends StatelessWidget{
                   style: TextStyle(
                       color: Colors.white),
                 ),
-                onPressed: () {}),
+                onPressed: () {
+                  if(callBack != null){
+                    callBack!();
+                  }
+                }),
           ];
         }
       }
@@ -357,7 +399,9 @@ class SongSuggestion extends StatelessWidget{
                                 size: 15, color: Colors.white),
                           ),
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+
+                        },
                         menuItems: menuItems
                     ) : Container()
                   ],
@@ -414,6 +458,7 @@ class SongSuggestionList extends StatelessWidget{
     this.trailing = false,
     required this.suggestions,
     required this.event,
+    this.callBack,
     this.userType = UserType.partyGuest
   });
   bool isScrollable;
@@ -423,6 +468,7 @@ class SongSuggestionList extends StatelessWidget{
   Event event;
   List suggestions;
   UserType userType;
+  Function? callBack;
 
   @override
   Widget build(context){
@@ -497,6 +543,7 @@ class SongSuggestionList extends StatelessWidget{
                     suggestion: suggestion,
                     userType: this.userType,
                     suggestionType: SuggestionType.New,
+                    callBack: callBack,
                   );
                 },
                 separatorBuilder: (context, index){
