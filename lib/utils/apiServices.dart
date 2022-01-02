@@ -256,7 +256,7 @@ class ApiBaseHelper {
       ScaffoldMessenger.of(
           this.context!)
           .showSnackBar(
-          SnackBar(
+            SnackBar(
             content: Text(
               '$message',
               textAlign: TextAlign
@@ -264,7 +264,8 @@ class ApiBaseHelper {
             ),
             backgroundColor:
             Colors.red,
-          ));
+          )
+      );
     }
   }
   dynamic _returnResponse(http.Response response) {

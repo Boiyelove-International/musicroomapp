@@ -44,10 +44,14 @@ class _PartyPlayList extends State<PartyPlayList> {
       result = event.suggestions!.where((element) => element['is_playing'] == null).toList();
     }
     else if(type == 'accepted'){
-      result = event.suggestions!.where((element) => element['accepted'] != null).toList();
-    }else{
+      result = event.suggestions!.where((element) => element['accepted'] == true).toList();
+    }
+    else if(type == 'next'){
       result = event.suggestions!.where((element) => element['is_playing'] == null).toList();
       result = result.isNotEmpty ? [result[0]] : result;
+    }
+    else if(type == 'new'){
+      result = event.suggestions!.where((element) => element['accepted'] == null).toList();
     }
     return result;
   }
@@ -256,43 +260,6 @@ class _PartyPlayList extends State<PartyPlayList> {
         itemCount: 10);
   }
 
-  _suggestionActionHandler(int suggestion_id, dynamic action)async {
-    Map<String, dynamic> payload = _buildOptionsPayload(suggestion_id, action);
-    ApiBaseHelper _api = ApiBaseHelper();
-    Map<String, dynamic> response = await _api.patch("/event/${event.id}/suggestions/",
-        payload);
-
-    print(response);
-  }
-
-  Map<String, dynamic>  _buildOptionsPayload(int suggestion_id, dynamic action){
-    if(action == 'now'){
-      return {
-        "playing_song": true,
-        "suggestion_id":suggestion_id
-      };
-    }
-    else if(action == 'next'){
-      return {
-        "playing_song_next": true,
-        "suggestion_id":suggestion_id
-      };
-    }
-    else if(action == 'queued'){
-      return {
-        "accept_suggestion": true,
-        "suggestion_id":suggestion_id
-      };
-    }
-    else if(action == 'remove'){
-      return {
-        "accept_suggestion": true,
-        "suggestion_id":suggestion_id
-      };
-    }
-    return {};
-  }
-
   Widget getPlaylist(){
     Widget playlist = Container();
     Widget header = Container(
@@ -408,7 +375,7 @@ class _PartyPlayList extends State<PartyPlayList> {
             SongSuggestionList(
               title: "Newly Suggested",
               event: event,
-              suggestions: _getList('accepted'),
+              suggestions: _getList('new'),
               color: DarkPalette.lightFushia,
               userType: UserType.partyOrganizer,
             )
@@ -420,6 +387,72 @@ class _PartyPlayList extends State<PartyPlayList> {
         break;
     }
     return playlist;
+  }
+
+
+  _suggestionActionHandler(int suggestion_id, dynamic action)async {
+    Map<String, dynamic> payload = _buildOptionsPayload(suggestion_id, action);
+    ApiBaseHelper _api = ApiBaseHelper();
+    _api.patch("/event/${event.id}/suggestions/",
+        payload);
+
+  }
+
+  Map<String, dynamic>  _buildOptionsPayload(int suggestion_id, dynamic action){
+    if(action == 'now'){
+      //updating view
+      setState(() {
+        event.suggestions = event.suggestions!.map((e){
+          if(e['id'] == suggestion_id) e['is_playing'] = true;
+          return e;
+        }).toList();
+      });
+      return {
+        "playing_song": true,
+        "suggestion_id":suggestion_id
+      };
+    }
+    else if(action == 'next'){
+      //updating view
+      setState(() {
+        Map sug = {};
+        List temp = event.suggestions!;
+        int index = temp.indexWhere((element) => element['id'] == suggestion_id);
+        sug = temp.removeAt(index);
+        sug['is_playing'] = null;
+        temp.insert(0, sug);
+        event.suggestions = temp;
+      });
+      return {
+        "playing_song_next": true,
+        "suggestion_id":suggestion_id
+      };
+    }
+    else if(action == 'queued'){
+      //updating view
+      setState(() {
+        event.suggestions = event.suggestions!.map((e){
+          if(e['id'] == suggestion_id) e['is_playing'] = null;
+          return e;
+        }).toList();
+      });
+
+      return {
+        "accept_suggestion": true,
+        "suggestion_id":suggestion_id
+      };
+    }
+    else if(action == 'remove'){
+      //updating view
+      setState(() {
+        event.suggestions = event.suggestions!.where((element) => element['id'] != suggestion_id).toList();
+      });
+      return {
+        "accept_suggestion": true,
+        "suggestion_id":suggestion_id
+      };
+    }
+    return {};
   }
 
 }
