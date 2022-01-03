@@ -136,7 +136,7 @@ class Event{
       event_date: _event_date,
       image: data["image"],
       code: data["code"],
-      organizer: data["organizer"],
+      organizer: data["organizer"].toString(),
       attendees: data["attendees"],
       suggestions: data["suggestions"],
       suggestersCount: 0//int.parse(data["suggesters_count"].toString()),

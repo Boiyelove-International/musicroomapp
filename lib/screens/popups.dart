@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
+import 'package:musicroom/screens/empty_content.dart';
 import 'package:musicroom/screens/event_card_gold.dart';
 import 'package:musicroom/screens/event_details.dart';
 import 'package:musicroom/screens/event_party_guest.dart';
@@ -30,11 +31,12 @@ class PopupWidget extends StatefulWidget{
   UserType? userType;
   Popup popup;
   double? height;
+  bool pushReplacement;
   SongModel? song;
   Event? event;
   Function? callback;
 
-  PopupWidget({Key? key, required this.popup, this.callback, this.event, this.userType, this.height = 0.6, this.song}) : super(key: key);
+  PopupWidget({Key? key, required this.popup, this.pushReplacement = false, this.callback, this.event, this.userType, this.height = 0.6, this.song}) : super(key: key);
 
   @override
   _PopupWidget createState() => _PopupWidget();
@@ -308,7 +310,8 @@ class _PopupWidget extends State<PopupWidget> {
             ),
         errorWidget: (context, url, error) => const Icon(Icons.error),
       ),
-      Text(widget.song!.title, style: GoogleFonts.workSans(
+      Text(widget.song!.title,
+        style: GoogleFonts.workSans(
         fontWeight: FontWeight.w700,
         fontSize: 20,
         height:2,
@@ -528,8 +531,12 @@ class _PopupWidget extends State<PopupWidget> {
     }
 
     // Navigator.pushReplacementNamed(context, Routes.guestHome);
-    Navigator.pushReplacement(context,
-        MaterialPageRoute(builder: (context)=> EventDetailPartyGuest(event: widget.event!)));
+    if(widget.pushReplacement){
+      Navigator.pushReplacement(context,
+          MaterialPageRoute(builder: (context)=> EventDetailPartyGuest(event: widget.event!)));
+    }else{
+      Navigator.pop(context);
+    }
   }
 }
 
@@ -1105,74 +1112,131 @@ class _CreateEventForm extends State<CreateEventForm> {
 
 
 class SuggestEventForm extends StatefulWidget{
+  SongModel? song;
+  UserType? userType;
+  SuggestEventForm({this.song, this.userType});
+
   @override
 _SuggestEventForm createState() => _SuggestEventForm();
 }
 
 class _SuggestEventForm extends State<SuggestEventForm>{
-
+  var audio = AudioPlayer();
   PageController _pageController = PageController(initialPage: 0);
   double sliderValue = 50.0;
-
+  bool playing = false;
+  UserType? get userType => widget.userType;
+  SongModel get song=> widget.song!;
+  Event? _event;
+  ApiBaseHelper _api = ApiBaseHelper();
 
   @override
   Widget build(BuildContext context){
-    void _changePage(int currPage) {
-      if (_pageController.hasClients) {
-        _pageController.animateToPage(
-          currPage,
-          duration: Duration(milliseconds: 350),
-          curve: Curves.easeIn,
-        );
+    return PageView(
+      controller: _pageController,
+      physics: NeverScrollableScrollPhysics(),
+      children: [
+            _nowPlayingPopup,
+            _eventGrid,
+            _suggestionDone,
+        _alreadySuggested
+      ],
+    );
+  }
+
+  void _changePage(int currPage) {
+    if (_pageController.hasClients) {
+      _pageController.animateToPage(
+        currPage,
+        duration: Duration(milliseconds: 350),
+        curve: Curves.easeIn,
+      );
+
+      if(currPage == 1){
+
       }
     }
+  }
 
-    Widget _nowPlayingPopup = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
+  Widget get _nowPlayingPopup => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      CachedNetworkImage(
+        imageUrl: widget.song!.album_art.replaceAll("300x300", "300x200"),
+        imageBuilder: (context, imageProvider) => Container(
           height: MediaQuery.of(context).size.height * 0.292,
           padding: EdgeInsets.all(20),
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
               image: DecorationImage(
-                  image: AssetImage(
-                    "assets/images/player_art.png",
-                  ),
+                  image: imageProvider,
                   fit: BoxFit.contain
               )
           ),
         ),
-        Text("Essence ft Tems", style: GoogleFonts.workSans(
-            fontWeight: FontWeight.w700,
-            fontSize: 20,
-            height:2
-        ),),
-        Text("Single - Wizkid", style: GoogleFonts.workSans(
-            fontWeight: FontWeight.w300,
-            fontSize: 14,
-            height:2
-        )),
-        Row(
-          children: [
-            Text("0:12"),
-            Flexible(child: Slider(value: sliderValue, activeColor: Colors.amber, inactiveColor: Colors.white,
-                max:100,onChanged:(double value){
-                  setState(() {
-                    sliderValue = value;
-                  });
-
-                })),
-            Text("0:30"),
-          ],
+        placeholder: (context, url) =>
+            Container(
+              height: MediaQuery.of(context).size.height * 0.292,
+              padding: EdgeInsets.all(20),
+              child: Center(
+                child: CircularProgressIndicator(
+                  color: Colors.amber,
+                  strokeWidth: 1.0,
+                ),
+              ),
+            ),
+        errorWidget: (context, url, error) => const Icon(Icons.error),
+      ),
+      Text(widget.song!.title,
+        style: GoogleFonts.workSans(
+          fontWeight: FontWeight.w700,
+          fontSize: 20,
+          height:2,
         ),
-        Padding(
-            padding:EdgeInsets.only(left:30,top:10, bottom:10, right:30),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
+        softWrap: true,
+      ),
+      Text(widget.song!.artist, style: GoogleFonts.workSans(
+          fontWeight: FontWeight.w300,
+          fontSize: 14,
+          height:2
+      )),
+      Row(
+        children: [
+          Text("0:12"),
+          Flexible(
+              child: StreamBuilder(
+                initialData: 0.0,
+                stream: audio.onAudioPositionChanged,
+                builder: (BuildContext context,  snapshot){
+                  return Slider(
+                      value: 0.0,
+                      activeColor: Colors.amber,
+                      inactiveColor: Colors.white,
+                      min: 0.0,
+                      max:29.0,onChanged:(double value){
+                    setState(() {
+                      sliderValue = value;
+                    });
+                  });
+                },
+              )
+          ),
+          Text("0:29"),
+        ],
+      ),
+      Padding(
+          padding:EdgeInsets.only(left:30,top:10, bottom:10, right:30),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              GestureDetector(
+                onTap: ()async {
+
+                },
+                child: Container(
                   padding: EdgeInsets.all(13),
 
                   decoration: BoxDecoration(
@@ -1188,192 +1252,240 @@ class _SuggestEventForm extends State<SuggestEventForm>{
                     child: Text("5s", style:TextStyle(fontSize: 10), textAlign: TextAlign.center,),
                   ),
                 ),
-                Container(
-                  margin: EdgeInsets.only(left:10),
-                  height: 50,
-                  width:50,
-                  decoration: BoxDecoration(
-                      image: DecorationImage(
-                          image: AssetImage(
-                              "assets/images/play_icon.png"
-                          ),
-                          fit: BoxFit.contain
-                      )
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsets.all(13),
+              ),
+              GestureDetector(
+                  onTap: (){
+                    if(!playing){
+                      audio.play(widget.song!.previewUrl);
+                      setState(() {
+                        playing = true;
+                      });
+                    } else {
+                      audio.pause();
+                      setState(() {
+                        playing = false;
+                      });
+                    }
 
-                  decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      image: DecorationImage(
-                          image: AssetImage(
-                              "assets/images/forward_icon.png"
-                          ),
-                          fit: BoxFit.contain
-                      )
-                  ),
-                  child: Center(
-                    child: Text("5s", style:TextStyle(fontSize: 10), textAlign: TextAlign.center,),
-                  ),
-                )
-              ],
-            )
-        ),
-        SizedBox(height: 30),
-        Padding(
-          padding: EdgeInsets.all(2.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                          color: Colors.black26,
-                          offset: Offset(0, 4),
-                          blurRadius: 5.0)
-                    ],
-                    gradient: DarkPalette.borderGradient1,
-                    // color: Colors.deepPurple.shade300,
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  child: ElevatedButton(
-                    style: ButtonStyle(
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5.0),
+                  },
+                  child: playing ? Icon(FeatherIcons.stopCircle,
+                    size: 30, color: Colors.amber,) :Container(
+                    margin: EdgeInsets.only(left:10),
+                    height: 50,
+                    width:50,
+                    decoration: BoxDecoration(
+                        image: DecorationImage(
+                            image: AssetImage(
+                                "assets/images/play_icon.png"
+                            ),
+                            fit: BoxFit.contain
+                        )
+                    ),
+                  )),
+              Container(
+                padding: EdgeInsets.all(13),
+
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                        image: AssetImage(
+                            "assets/images/forward_icon.png"
                         ),
-                      ),
-                      minimumSize: MaterialStateProperty.all(Size(50, 50)),
-                      backgroundColor: MaterialStateProperty.all(Colors.transparent),
-                      // elevation: MaterialStateProperty.all(3),
-                      shadowColor: MaterialStateProperty.all(Colors.transparent),
-                    ),
-                    onPressed: () {
-                      _changePage(1);
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                        top: 10,
-                        bottom: 10,
-                      ),
-                      child: Text("Suggest for an event",
-                          style: GoogleFonts.workSans(
-                              color: DarkPalette.darkDark,
-                              fontWeight: FontWeight.bold
-                          )),
-                    ),
-                  ),
+                        fit: BoxFit.contain
+                    )
+                ),
+                child: Center(
+                  child: Text("5s", style:TextStyle(fontSize: 10), textAlign: TextAlign.center,),
                 ),
               )
             ],
-          ),
-        )
-      ],
-    );
+          )
+      ),
+      Visibility(
+        visible: userType == UserType.partyGuest ?
+        true : false,
+        child:
+        SizedBox(height: 30),
+      ),
+      Visibility(
+          visible: userType == UserType.partyGuest ?
+          true : false,
+          child:  Padding(
+            padding: EdgeInsets.all(2.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                            color: Colors.black26,
+                            offset: Offset(0, 4),
+                            blurRadius: 5.0)
+                      ],
+                      gradient: DarkPalette.borderGradient1,
+                      // color: Colors.deepPurple.shade300,
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: ElevatedButton(
+                      style: ButtonStyle(
+                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5.0),
+                          ),
+                        ),
+                        minimumSize: MaterialStateProperty.all(Size(50, 50)),
+                        backgroundColor: MaterialStateProperty.all(Colors.transparent),
+                        // elevation: MaterialStateProperty.all(3),
+                        shadowColor: MaterialStateProperty.all(Colors.transparent),
+                      ),
+                      onPressed: () {
+                        _changePage(1);
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          top: 10,
+                          bottom: 10,
+                        ),
+                        child: Text("Suggest an event",
+                            style: GoogleFonts.workSans(
+                                color: DarkPalette.darkDark,
+                                fontWeight: FontWeight.bold
+                            )),
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ))
 
-    Widget _eventGrid = Column(
-      children: [
-        Text("What event are you suggesting this song for?",     style: GoogleFonts.workSans(
-            fontSize: 25,
-            height:1.5,
+    ],
+  );
+
+  Widget get _eventGrid => Column(
+    children: [
+      Text("What event are you suggesting this song for?",     style: GoogleFonts.workSans(
+          fontSize: 25,
+          height:1.5,
+          fontWeight: FontWeight.bold
+      )),
+      SizedBox(height:20),
+      FutureBuilder(
+        future: _api.get("/events/"),
+        builder: (context, snapshot){
+          if (snapshot.hasData){
+            var itemList = snapshot.data as List;
+            if (itemList.isNotEmpty){
+              return GridView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  gridDelegate:
+                  SliverGridDelegateWithFixedCrossAxisCount(
+                    // maxCrossAxisExtent: 300,
+                      mainAxisExtent: 230,
+                      // childAspectRatio: 2 / 3,
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 20,
+                      mainAxisSpacing: 20),
+                  itemCount: itemList.length,
+                  itemBuilder: (context, index){
+                    Event event = Event.fromJson(itemList[index]);
+                    return GestureDetector(
+                        onTap: (){
+                          _event = event;
+                          suggest();
+                        },
+                        child:EventCardGold(
+                            title: "${event.name}",
+                            artist: "${event.organizer}",
+                            image: "${event.image}"
+                        ));
+                  });
+            }
+            return EmptyContent();
+          }
+          else if (snapshot.hasError){
+            return Text("Oops! something went wrong");
+          }
+          return CircularProgressIndicator(
+            color: Colors.amber,
+            strokeWidth: 1,
+          );
+        },
+      ),
+    ],
+  );
+  Widget get _suggestionDone => Column(children: [
+    Container(
+      child: Image.asset("assets/images/suggestion_created_Illustration.png"),
+    ),
+    SizedBox(height: 20),
+    Text(
+        "Yay!! Your song has been suggested for this event.",
+        style: GoogleFonts.workSans(
+            fontSize: 23,
             fontWeight: FontWeight.bold
-        )),
-        SizedBox(height:20),
-        GridView.builder(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            gridDelegate:
-            SliverGridDelegateWithFixedCrossAxisCount(
-              // maxCrossAxisExtent: 300,
-                mainAxisExtent: 230,
-                // childAspectRatio: 2 / 3,
-                crossAxisCount: 2,
-                crossAxisSpacing: 20,
-                mainAxisSpacing: 20),
-            itemCount: 2,
-            itemBuilder: (context, index){
-              return GestureDetector(
-                  onTap: (){
-                    // showModalBottomSheet(
-                    //     isScrollControlled: true,
-                    //     context: context,
-                    //     backgroundColor: Colors.transparent,
-                    //     builder: (context){
-                    //       return Wrap(
-                    //         children: [
-                    //           PopupWidget(
-                    //               popup: Popup.nowPlayingFilter,
-                    //               userType: UserType.partyGuest,
-                    //               height: 0.8
-                    //           )
-                    //         ],
-                    //       );
-                    //     });
-                    _changePage(2);
-                  },
-                  child:EventCardGold(
-                      title: "Essence ft Tems",
-                      artist: "Wizkid",
-                      image: "ahsdfggg.jpg"
-                  ));
-            })
-      ],
-    );
-    Widget _suggestionDone =   Column(children: [
-      Container(
-        child: Image.asset("assets/images/suggestion_created_Illustration.png"),
-      ),
-      SizedBox(height: 20),
-      Text(
-          "Yay!! Your song has been suggested for this event.",
-          style: GoogleFonts.workSans(
-              fontSize: 23,
-              fontWeight: FontWeight.bold
-          ), textAlign: TextAlign.center
-      ),
-      SizedBox(height: 20),
-      Text(
-          "You will ge updated on the status of your suggestion as soon as the event organizer approves it. ",
-          style: GoogleFonts.workSans(
-              fontSize: 15,
-              fontWeight: FontWeight.w300,
-              height:1.5
-          ),
-          textAlign: TextAlign.center),
-    ]);
-    Widget _alreadySuggested =   Column(children: [
-      Container(
-        child: Image.asset("assets/images/event_created_success.png"),
-      ),
-      SizedBox(height: 20),
-      Text(
-          "Coool suggestion.",
-          style: GoogleFonts.workSans(
-              fontSize: 23,
-              fontWeight: FontWeight.bold
-          ), textAlign: TextAlign.center
-      ),
-      SizedBox(height: 20),
-      Text(
-          "You seem to know your stuff, nice suggestion thanks for adding life to the party. ",
-          style: GoogleFonts.workSans(
-              fontSize: 15,
-              fontWeight: FontWeight.w300,
-              height:1.5
-          ),
-          textAlign: TextAlign.center),
-    ]);
-    return PageView(
-      controller: _pageController,
-      children: [
-            _nowPlayingPopup,
-            _eventGrid,
-            _suggestionDone,
-        _alreadySuggested
-      ],
-    );
+        ), textAlign: TextAlign.center
+    ),
+    SizedBox(height: 20),
+    Text(
+        "You will ge updated on the status of your suggestion as soon as the event organizer approves it. ",
+        style: GoogleFonts.workSans(
+            fontSize: 15,
+            fontWeight: FontWeight.w300,
+            height:1.5
+        ),
+        textAlign: TextAlign.center),
+  ]);
+  Widget get _alreadySuggested => Column(children: [
+    Container(
+      child: Image.asset("assets/images/event_created_success.png"),
+    ),
+    SizedBox(height: 20),
+    Text(
+        "Coool suggestion.",
+        style: GoogleFonts.workSans(
+            fontSize: 23,
+            fontWeight: FontWeight.bold
+        ), textAlign: TextAlign.center
+    ),
+    SizedBox(height: 20),
+    Text(
+        "You seem to know your stuff, nice suggestion thanks for adding life to the party. ",
+        style: GoogleFonts.workSans(
+            fontSize: 15,
+            fontWeight: FontWeight.w300,
+            height:1.5
+        ),
+        textAlign: TextAlign.center),
+  ]);
+
+
+  suggest()async {
+    if(audio != null){
+      audio.stop();
+    }
+
+    if(_event != null){
+      ApiBaseHelper _api = ApiBaseHelper();
+      http.Response response = await _api.put("/event/${_event?.id}/suggestions/",
+          {
+            "apple_song_id": song.apple_song_id,
+            "pk": _event?.id,
+          }, returnHttpResponse: true);
+
+      if(response.statusCode == 201){
+        _changePage(2);
+        return;
+      }
+
+      if(response.statusCode == 200){
+        _changePage(3);
+        return;
+      }
+    }
+
   }
 }
 

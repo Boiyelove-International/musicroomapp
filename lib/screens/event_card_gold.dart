@@ -29,7 +29,7 @@ class EventCardGold extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                     image: DecorationImage(
-                        image: AssetImage("assets/images/album_art_7.png"),
+                        image: NetworkImage("${image}"),
                         fit: BoxFit.cover)),
               )),
           SizedBox(height: 15),
@@ -39,7 +39,7 @@ class EventCardGold extends StatelessWidget {
                   fontSize: 12,
                   fontWeight: FontWeight.w500)),
           SizedBox(height: 5),
-          Text("Single - Wizkid",
+          Text("${artist}",
               style: GoogleFonts.workSans(
                   color: Colors.black,
                   fontSize: 12,

@@ -599,10 +599,13 @@ class _PartyGuestHome extends State<PartyGuestHome> {
                                     onTap: (){
                                       Navigator.push(
                                         context,
-                                        MaterialPageRoute(builder: (context) => SearchResultScreen(
-                                          title: "Trending Result",
-                                          url: "/suggestions/?qt=trending",
-                                        )),
+                                        MaterialPageRoute(builder: (context) =>
+                                            SearchResultScreen(
+                                              title: "Trending Result",
+                                              url: "/suggestions/?q=trending",
+                                              type: "suggestions",
+                                            )
+                                        ),
                                       );
                                     },
                                       child: Container(
@@ -621,7 +624,7 @@ class _PartyGuestHome extends State<PartyGuestHome> {
                               ),
                               SizedBox(height:30),
                               FutureBuilder(
-                                future: _api.get("/suggestions/?qt=trending"),
+                                future: _api.get("/suggestions/?q=trending"),
                                 builder: (context, snapshot){
                                  if (snapshot.hasData){
                                    var itemList = snapshot.data as List;
@@ -639,35 +642,21 @@ class _PartyGuestHome extends State<PartyGuestHome> {
                                              mainAxisSpacing: 20),
                                          itemCount: 2,
                                          itemBuilder: (context, index){
+                                           Map suggestion = itemList[index];
                                            return GestureDetector(
                                                onTap: (){
-                                                 showModalBottomSheet<void>(
-                                                   isScrollControlled: true,
-                                                   backgroundColor: Colors.transparent,
-                                                   context: context,
-                                                   builder: (BuildContext context) => Container(
-                                                       decoration: BoxDecoration(
-                                                           color: Colors.black,
-                                                           borderRadius: new BorderRadius.only(
-                                                             topLeft: const Radius.circular(40.0),
-                                                             topRight: const Radius.circular(40.0),
-                                                           )),
-                                                       padding: EdgeInsets.only(
-                                                           top: 30, left: 20, right: 20, bottom: 20),
-                                                       height: MediaQuery.of(context).size.height * 0.7,
-                                                       child: SuggestEventForm()),
-                                                 );
-
+                                                 MRselectSong2(suggestion['song'], context);
                                                },
                                                child:EventCardGold(
-                                                   title: "Essence ft Tems",
-                                                   artist: "Wizkid",
-                                                   image: "ahsdfggg.jpg"
+                                                   title: "${suggestion['song']['song_title']}",
+                                                   artist: "${suggestion['song']['artist_name']}",
+                                                   image: "${suggestion['song']['album_art']}"
                                                ));
                                          });
                                    }
                                    return EmptyContent();
-                                 } else if (snapshot.hasError){
+                                 }
+                                 else if (snapshot.hasError){
                                    return Text("Oops! something went wrong");
                                  }
                                  return CircularProgressIndicator(
@@ -696,9 +685,7 @@ class _PartyGuestHome extends State<PartyGuestHome> {
                                     onTap: (){
                                       Navigator.push(
                                         context,
-                                        MaterialPageRoute(builder: (context) => EventListScreen(
-                                          url: "/events/"
-                                        )),
+                                        MaterialPageRoute(builder: (context) => PartyGuestEventCardList()),
                                       );
                                     },
                                       child: Container(
@@ -745,12 +732,11 @@ class _PartyGuestHome extends State<PartyGuestHome> {
                                                         userType: UserType.partyGuest,
                                                         event: event,
                                                       )));
-
                                                 },
                                                 child:EventCardGold(
-                                                    title: "Essence ft Tems",
-                                                    artist: "Wizkid",
-                                                    image: "ahsdfggg.jpg"
+                                                    title: "${event.name}",
+                                                    artist: "${event.organizer}",
+                                                    image: "${event.image}"
                                                 ));
                                           });
                                     }

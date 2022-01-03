@@ -7,6 +7,7 @@ import 'package:iconly/iconly.dart';
 import 'package:musicroom/screens/empty_content.dart';
 import 'package:musicroom/screens/popups.dart';
 import 'package:musicroom/styles.dart';
+import 'package:musicroom/utils.dart';
 import 'package:musicroom/utils/apiServices.dart';
 import 'package:musicroom/utils/models.dart';
 
@@ -16,10 +17,12 @@ class SearchResultScreen extends StatefulWidget {
     this.title = "Search Results",
     this.url,
     this.actions,
-    this.event
+    this.event,
+    this.type
   }) : super(key: key);
 
   String? title;
+  String? type;
   Event? event;
   List<Widget>? actions = [];
   static const String routeName = "/search";
@@ -76,12 +79,52 @@ class _SearchResultScreen extends State<SearchResultScreen> {
                 return EmptyContent();
               }
 
+              if(widget.type == 'suggestions'){
+                return ListView.separated(
+                    padding: EdgeInsets.only(top: 30, left: 18, right: 18),
+                    itemBuilder: (context, index) {
+                      return GestureDetector(
+                          onTap: (){
+                              MRselectSong2(dataItems[index]['song'], context);
+                          },
+                          child:Container(
+                              padding: EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                  color: DarkPalette.darkGrey1,
+                                  borderRadius: BorderRadius.circular(15)),
+                              child: ListTile(
+                                leading: CachedNetworkImage(
+                                  imageUrl: "${dataItems[index]['song']['album_art']}",
+                                  placeholder: (context, url) => SizedBox(
+                                    height: 10,
+                                    width: 10,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 1.0,
+                                      color: Colors.amber,
+                                    ),
+                                  ),
+                                  errorWidget: (context, url, error) => Icon(Icons.error),
+                                ),
+                                title: Text("${dataItems[index]['song']['song_title']}", style:GoogleFonts.workSans(
+                                    fontWeight: FontWeight.bold
+                                )),
+                                subtitle: Text("${dataItems[index]['song']['artist_name']}y"),
+
+
+                              ))
+                      );
+                    },
+                    separatorBuilder: (context, index) {
+                      return SizedBox(height: 30);
+                    },
+                    itemCount: dataItems.length);
+              }
               return ListView.separated(
                   padding: EdgeInsets.only(top: 30, left: 18, right: 18),
                   itemBuilder: (context, index) {
                     return GestureDetector(
                         onTap: (){
-                          selectSong(dataItems[index]);
+                          MRselectSong(dataItems[index], context, widget.event!, pushReplacement: true);
                         },
                         child:Container(
                             padding: EdgeInsets.all(5),
@@ -102,7 +145,7 @@ class _SearchResultScreen extends State<SearchResultScreen> {
                                 errorWidget: (context, url, error) => Icon(Icons.error),
                               ),
                               title: Text("${dataItems[index]['song_title']}", style:GoogleFonts.workSans(
-                                fontWeight: FontWeight.bold
+                                  fontWeight: FontWeight.bold
                               )),
                               subtitle: Text("${dataItems[index]['artist_name']}y"),
                               trailing: _userType == UserType.partyOrganizer ? Container(
@@ -118,7 +161,8 @@ class _SearchResultScreen extends State<SearchResultScreen> {
                                   )
                               ) : null,
 
-                            )));
+                            ))
+                    );
                   },
                   separatorBuilder: (context, index) {
                     return SizedBox(height: 30);
@@ -147,32 +191,7 @@ class _SearchResultScreen extends State<SearchResultScreen> {
     );
   }
 
-  selectSong(Map dataItem){
-    dataItem.forEach((key, value) {print(key);});
-    showModalBottomSheet(
-        isScrollControlled: true,
-        context: context,
-        backgroundColor: Colors.transparent,
-        builder: (context){
-          return Wrap(
-            children: [
-              PopupWidget(
-                  popup: Popup.nowPlayingFilter,
-                  userType: UserType.partyGuest,
-                  height: 0.8,
-                  event: widget.event,
-                  song: SongModel(
-                      title: dataItem['song_title'],
-                      artist: dataItem['artist_name'],
-                      album_art: dataItem['album_art'],
-                      previewUrl: dataItem['song_url'],
-                      apple_song_id: dataItem['apple_song_id']
-                  )
-              )
-            ],
-          );
-        });
-  }
+
 
   _searchTerm()async {
     ApiBaseHelper _api = ApiBaseHelper();

@@ -137,7 +137,7 @@ class ApiBaseHelper {
     return responseJson;
   }
 
-  Future<dynamic> put(String url, Map<String, dynamic> data, ) async {
+  Future<dynamic> put(String url, Map<String, dynamic> data, {bool returnHttpResponse=false}) async {
     print('Api Put, url $url');
     var responseJson;
     SharedPreferences pref  = await SharedPreferences.getInstance();
@@ -164,6 +164,9 @@ class ApiBaseHelper {
           headers: headers,
           body: json.encode(data));
 
+      if(returnHttpResponse){
+        return response;
+      }
       print("response is ${response.body}");
 
 

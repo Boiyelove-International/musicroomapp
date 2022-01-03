@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
+import 'package:musicroom/screens/popups.dart';
 import 'package:musicroom/utils/models.dart';
 
 class GradientBorder extends Border {
@@ -155,4 +156,58 @@ extension StringExtension on String {
   String capitalize() {
     return "${this[0].toUpperCase()}${this.substring(1)}";
   }
+}
+
+MRselectSong(Map dataItem, BuildContext context, Event event, {bool pushReplacement=false}){
+  showModalBottomSheet(
+      isScrollControlled: true,
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context){
+        return Wrap(
+          children: [
+            PopupWidget(
+                popup: Popup.nowPlayingFilter,
+                userType: UserType.partyGuest,
+                height: 0.8,
+                event: event,
+                song: SongModel(
+                    title: dataItem['song_title'],
+                    artist: dataItem['artist_name'],
+                    album_art: dataItem['album_art'],
+                    previewUrl: dataItem['song_url'],
+                    apple_song_id: dataItem['apple_song_id']
+                )
+            )
+          ],
+        );
+      });
+}
+
+MRselectSong2(Map dataItem, BuildContext context){
+  showModalBottomSheet<void>(
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    context: context,
+    builder: (BuildContext context) => Container(
+        decoration: BoxDecoration(
+            color: Colors.black,
+            borderRadius: new BorderRadius.only(
+              topLeft: const Radius.circular(40.0),
+              topRight: const Radius.circular(40.0),
+            )),
+        padding: EdgeInsets.only(
+            top: 30, left: 20, right: 20, bottom: 20),
+        height: MediaQuery.of(context).size.height * 0.7,
+        child: SuggestEventForm(
+          userType: UserType.partyGuest,
+          song: SongModel(
+              title: dataItem['song_title'],
+              artist: dataItem['artist_name'],
+              album_art: dataItem['album_art'],
+              previewUrl: dataItem['song_url'],
+              apple_song_id: dataItem['apple_song_id']
+          ),
+        )),
+  );
 }

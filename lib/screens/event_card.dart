@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../styles.dart';
 
 class EventCard extends StatelessWidget {
+
   @override
   Widget build(context) {
     return Container(
