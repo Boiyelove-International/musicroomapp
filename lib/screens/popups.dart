@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
@@ -9,16 +8,17 @@ import 'package:flutter/services.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:musicroom/screens/empty_content.dart';
 import 'package:musicroom/screens/event_card_gold.dart';
 import 'package:musicroom/screens/event_details.dart';
 import 'package:musicroom/screens/event_party_guest.dart';
+import 'package:musicroom/screens/scanner.dart';
 import 'package:musicroom/screens/search.dart';
 import 'package:musicroom/styles.dart';
 import 'package:musicroom/utils/apiServices.dart';
 import 'package:musicroom/utils/models.dart';
 import 'package:page_transition/page_transition.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -42,71 +42,10 @@ class PopupWidget extends StatefulWidget{
   _PopupWidget createState() => _PopupWidget();
 }
 class _PopupWidget extends State<PopupWidget> {
-  var audio = AudioPlayer();
-  bool playing = false;
   late Widget _selected;
   UserType? get userType => widget.userType;
   Popup get popup => widget.popup;
-
   SongModel get song=> widget.song!;
-
-// Filter Widgets
-  final Widget _filterSearchPopup = Column(children: [
-    Padding(
-      padding:EdgeInsets.all(30),
-      child: Text("Filter Search Results", style: GoogleFonts.workSans(
-          fontSize: 18,
-          fontWeight: FontWeight.bold
-      ),)
-    ),
-    Row(children: [
-      Padding(
-        padding: EdgeInsets.all(1),
-        child: Icon(IconlyBold.arrow_up, size:35, color: DarkPalette.darkGold)
-      ),
-      SizedBox(width:20),
-      Text("Most Suggested", style: GoogleFonts.workSans(
-        fontSize: 18,
-        fontWeight: FontWeight.w300
-      ))
-    ]),
-    SizedBox(height:30),
-    Row(children: [
-      Padding(
-          padding: EdgeInsets.all(1),
-          child: Icon(IconlyBold.arrow_down, color: DarkPalette.darkYellow, size:35)
-      ),
-      SizedBox(width:20),
-      Text("Least Suggested", style: GoogleFonts.workSans(
-          fontSize: 18,
-          fontWeight: FontWeight.w300
-      ))
-    ]),
-    SizedBox(height:30),
-    Row(children: [
-      Padding(
-          padding: EdgeInsets.all(1),
-          child: Icon(IconlyBold.arrow_up, size:35, color: DarkPalette.darkGold)
-      ),
-      SizedBox(width:20),
-      Text("Most Played", style: GoogleFonts.workSans(
-          fontSize: 18,
-          fontWeight: FontWeight.w300
-      ))
-    ]),
-    SizedBox(height:30),
-    Row(children: [
-      Padding(
-          padding: EdgeInsets.all(1),
-          child: Icon(IconlyBold.arrow_down, color: DarkPalette.darkYellow, size:35)
-      ),
-      SizedBox(width:20),
-      Text("Least Played", style: GoogleFonts.workSans(
-          fontSize: 18,
-          fontWeight: FontWeight.w300
-      ))
-    ]),
-  ]);
 
   final Widget _filterEventPopup = Column(children: [
     Padding(
@@ -166,23 +105,110 @@ class _PopupWidget extends State<PopupWidget> {
     ])
   ]);
 
-  double sliderValue = 0.0;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+  }
 
   @override
   void dispose() {
-    if (playing){
-      // audio.stop();
-      audio.dispose();
-    }
     // TODO: implement dispose
     super.dispose();
   }
 
+  Widget _buildSearchFilters(){
+    return Column(children: [
+      Padding(
+          padding:EdgeInsets.all(30),
+          child: Text("Filter Search Results", style: GoogleFonts.workSans(
+              fontSize: 18,
+              fontWeight: FontWeight.bold
+          ),)
+      ),
+      InkWell(
+        child: Row(children: [
+          Padding(
+              padding: EdgeInsets.all(1),
+              child: Icon(IconlyBold.arrow_up, size:35, color: DarkPalette.darkGold)
+          ),
+          SizedBox(width:20),
+          Text("Already Started", style: GoogleFonts.workSans(
+              fontSize: 18,
+              fontWeight: FontWeight.w300
+          ))
+        ]),
+        onTap: (){
+          if(widget.callback != null){
+            widget.callback!('started');
+          }
+        },
+      ),
+      SizedBox(height:30),
+      InkWell(
+        child: Row(children: [
+          Padding(
+              padding: EdgeInsets.all(1),
+              child: Icon(IconlyBold.arrow_up, size:35, color: DarkPalette.darkGold)
+          ),
+          SizedBox(width:20),
+          Text("Concluded Events", style: GoogleFonts.workSans(
+              fontSize: 18,
+              fontWeight: FontWeight.w300
+          ))
+        ]),
+        onTap: (){
+          if(widget.callback != null){
+            widget.callback!('concluded');
+          }
+        },
+      ),
+      SizedBox(height:30),
+      InkWell(
+        child: Row(children: [
+          Padding(
+              padding: EdgeInsets.all(1),
+              child: Icon(IconlyBold.arrow_up, size:35, color: DarkPalette.darkGold)
+          ),
+          SizedBox(width:20),
+          Text("Most Attendees", style: GoogleFonts.workSans(
+              fontSize: 18,
+              fontWeight: FontWeight.w300
+          ))
+        ]),
+        onTap: (){
+          if(widget.callback != null){
+            widget.callback!('attendees');
+          }
+        },
+      ),
+      SizedBox(height:30),
+      InkWell(
+        child: Row(children: [
+          Padding(
+              padding: EdgeInsets.all(1),
+              child: Icon(IconlyBold.arrow_up, size:35, color: DarkPalette.darkGold)
+          ),
+          SizedBox(width:20),
+          Text("Least Time left", style: GoogleFonts.workSans(
+              fontSize: 18,
+              fontWeight: FontWeight.w300
+          ))
+        ]),
+        onTap: (){
+          if(widget.callback != null){
+            widget.callback!('timeleft');
+          }
+        },
+      ),
+      SizedBox(height:30),
+
+    ]);
+  }
 
   @override
   Widget build(BuildContext context) {
-
-
     switch (popup) {
       case Popup.eventFilter:
         _selected = _filterEventPopup;
@@ -191,10 +217,10 @@ class _PopupWidget extends State<PopupWidget> {
         _selected = _filterPlaylistPopup();
         break;
       case Popup.nowPlayingFilter:
-        _selected = _nowPlayingPopup ;
+        _selected = _buildAudioPlayer() ;
         break;
       default:
-        _selected = _filterSearchPopup;
+        _selected = _buildSearchFilters();
     }
 
 
@@ -280,209 +306,7 @@ class _PopupWidget extends State<PopupWidget> {
     ]);
   }
 
-  Widget get _nowPlayingPopup => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      CachedNetworkImage(
-        imageUrl: widget.song!.album_art.replaceAll("300x300", "300x200"),
-        imageBuilder: (context, imageProvider) => Container(
-          height: MediaQuery.of(context).size.height * 0.292,
-          padding: EdgeInsets.all(20),
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              image: DecorationImage(
-                  image: imageProvider,
-                  fit: BoxFit.contain
-              )
-          ),
-        ),
-        placeholder: (context, url) =>
-            Container(
-              height: MediaQuery.of(context).size.height * 0.292,
-              padding: EdgeInsets.all(20),
-              child: Center(
-                child: CircularProgressIndicator(
-                  color: Colors.amber,
-                  strokeWidth: 1.0,
-                ),
-              ),
-            ),
-        errorWidget: (context, url, error) => const Icon(Icons.error),
-      ),
-      Text(widget.song!.title,
-        style: GoogleFonts.workSans(
-        fontWeight: FontWeight.w700,
-        fontSize: 20,
-        height:2,
-      ),
-        overflow: TextOverflow.ellipsis,
-        maxLines: 1,
-        softWrap: true,
-      ),
-      Text(widget.song!.artist, style: GoogleFonts.workSans(
-          fontWeight: FontWeight.w300,
-          fontSize: 14,
-          height:2
-      )),
-      Row(
-        children: [
-          Text("0:12"),
-          Flexible(
-              child: StreamBuilder(
-                initialData: 0.0,
-                stream: audio.onAudioPositionChanged,
-                builder: (BuildContext context,  snapshot){
-                  return Slider(
-                      value: 0.0,
-                      activeColor: Colors.amber,
-                      inactiveColor: Colors.white,
-                      min: 0.0,
-                      max:29.0,onChanged:(double value){
-                    setState(() {
-                      sliderValue = value;
-                    });
-                  });
-                },
-              )
-          ),
-          Text("0:29"),
-        ],
-      ),
-      Padding(
-          padding:EdgeInsets.only(left:30,top:10, bottom:10, right:30),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              GestureDetector(
-                onTap: ()async {
-                },
-                child: Container(
-                  padding: EdgeInsets.all(13),
 
-                  decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      image: DecorationImage(
-                          image: AssetImage(
-                              "assets/images/backward_icon.png"
-                          ),
-                          fit: BoxFit.contain
-                      )
-                  ),
-                  child: Center(
-                    child: Text("5s", style:TextStyle(fontSize: 10), textAlign: TextAlign.center,),
-                  ),
-                ),
-              ),
-              GestureDetector(
-                  onTap: (){
-                    if(!playing){
-                      audio.play(widget.song!.previewUrl);
-                      setState(() {
-                        playing = true;
-                      });
-                    } else {
-                      audio.pause();
-                      setState(() {
-                        playing = false;
-                      });
-                    }
-
-                  },
-                  child: playing ? Icon(FeatherIcons.stopCircle,
-                    size: 30, color: Colors.amber,) :Container(
-                    margin: EdgeInsets.only(left:10),
-                    height: 50,
-                    width:50,
-                    decoration: BoxDecoration(
-                        image: DecorationImage(
-                            image: AssetImage(
-                                "assets/images/play_icon.png"
-                            ),
-                            fit: BoxFit.contain
-                        )
-                    ),
-                  )),
-              Container(
-                padding: EdgeInsets.all(13),
-
-                decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    image: DecorationImage(
-                        image: AssetImage(
-                            "assets/images/forward_icon.png"
-                        ),
-                        fit: BoxFit.contain
-                    )
-                ),
-                child: Center(
-                  child: Text("5s", style:TextStyle(fontSize: 10), textAlign: TextAlign.center,),
-                ),
-              )
-            ],
-          )
-      ),
-      Visibility(
-        visible: userType == UserType.partyGuest ?
-        true : false,
-        child:
-        SizedBox(height: 30),
-      ),
-      Visibility(
-          visible: userType == UserType.partyGuest ?
-          true : false,
-          child:  Padding(
-            padding: EdgeInsets.all(2.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.black26,
-                            offset: Offset(0, 4),
-                            blurRadius: 5.0)
-                      ],
-                      gradient: DarkPalette.borderGradient1,
-                      // color: Colors.deepPurple.shade300,
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: ElevatedButton(
-                      style: ButtonStyle(
-                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5.0),
-                          ),
-                        ),
-                        minimumSize: MaterialStateProperty.all(Size(50, 50)),
-                        backgroundColor: MaterialStateProperty.all(Colors.transparent),
-                        // elevation: MaterialStateProperty.all(3),
-                        shadowColor: MaterialStateProperty.all(Colors.transparent),
-                      ),
-                      onPressed: () {
-                        suggest() ;
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                          top: 10,
-                          bottom: 10,
-                        ),
-                        child: Text("Suggest an event",
-                            style: GoogleFonts.workSans(
-                                color: DarkPalette.darkDark,
-                                fontWeight: FontWeight.bold
-                            )),
-                      ),
-                    ),
-                  ),
-                )
-              ],
-            ),
-          ))
-
-    ],
-  );
   Widget get suggestionList => Column(
       mainAxisSize: MainAxisSize.min,
       children:[
@@ -517,6 +341,73 @@ class _PopupWidget extends State<PopupWidget> {
       ]
   );
 
+  Widget _buildAudioPlayer() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        AudioPlayerScreen(song: widget.song!),
+        Visibility(
+          visible: userType == UserType.partyGuest ?
+          true : false,
+          child:
+          SizedBox(height: 30),
+        ),
+        Visibility(
+            visible: userType == UserType.partyGuest ?
+            true : false,
+            child:  Padding(
+              padding: EdgeInsets.all(2.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                              color: Colors.black26,
+                              offset: Offset(0, 4),
+                              blurRadius: 5.0)
+                        ],
+                        gradient: DarkPalette.borderGradient1,
+                        // color: Colors.deepPurple.shade300,
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: ElevatedButton(
+                        style: ButtonStyle(
+                          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5.0),
+                            ),
+                          ),
+                          minimumSize: MaterialStateProperty.all(Size(50, 50)),
+                          backgroundColor: MaterialStateProperty.all(Colors.transparent),
+                          // elevation: MaterialStateProperty.all(3),
+                          shadowColor: MaterialStateProperty.all(Colors.transparent),
+                        ),
+                        onPressed: () {
+                          suggest() ;
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                            top: 10,
+                            bottom: 10,
+                          ),
+                          child: Text("Suggest an event",
+                              style: GoogleFonts.workSans(
+                                  color: DarkPalette.darkDark,
+                                  fontWeight: FontWeight.bold
+                              )),
+                        ),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ))
+      ],
+    );
+  }
   suggest()async {
 
     if(widget.event != null){
@@ -539,6 +430,218 @@ class _PopupWidget extends State<PopupWidget> {
     }
   }
 }
+
+class AudioPlayerScreen extends StatefulWidget {
+  SongModel? song;
+
+  AudioPlayerScreen({Key? key, required this.song}) : super(key: key);
+
+  @override
+  _AudioPlayerScreenState createState() => _AudioPlayerScreenState();
+}
+
+class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
+  bool playing = false;
+  late Widget _selected;
+  SongModel get song=> widget.song!;
+  final player = AudioPlayer();
+  double _duration = 0;
+  int _currentPosition = 0;
+  double sliderValue = 0.0;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    _initializePlayer();
+  }
+
+
+  _initializePlayer()async {
+    Duration? duration = await player.setUrl(widget.song!.previewUrl);
+    setState(() {
+      _duration = duration?.abs().inSeconds.toDouble() ?? 0;
+    });
+    player.setVolume(5);
+  }
+
+  @override
+  void dispose() {
+    if (playing){
+      // audio.stop();
+      player.dispose();
+    }
+    // TODO: implement dispose
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        CachedNetworkImage(
+          imageUrl: widget.song!.album_art.replaceAll("300x300", "300x200"),
+          imageBuilder: (context, imageProvider) => Container(
+            height: MediaQuery.of(context).size.height * 0.292,
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                image: DecorationImage(
+                    image: imageProvider,
+                    fit: BoxFit.contain
+                )
+            ),
+          ),
+          placeholder: (context, url) =>
+              Container(
+                height: MediaQuery.of(context).size.height * 0.292,
+                padding: EdgeInsets.all(20),
+                child: Center(
+                  child: CircularProgressIndicator(
+                    color: Colors.amber,
+                    strokeWidth: 1.0,
+                  ),
+                ),
+              ),
+          errorWidget: (context, url, error) => const Icon(Icons.error),
+        ),
+        Text(widget.song!.title,
+          style: GoogleFonts.workSans(
+            fontWeight: FontWeight.w700,
+            fontSize: 20,
+            height:2,
+          ),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
+          softWrap: true,
+        ),
+        Text(widget.song!.artist,
+            style: GoogleFonts.workSans(
+                fontWeight: FontWeight.w300,
+                fontSize: 14,
+                height:2
+            )
+        ),
+        StreamBuilder(
+          initialData: 0.0,
+          stream: player.positionStream,
+          builder: (BuildContext context,  snapshot){
+            dynamic? position = snapshot.data;
+            _currentPosition =  position.inSeconds ?? 0;
+            return Row(
+              children: [
+                Text("${double.parse(position.inSeconds.toString()).toStringAsFixed(2)}"),
+                Flexible(
+                  child: Slider(
+                      value: position.inSeconds.toDouble(),
+                      activeColor: Colors.amber,
+                      inactiveColor: Colors.white,
+                      min: 0.0,
+                      max:_duration,
+                      onChanged:(double value){
+                        sliderValue = value;
+                        player.seek(Duration(seconds: value.toInt()));
+                      }),
+                ),
+                Text("${_duration.toDouble().toStringAsFixed(2)}"),
+              ],
+            );
+          },
+        ),
+        Padding(
+            padding:EdgeInsets.only(left:30,top:10, bottom:10, right:30),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                GestureDetector(
+                  onTap: ()async {
+                    double val = (_currentPosition - 5.0);
+                    if(val < 0) val = 0;
+                    print(val);
+                    player.seek(Duration(seconds: val.toInt()));
+                  },
+                  child: Container(
+                    padding: EdgeInsets.all(13),
+
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        image: DecorationImage(
+                            image: AssetImage(
+                                "assets/images/backward_icon.png"
+                            ),
+                            fit: BoxFit.contain
+                        )
+                    ),
+                    child: Center(
+                      child: Text("5s", style:TextStyle(fontSize: 10), textAlign: TextAlign.center,),
+                    ),
+                  ),
+                ),
+                GestureDetector(
+                    onTap: (){
+                      if(!playing){
+                        player.play();
+                        setState(() {
+                          playing = true;
+                        });
+                      } else {
+                        player.pause();
+                        setState(() {
+                          playing = false;
+                        });
+                      }
+
+                    },
+                    child: playing ? Icon(
+                        FeatherIcons.stopCircle,
+                        size: 30, color: Colors.amber
+                    ) :Container(
+                      margin: EdgeInsets.only(left:10),
+                      height: 30,
+                      width:30,
+                      decoration: BoxDecoration(
+                          image: DecorationImage(
+                              image: AssetImage(
+                                  "assets/images/play_icon.png"
+                              ),
+                              fit: BoxFit.contain
+                          )
+                      ),
+                    )
+                ),
+                GestureDetector(
+                  onTap: (){
+                    double val = (_currentPosition + 5.0);
+                    if(val > _duration) val = double.parse(_duration.toString());
+                    player.seek(Duration(seconds: val.toInt()));
+                  },
+                  child: Container(
+                    padding: EdgeInsets.all(13),
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        image: DecorationImage(
+                            image: AssetImage(
+                                "assets/images/forward_icon.png"
+                            ),
+                            fit: BoxFit.contain
+                        )
+                    ),
+                    child: Center(
+                      child: Text("5s", style:TextStyle(fontSize: 10), textAlign: TextAlign.center,),
+                    ),
+                  ),
+                )
+              ],
+            )
+        )
+      ],
+    );
+  }
+}
+
 
 
 class CreateEventForm extends StatefulWidget {
@@ -1162,145 +1265,7 @@ class _SuggestEventForm extends State<SuggestEventForm>{
     crossAxisAlignment: CrossAxisAlignment.start,
     mainAxisSize: MainAxisSize.min,
     children: [
-      CachedNetworkImage(
-        imageUrl: widget.song!.album_art.replaceAll("300x300", "300x200"),
-        imageBuilder: (context, imageProvider) => Container(
-          height: MediaQuery.of(context).size.height * 0.292,
-          padding: EdgeInsets.all(20),
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              image: DecorationImage(
-                  image: imageProvider,
-                  fit: BoxFit.contain
-              )
-          ),
-        ),
-        placeholder: (context, url) =>
-            Container(
-              height: MediaQuery.of(context).size.height * 0.292,
-              padding: EdgeInsets.all(20),
-              child: Center(
-                child: CircularProgressIndicator(
-                  color: Colors.amber,
-                  strokeWidth: 1.0,
-                ),
-              ),
-            ),
-        errorWidget: (context, url, error) => const Icon(Icons.error),
-      ),
-      Text(widget.song!.title,
-        style: GoogleFonts.workSans(
-          fontWeight: FontWeight.w700,
-          fontSize: 20,
-          height:2,
-        ),
-        overflow: TextOverflow.ellipsis,
-        maxLines: 1,
-        softWrap: true,
-      ),
-      Text(widget.song!.artist, style: GoogleFonts.workSans(
-          fontWeight: FontWeight.w300,
-          fontSize: 14,
-          height:2
-      )),
-      Row(
-        children: [
-          Text("0:12"),
-          Flexible(
-              child: StreamBuilder(
-                initialData: 0.0,
-                stream: audio.onAudioPositionChanged,
-                builder: (BuildContext context,  snapshot){
-                  return Slider(
-                      value: 0.0,
-                      activeColor: Colors.amber,
-                      inactiveColor: Colors.white,
-                      min: 0.0,
-                      max:29.0,onChanged:(double value){
-                    setState(() {
-                      sliderValue = value;
-                    });
-                  });
-                },
-              )
-          ),
-          Text("0:29"),
-        ],
-      ),
-      Padding(
-          padding:EdgeInsets.only(left:30,top:10, bottom:10, right:30),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              GestureDetector(
-                onTap: ()async {
-
-                },
-                child: Container(
-                  padding: EdgeInsets.all(13),
-
-                  decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      image: DecorationImage(
-                          image: AssetImage(
-                              "assets/images/backward_icon.png"
-                          ),
-                          fit: BoxFit.contain
-                      )
-                  ),
-                  child: Center(
-                    child: Text("5s", style:TextStyle(fontSize: 10), textAlign: TextAlign.center,),
-                  ),
-                ),
-              ),
-              GestureDetector(
-                  onTap: (){
-                    if(!playing){
-                      audio.play(widget.song!.previewUrl);
-                      setState(() {
-                        playing = true;
-                      });
-                    } else {
-                      audio.pause();
-                      setState(() {
-                        playing = false;
-                      });
-                    }
-
-                  },
-                  child: playing ? Icon(FeatherIcons.stopCircle,
-                    size: 30, color: Colors.amber,) :Container(
-                    margin: EdgeInsets.only(left:10),
-                    height: 50,
-                    width:50,
-                    decoration: BoxDecoration(
-                        image: DecorationImage(
-                            image: AssetImage(
-                                "assets/images/play_icon.png"
-                            ),
-                            fit: BoxFit.contain
-                        )
-                    ),
-                  )),
-              Container(
-                padding: EdgeInsets.all(13),
-
-                decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    image: DecorationImage(
-                        image: AssetImage(
-                            "assets/images/forward_icon.png"
-                        ),
-                        fit: BoxFit.contain
-                    )
-                ),
-                child: Center(
-                  child: Text("5s", style:TextStyle(fontSize: 10), textAlign: TextAlign.center,),
-                ),
-              )
-            ],
-          )
-      ),
+      AudioPlayerScreen(song: song),
       Visibility(
         visible: userType == UserType.partyGuest ?
         true : false,
@@ -1503,6 +1468,11 @@ class _JoinEventForm extends State<JoinEventForm>{
   TextEditingController _codeBox2 = TextEditingController();
   TextEditingController _codeBox3 = TextEditingController();
   TextEditingController _codeBox4 = TextEditingController();
+
+  var _focusBox1 = FocusNode();
+  var _focusBox2 = FocusNode();
+  var _focusBox3 = FocusNode();
+  var _focusBox4 = FocusNode();
   ApiBaseHelper _api = ApiBaseHelper();
   Event? eventData;
   TextStyle? subtitle2;
@@ -1512,7 +1482,7 @@ class _JoinEventForm extends State<JoinEventForm>{
     // TODO: implement didChangeDependencies
     super.didChangeDependencies();
     subtitle2 = Theme.of(context).textTheme.subtitle2!;
-
+    _focusBox1.requestFocus();
   }
 
   @override
@@ -1528,6 +1498,8 @@ class _JoinEventForm extends State<JoinEventForm>{
           _joinEventDone ,
         ]);
   }
+
+
 
   void _changePage(int currPage, {skip = false}) {
     if (_pageController.hasClients) {
@@ -1664,7 +1636,8 @@ class _JoinEventForm extends State<JoinEventForm>{
                           child: Image.asset(
                               "assets/images/scan_icon.png"),
                         ),
-                      )),
+                      )
+                  ),
                   Positioned.fill(
                     child: Align(
                         alignment: Alignment.bottomCenter,
@@ -1731,6 +1704,7 @@ class _JoinEventForm extends State<JoinEventForm>{
               ),
               child: TextFormField(
                 controller: _codeBox1,
+                focusNode: _focusBox1,
                 textInputAction: TextInputAction.next,
                 inputFormatters: [
                   new LengthLimitingTextInputFormatter(1),
@@ -1751,7 +1725,9 @@ class _JoinEventForm extends State<JoinEventForm>{
                 decoration: InputDecoration(
                   border: InputBorder.none,
                 ),
-
+                onChanged: (String v){
+                  if(v.isNotEmpty) _focusBox2.requestFocus();
+                },
               ),
             ),
             Container(
@@ -1764,6 +1740,7 @@ class _JoinEventForm extends State<JoinEventForm>{
               ),
               child:  TextFormField(
                 controller: _codeBox2,
+                focusNode: _focusBox2,
                 textInputAction: TextInputAction.next,
                 textCapitalization: TextCapitalization.characters,
                 inputFormatters: [
@@ -1784,7 +1761,9 @@ class _JoinEventForm extends State<JoinEventForm>{
                 decoration: InputDecoration(
                   border: InputBorder.none,
                 ),
-
+                onChanged: (String v){
+                  if(v.isNotEmpty) _focusBox3.requestFocus();
+                },
               ),
             ),
             Container(
@@ -1797,6 +1776,7 @@ class _JoinEventForm extends State<JoinEventForm>{
               ),
               child:  TextFormField(
                 controller: _codeBox3,
+                focusNode: _focusBox3,
                 textInputAction: TextInputAction.next,
                 textCapitalization: TextCapitalization.characters,
 
@@ -1818,7 +1798,9 @@ class _JoinEventForm extends State<JoinEventForm>{
                 decoration: InputDecoration(
                   border: InputBorder.none,
                 ),
-
+                onChanged: (String v){
+                  if(v.isNotEmpty) _focusBox4.requestFocus();
+                },
               ),
             ),
             Container(
@@ -1832,6 +1814,7 @@ class _JoinEventForm extends State<JoinEventForm>{
               ),
               child:  TextFormField(
                 controller: _codeBox4,
+                focusNode: _focusBox4,
                 textCapitalization: TextCapitalization.characters,
                 validator: (value){
                   if( value == null || value.isEmpty){
@@ -1851,7 +1834,6 @@ class _JoinEventForm extends State<JoinEventForm>{
                 decoration: InputDecoration(
                   border: InputBorder.none,
                 ),
-
               ),
             )
           ],
@@ -1912,45 +1894,16 @@ class _JoinEventForm extends State<JoinEventForm>{
     ],
   );
 
-  Widget get _qrScan => Column(
-      children: [
-        Text("Scan the QR Code", style: GoogleFonts.workSans(
-            fontWeight: FontWeight.w700,
-            fontSize: 20,
-            height:2
-        ), textAlign: TextAlign.center,),
-        SizedBox(height:20),
-        Text("Place your phone camera over the QR Code provides and scan it", style: GoogleFonts.workSans(
-            fontWeight: FontWeight.w300,
-            fontSize: 16,
-            height:1.8
-        ), textAlign: TextAlign.center,),
-        Padding(
-            padding: EdgeInsets.all(20),
-            child: Center(
-                child: AspectRatio(aspectRatio: 1/1,
-                  child: Container(
-                    decoration: BoxDecoration(
-                        image: DecorationImage(
-                            image: AssetImage(
-                                "assets/images/qr_bounding_box.png"
-                            ),
-                            fit: BoxFit.contain
-                        )
-                    ),
-                    child: Center(
-                      child: QrImage(
-                        data: "QYL!",
-                        version: QrVersions.auto,
-                        size: 00.0,
-                      ),
-                    ),
-                  ),)
-            )
-        )
-      ]
+  Widget get _qrScan =>  QRScannerScreen(
+    onCompleted: _completeScan,
   );
 
+  _completeScan(value){
+    setState(() {
+      eventData = Event.fromJson(value);
+    });
+    _changePage(3, skip:true);
+  }
   Widget get _partyDetail =>  eventData != null ? Column(
     children: [
       Container(

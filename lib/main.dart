@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -17,16 +18,21 @@ import 'package:musicroom/screens/suggestion_list.dart';
 import 'package:musicroom/screens/yourRoom.dart';
 import 'package:musicroom/styles.dart';
 import 'package:musicroom/utils.dart';
+import 'package:musicroom/utils/fcm-service.dart';
 import 'package:musicroom/utils/models.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
   LicenseRegistry.addLicense(() async* {
     final license = await rootBundle.loadString('google_fonts/OFL.txt');
     yield LicenseEntryWithLineBreaks(['google_fonts'], license);
   });
-  runApp(
-      MyApp());
+
+  FCMService();
+
+  runApp( MyApp());
 }
 
 class MyApp extends StatelessWidget {

@@ -384,7 +384,8 @@ class SongSuggestion extends StatelessWidget{
                           fontSize:
                           MediaQuery.of(context).size.width *
                               0.05,
-                          fontWeight: FontWeight.w900),
+                          fontWeight: FontWeight.w900,
+                      )
                     ),
                     Spacer(),
                     this.showTrailing ? FocusedMenuHolder(

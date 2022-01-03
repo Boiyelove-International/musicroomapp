@@ -198,7 +198,7 @@ MRselectSong2(Map dataItem, BuildContext context){
             )),
         padding: EdgeInsets.only(
             top: 30, left: 20, right: 20, bottom: 20),
-        height: MediaQuery.of(context).size.height * 0.7,
+        height: MediaQuery.of(context).size.height * 0.9,
         child: SuggestEventForm(
           userType: UserType.partyGuest,
           song: SongModel(

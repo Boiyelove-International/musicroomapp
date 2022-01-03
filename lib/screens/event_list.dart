@@ -26,6 +26,7 @@ class EventListScreen extends StatefulWidget {
 class _EventListScreen extends State<EventListScreen> {
   UserType _userType = UserType.partyOrganizer;
   ApiBaseHelper _api = ApiBaseHelper();
+  String  orderBy = '';
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +54,7 @@ class _EventListScreen extends State<EventListScreen> {
                         builder: (context) {
                           return PopupWidget(
                             popup: Popup.searchFilter,
+                            callback: _orderBy,
                           );
                         });
                   },
@@ -66,10 +68,11 @@ class _EventListScreen extends State<EventListScreen> {
         top: true,
         bottom: true,
         child: FutureBuilder(
-            future: _api.get("${widget.url}"),
+            future: _api.get("${widget.url}?order_by=orderBy"),
             builder: (context, snapshot){
               if (snapshot.hasData){
                 var itemList = snapshot.data as List;
+
                 if (itemList.isNotEmpty){
                   return ListView.separated(
                       padding: EdgeInsets.only(top: 30, left: 18, right: 18),
@@ -200,5 +203,11 @@ class _EventListScreen extends State<EventListScreen> {
         ),
       ),
     );
+  }
+
+  _orderBy(String option){
+    setState(() {
+      orderBy = option;
+    });
   }
 }

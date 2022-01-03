@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:focused_menu/focused_menu.dart';
+import 'package:focused_menu/modals.dart';
 import 'package:iconly/iconly.dart';
 import 'package:intl/intl.dart';
 import 'package:musicroom/screens/playlist.dart';
 import 'package:musicroom/screens/popups.dart';
+import 'package:musicroom/screens/yourRoom.dart';
 import 'package:musicroom/utils/apiServices.dart';
 import 'package:musicroom/utils/models.dart';
 import '../routes.dart';
@@ -29,6 +32,7 @@ class EventDetail extends StatefulWidget {
 
 class _EventDetail extends State<EventDetail> {
   bool _showAttendees = false;
+  bool _showAbout = false;
   late Widget _rightContext = Container();
   Event get _event => widget.event;
   set _event(Event value){
@@ -37,6 +41,20 @@ class _EventDetail extends State<EventDetail> {
 
   @override
   Widget build(BuildContext context) {
+
+    switch (widget.userType){
+      case UserType.partyGuest:{
+        _rightContext = _contextMenuDots;
+        _showAbout = false;
+      }
+      break;
+      case UserType.partyOrganizer:{
+        _rightContext = _contextMenuDots;
+        _showAbout = true;
+
+      }
+      break;
+    }
 
     return Scaffold(
       body: SafeArea(
@@ -428,4 +446,37 @@ class _EventDetail extends State<EventDetail> {
     _api.delete("/event/${_event.id}/", {});
     Navigator.pop(context, {"rm_event":_event.id});
   }
+  Widget get _contextMenuDots => FocusedMenuHolder(
+      openWithTap: true,
+      menuWidth: MediaQuery.of(context).size.width * 0.4,
+      child: Icon(Icons.more_vert, color: Colors.white, size: 50),
+      onPressed: () {},
+      menuItems: <FocusedMenuItem>[
+        FocusedMenuItem(
+            title: Padding(
+                padding: EdgeInsets.all(4),
+                child: Text(
+                  "Share Event",
+                  style: TextStyle(color: Colors.black),
+                )),
+            onPressed: () {
+              Navigator.of(context).push(
+                  MaterialPageRoute(
+                      builder: (context)=> YourRoom(
+                        code: _event.code!,
+                      )
+                  )
+              );
+            }),
+        FocusedMenuItem(
+            title: Text("Edit Event", style: TextStyle(color: Colors.black)),
+            onPressed: () {
+              toggleEditEvent();
+            }
+        ),
+        FocusedMenuItem(
+            title: Text("Delete Event", style: TextStyle(color: Colors.red)),
+            onPressed: _deleteEvent
+        )
+      ]);
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -55,7 +56,9 @@ class ApiBaseHelper {
   String get baseurl => _baseUrl;
   BuildContext? context;
 
+
   Future<dynamic> get(String url) async {
+    String? FCMdeviceId = await FirebaseMessaging.instance.getToken();
     print('Api Get, url $url');
     var responseJson;
     SharedPreferences pref  = await SharedPreferences.getInstance();
@@ -77,6 +80,7 @@ class ApiBaseHelper {
           "guest" : deviceId
         });
       }
+      headers.addAll({"fcm-device-id":FCMdeviceId ?? ''});
 
       final response = await http.get(
         Uri.parse(_baseUrl + url),
@@ -95,6 +99,7 @@ class ApiBaseHelper {
 
   Future<dynamic> post(String url, Map<String, dynamic> data,
       {BuildContext? context}) async {
+    String? FCMdeviceId = await FirebaseMessaging.instance.getToken();
 
     if (context != null){
       this.context = context;
@@ -116,10 +121,13 @@ class ApiBaseHelper {
             }
         );
       } else {
+
         headers.addAll({
           "guest" : deviceId
         });
       }
+      headers.addAll({"fcm-device-id":FCMdeviceId ?? ''});
+
       final response = await http.post(Uri.parse(_baseUrl + url),
           headers: headers,
           body: json.encode(data));
@@ -143,6 +151,8 @@ class ApiBaseHelper {
     SharedPreferences pref  = await SharedPreferences.getInstance();
     String? token = await pref.getString("token");
     String deviceId= await getDeviceId();
+    String? FCMdeviceId = await FirebaseMessaging.instance.getToken();
+
 
 
     try {
@@ -159,6 +169,7 @@ class ApiBaseHelper {
           "guest" : deviceId
         });
       }
+      headers.addAll({"fcm-device-id":FCMdeviceId ?? ''});
       print(data);
       final response = await http.put(Uri.parse(_baseUrl + url),
           headers: headers,
@@ -185,6 +196,7 @@ class ApiBaseHelper {
     SharedPreferences pref  = await SharedPreferences.getInstance();
     String? token = await pref.getString("token");
     String deviceId= await getDeviceId();
+    String? FCMdeviceId = await FirebaseMessaging.instance.getToken();
 
 
     try {
@@ -201,6 +213,8 @@ class ApiBaseHelper {
           "guest" : deviceId
         });
       }
+
+      headers.addAll({"fcm-device-id":FCMdeviceId ?? ''});
       final response = await http.patch(Uri.parse(_baseUrl + url),
           headers: headers,
           body: json.encode(data));
@@ -223,6 +237,7 @@ class ApiBaseHelper {
     SharedPreferences pref  = await SharedPreferences.getInstance();
     String? token = await pref.getString("token");
     String deviceId= await getDeviceId();
+    String? FCMdeviceId = await FirebaseMessaging.instance.getToken();
 
 
     try {
@@ -239,6 +254,8 @@ class ApiBaseHelper {
           "guest" : deviceId
         });
       }
+      String? FCMdeviceId = await FirebaseMessaging.instance.getToken();
+      headers.addAll({"fcm-device-id":FCMdeviceId ?? ''});
       final response = await http.delete(Uri.parse(_baseUrl + url),
           headers: headers,
           body: json.encode(data));

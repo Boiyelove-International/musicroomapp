@@ -43,6 +43,12 @@ dependencies:
   audioplayers:
   cached_network_image:
   http_parser:
+  path_provider:
+  just_audio: ^0.9.18
+  share: ^2.0.4
+  firebase_core: ^1.10.2
+  firebase_messaging: ^11.2.0
+  flutter_local_notifications: ^9.1.4
 
   #  overlay_group_avatar: ^0.0.2
 
