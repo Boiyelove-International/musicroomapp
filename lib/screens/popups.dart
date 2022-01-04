@@ -1061,7 +1061,8 @@ class _CreateEventForm extends State<CreateEventForm> {
               child: GoldButton(
                   isLoading: isLoading,
                   onPressed: _submit,
-                  buttonText: "Proceed"))
+                  buttonText: "Proceed")
+          )
         ])
       ]));
 
@@ -1113,9 +1114,8 @@ class _CreateEventForm extends State<CreateEventForm> {
         //Event updated
         String data = await response.stream.bytesToString();
         var item = jsonDecode(data);
-        // if(widget.callback != null){
         widget.callback!(Event.fromJson(item));
-        // }
+        _changePage(4);
         return;
       }
     } catch (e) {

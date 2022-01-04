@@ -353,7 +353,11 @@ class _EventOrganizerHome extends State<EventOrganizerHome> {
                           }));
                 },
                 label: Text("Create an Event",
-                    style: TextStyle(color: Colors.black)))));
+                    style: TextStyle(color: Colors.black)
+                )
+            )
+        )
+    );
   }
 
   _gotoEventPage(eventItem) {
