@@ -459,7 +459,7 @@ class _LoginScreenState extends State<LoginScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.remove("token");
     try{
-      await api.post("/login/", <String, String>{
+       api.post("/login/", <String, String>{
         "username": _emailController.text.toLowerCase(),
         "password": _passwordController.text
       }, context: context).then((data) async {
@@ -467,10 +467,12 @@ class _LoginScreenState extends State<LoginScreen> {
         await prefs.setString("token", data["token"]);
         await prefs.setString("email", data["email"]);
         await prefs.setString("display_name", data["display_name"]);
+        setState(() { isLoading = false;  });
         Navigator.pushReplacementNamed(context, Routes.organizerHome);
       });
-      setState(() { isLoading = true;  });
+
     } catch (e){
+      setState(() { isLoading = false;  });
       print("error is $e");
     }
   }
