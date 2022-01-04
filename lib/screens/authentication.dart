@@ -28,6 +28,45 @@ class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool isLoading = false;
+
+  _register() async {
+    setState(() {
+      isLoading = true;
+    });
+    ApiBaseHelper api = ApiBaseHelper();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove("token");
+    try {
+      // var formData = <String, String>{
+      //   "organizer_name":  _organizerName.text,
+      //   "email": _emailController.text,
+      //   "password": _passwordController.text
+      // };
+
+      api
+          .post(
+              "/register/",
+              <String, String>{
+                "display_name": _organizerName.text,
+                "email": _emailController.text,
+                "username": _emailController.text,
+                "password": _passwordController.text
+              },
+              context: context)
+          .then((value) {
+        Navigator.of(context).pushNamed(Routes.login);
+        print("value is $value");
+      });
+
+      if (_formKey.currentState!.validate()) {}
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      print("error is $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -160,80 +199,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                     ),
                     SizedBox(height: 30),
-                    Padding(
-                      padding: const EdgeInsets.all(2.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                                color: Colors.black26,
-                                offset: Offset(0, 4),
-                                blurRadius: 5.0)
-                          ],
-                          gradient: DarkPalette.borderGradient1,
-                          // color: Colors.deepPurple.shade300,
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        child: ElevatedButton(
-                          style: ButtonStyle(
-                            shape: MaterialStateProperty.all<
-                                RoundedRectangleBorder>(
-                              RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5.0),
-                              ),
-                            ),
-                            minimumSize:
-                                MaterialStateProperty.all(Size(50, 50)),
-                            backgroundColor:
-                                MaterialStateProperty.all(Colors.transparent),
-                            // elevation: MaterialStateProperty.all(3),
-                            shadowColor:
-                                MaterialStateProperty.all(Colors.transparent),
-                          ),
-                          onPressed: () async {
-                            // var formData = <String, String>{
-                            //   "organizer_name":  _organizerName.text,
-                            //   "email": _emailController.text,
-                            //   "password": _passwordController.text
-                            // };
-                            SharedPreferences prefs =
-                                await SharedPreferences.getInstance();
-                            prefs.remove("token");
-                            ApiBaseHelper api = ApiBaseHelper();
-                            try {
-                              api
-                                  .post(
-                                      "/register/",
-                                      <String, String>{
-                                        "display_name": _organizerName.text,
-                                        "email": _emailController.text,
-                                        "username": _emailController.text,
-                                        "password": _passwordController.text
-                                      },
-                                      context: context)
-                                  .then((value) {
-                                Navigator.of(context).pushNamed(Routes.login);
-                                print("value is $value");
-                              });
-                            } catch (e) {
-                              print("error is $e");
-                            }
-
-                            if (_formKey.currentState!.validate()) {}
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                              top: 10,
-                              bottom: 10,
-                            ),
-                            child: Text("Sign Up",
-                                style: GoogleFonts.workSans(
-                                    color: DarkPalette.darkDark,
-                                    fontWeight: FontWeight.bold)),
-                          ),
-                        ),
-                      ),
-                    ),
+                    GoldButton(
+                        isLoading: isLoading,
+                        onPressed: _register,
+                        buttonText: "Sign Up"),
                     SizedBox(height: 50),
                     Text(
                       "OR",
@@ -403,10 +372,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         SizedBox(height: 10),
         GoldButton(
-            buttonText: "Sign In",
-            isLoading: isLoading,
-            onPressed: _login
-        ),
+            buttonText: "Sign In", isLoading: isLoading, onPressed: _login),
         SizedBox(height: 50),
         Text(
           "OR",
@@ -452,27 +418,37 @@ class _LoginScreenState extends State<LoginScreen> {
     )));
   }
 
-  _login() async{
-    setState(() { isLoading = true;  });
+  _login() async {
+    setState(() {
+      isLoading = true;
+    });
 
     ApiBaseHelper api = ApiBaseHelper();
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.remove("token");
-    try{
-       api.post("/login/", <String, String>{
-        "username": _emailController.text.toLowerCase(),
-        "password": _passwordController.text
-      }, context: context).then((data) async {
+    try {
+      api
+          .post(
+              "/login/",
+              <String, String>{
+                "username": _emailController.text.toLowerCase(),
+                "password": _passwordController.text
+              },
+              context: context)
+          .then((data) async {
         print("value is $data");
         await prefs.setString("token", data["token"]);
         await prefs.setString("email", data["email"]);
         await prefs.setString("display_name", data["display_name"]);
-        setState(() { isLoading = false;  });
+        setState(() {
+          isLoading = false;
+        });
         Navigator.pushReplacementNamed(context, Routes.organizerHome);
       });
-
-    } catch (e){
-      setState(() { isLoading = false;  });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
       print("error is $e");
     }
   }
