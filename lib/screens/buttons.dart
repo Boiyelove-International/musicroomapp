@@ -42,7 +42,10 @@ class GoldButton extends StatelessWidget {
             // elevation: MaterialStateProperty.all(3),
             shadowColor: MaterialStateProperty.all(Colors.transparent),
           ),
-          onPressed: onPressed,
+          onPressed: (){
+            if(isLoading) return;
+            onPressed();
+          },
           child: Padding(
             padding: const EdgeInsets.only(
               top: 10,
