@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../routes.dart';
 import '../utils.dart';
+import 'buttons.dart';
 
 class RegisterScreen extends StatefulWidget {
   static const String routeName = '/RegisterScreen';
@@ -28,7 +29,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-
   @override
   Widget build(BuildContext context) {
     final TextStyle headline4 = Theme.of(context).textTheme.headline4!;
@@ -36,235 +36,253 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
         body: SafeArea(
             child: Form(
-              key: _formKey,
-              child: ListView(
-                padding: EdgeInsets.only(top: 15, bottom: 20, left: 10, right: 10),
-                children: [
-                  Text("Let's get you setup",
-                      style: GoogleFonts.workSans(
-                          fontWeight: FontWeight.w700,
-                          textStyle: headline4
-                      )),
-                  SizedBox(height: 20),
-                  Text(
-                      'Kindly provide the necessary details to get your account up and running',
-                      style: GoogleFonts.workSans(
-                          fontWeight: FontWeight.w300,
-                          fontSize: 16,
-                          height: 1.8
-                      )),
-                  SizedBox(height: 60),
-                  TextFormField(
-                    controller: _organizerName,
-                    textCapitalization: TextCapitalization.characters,
-                    onChanged: (value) {
-                      _organizerName.value = TextEditingValue(
-                          text: value.trim(), selection: _organizerName.selection);
-                    },
-                    validator: (value) => value!.isEmpty ? "Cannot be empty" : null,
-                    // textAlign: TextAlign.center,
-                    decoration: new InputDecoration(
-                      floatingLabelBehavior: FloatingLabelBehavior.always,
-                      labelStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
-                      focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white.withOpacity(0.7))),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white.withOpacity(0.7)),
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: const BorderRadius.all(
-                          const Radius.circular(10.0),
+                key: _formKey,
+                child: ListView(
+                  padding:
+                      EdgeInsets.only(top: 15, bottom: 20, left: 10, right: 10),
+                  children: [
+                    Text("Let's get you setup",
+                        style: GoogleFonts.workSans(
+                            fontWeight: FontWeight.w700, textStyle: headline4)),
+                    SizedBox(height: 20),
+                    Text(
+                        'Kindly provide the necessary details to get your account up and running',
+                        style: GoogleFonts.workSans(
+                            fontWeight: FontWeight.w300,
+                            fontSize: 16,
+                            height: 1.8)),
+                    SizedBox(height: 60),
+                    TextFormField(
+                      controller: _organizerName,
+                      textCapitalization: TextCapitalization.characters,
+                      onChanged: (value) {
+                        _organizerName.value = TextEditingValue(
+                            text: value.trim(),
+                            selection: _organizerName.selection);
+                      },
+                      validator: (value) =>
+                          value!.isEmpty ? "Cannot be empty" : null,
+                      // textAlign: TextAlign.center,
+                      decoration: new InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
+                        labelStyle:
+                            TextStyle(color: Colors.white.withOpacity(0.4)),
+                        focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Colors.white.withOpacity(0.7))),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: Colors.white.withOpacity(0.7)),
                         ),
-                      ),
-                      filled: true,
-                      hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
-                      fillColor: Colors.transparent,
-                      contentPadding: EdgeInsets.all(16),
-                      labelText: "DJ/Event Organizer Name",
-                    ),
-                  ),
-                  SizedBox(height: 30),
-                  TextFormField(
-                    controller: _emailController,
-                    textCapitalization: TextCapitalization.characters,
-                    onChanged: (value) {
-                      _emailController.value = TextEditingValue(
-                          text: value.trim(), selection: _emailController.selection);
-                    },
-                    validator: (value) => value!.isEmpty ? "Cannot be empty" : null,
-                    // textAlign: TextAlign.center,
-                    decoration: new InputDecoration(
-                      floatingLabelBehavior: FloatingLabelBehavior.always,
-                      labelStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
-                      focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white.withOpacity(0.7))),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white.withOpacity(0.7)),
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: const BorderRadius.all(
-                          const Radius.circular(10.0),
+                        border: OutlineInputBorder(
+                          borderRadius: const BorderRadius.all(
+                            const Radius.circular(10.0),
+                          ),
                         ),
+                        filled: true,
+                        hintStyle:
+                            TextStyle(color: Colors.white.withOpacity(0.6)),
+                        fillColor: Colors.transparent,
+                        contentPadding: EdgeInsets.all(16),
+                        labelText: "DJ/Event Organizer Name",
                       ),
-                      filled: true,
-                      hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
-                      fillColor: Colors.transparent,
-                      contentPadding: EdgeInsets.all(16),
-                      labelText: "Email Address",
                     ),
-                  ),
-                  SizedBox(height: 30),
-                  TextFormField(
-                    controller: _passwordController,
-                    // textCapitalization: TextCapitalization.characters,
-                    onChanged: (value) {
-                      _passwordController.value = TextEditingValue(
-                          text: value.trim(), selection: _passwordController.selection);
-                    },
-                    validator: (value) => value!.isEmpty ? "Cannot be empty" : null,
-                    // textAlign: TextAlign.center,
-                    decoration: new InputDecoration(
-                      floatingLabelBehavior: FloatingLabelBehavior.always,
-                      labelStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
-                      focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white.withOpacity(0.7))),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white.withOpacity(0.7)),
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: const BorderRadius.all(
-                          const Radius.circular(10.0),
+                    SizedBox(height: 30),
+                    TextFormField(
+                      controller: _emailController,
+                      textCapitalization: TextCapitalization.characters,
+                      onChanged: (value) {
+                        _emailController.value = TextEditingValue(
+                            text: value.trim(),
+                            selection: _emailController.selection);
+                      },
+                      validator: (value) =>
+                          value!.isEmpty ? "Cannot be empty" : null,
+                      // textAlign: TextAlign.center,
+                      decoration: new InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
+                        labelStyle:
+                            TextStyle(color: Colors.white.withOpacity(0.4)),
+                        focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Colors.white.withOpacity(0.7))),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: Colors.white.withOpacity(0.7)),
                         ),
+                        border: OutlineInputBorder(
+                          borderRadius: const BorderRadius.all(
+                            const Radius.circular(10.0),
+                          ),
+                        ),
+                        filled: true,
+                        hintStyle:
+                            TextStyle(color: Colors.white.withOpacity(0.6)),
+                        fillColor: Colors.transparent,
+                        contentPadding: EdgeInsets.all(16),
+                        labelText: "Email Address",
                       ),
-                      filled: true,
-                      hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
-                      fillColor: Colors.transparent,
-                      contentPadding: EdgeInsets.all(16),
-                      labelText: "Password",
                     ),
-                  ),
-                  SizedBox(height: 30),
-                  Padding(
-                    padding: const EdgeInsets.all(2.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        boxShadow: [
-                          BoxShadow(
-                              color: Colors.black26,
-                              offset: Offset(0, 4),
-                              blurRadius: 5.0)
-                        ],
-                        gradient: DarkPalette.borderGradient1,
-                        // color: Colors.deepPurple.shade300,
-                        borderRadius: BorderRadius.circular(5),
+                    SizedBox(height: 30),
+                    TextFormField(
+                      controller: _passwordController,
+                      // textCapitalization: TextCapitalization.characters,
+                      onChanged: (value) {
+                        _passwordController.value = TextEditingValue(
+                            text: value.trim(),
+                            selection: _passwordController.selection);
+                      },
+                      validator: (value) =>
+                          value!.isEmpty ? "Cannot be empty" : null,
+                      // textAlign: TextAlign.center,
+                      decoration: new InputDecoration(
+                        floatingLabelBehavior: FloatingLabelBehavior.always,
+                        labelStyle:
+                            TextStyle(color: Colors.white.withOpacity(0.4)),
+                        focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Colors.white.withOpacity(0.7))),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: Colors.white.withOpacity(0.7)),
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: const BorderRadius.all(
+                            const Radius.circular(10.0),
+                          ),
+                        ),
+                        filled: true,
+                        hintStyle:
+                            TextStyle(color: Colors.white.withOpacity(0.6)),
+                        fillColor: Colors.transparent,
+                        contentPadding: EdgeInsets.all(16),
+                        labelText: "Password",
                       ),
-                      child: ElevatedButton(
-                        style: ButtonStyle(
-                          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5.0),
+                    ),
+                    SizedBox(height: 30),
+                    Padding(
+                      padding: const EdgeInsets.all(2.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.black26,
+                                offset: Offset(0, 4),
+                                blurRadius: 5.0)
+                          ],
+                          gradient: DarkPalette.borderGradient1,
+                          // color: Colors.deepPurple.shade300,
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: ElevatedButton(
+                          style: ButtonStyle(
+                            shape: MaterialStateProperty.all<
+                                RoundedRectangleBorder>(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5.0),
+                              ),
                             ),
+                            minimumSize:
+                                MaterialStateProperty.all(Size(50, 50)),
+                            backgroundColor:
+                                MaterialStateProperty.all(Colors.transparent),
+                            // elevation: MaterialStateProperty.all(3),
+                            shadowColor:
+                                MaterialStateProperty.all(Colors.transparent),
                           ),
-                          minimumSize: MaterialStateProperty.all(Size(50, 50)),
-                          backgroundColor: MaterialStateProperty.all(Colors.transparent),
-                          // elevation: MaterialStateProperty.all(3),
-                          shadowColor: MaterialStateProperty.all(Colors.transparent),
-                        ),
-                        onPressed: () async {
-                          // var formData = <String, String>{
-                          //   "organizer_name":  _organizerName.text,
-                          //   "email": _emailController.text,
-                          //   "password": _passwordController.text
-                          // };
-                          SharedPreferences prefs = await SharedPreferences.getInstance();
-                          prefs.remove("token");
-                          ApiBaseHelper api = ApiBaseHelper();
-                          try{
-                            api.post("/register/", <String, String>{
-                              "display_name":  _organizerName.text,
-                              "email": _emailController.text,
-                              "username": _emailController.text,
-                              "password": _passwordController.text
-                            }, context: context).then((value){
-                              Navigator.of(context).pushNamed(Routes.login);
-                              print("value is $value");
-                            });
-                          } catch (e){
-                            print("error is $e");
-                          }
+                          onPressed: () async {
+                            // var formData = <String, String>{
+                            //   "organizer_name":  _organizerName.text,
+                            //   "email": _emailController.text,
+                            //   "password": _passwordController.text
+                            // };
+                            SharedPreferences prefs =
+                                await SharedPreferences.getInstance();
+                            prefs.remove("token");
+                            ApiBaseHelper api = ApiBaseHelper();
+                            try {
+                              api
+                                  .post(
+                                      "/register/",
+                                      <String, String>{
+                                        "display_name": _organizerName.text,
+                                        "email": _emailController.text,
+                                        "username": _emailController.text,
+                                        "password": _passwordController.text
+                                      },
+                                      context: context)
+                                  .then((value) {
+                                Navigator.of(context).pushNamed(Routes.login);
+                                print("value is $value");
+                              });
+                            } catch (e) {
+                              print("error is $e");
+                            }
 
-                          if (_formKey.currentState!.validate()){
-
-                          }
-
-
-
-
-
+                            if (_formKey.currentState!.validate()) {}
                           },
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                            top: 10,
-                            bottom: 10,
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                              top: 10,
+                              bottom: 10,
+                            ),
+                            child: Text("Sign Up",
+                                style: GoogleFonts.workSans(
+                                    color: DarkPalette.darkDark,
+                                    fontWeight: FontWeight.bold)),
                           ),
-                          child: Text("Sign Up",
-
-                              style: GoogleFonts.workSans(
-                                  color: DarkPalette.darkDark,
-                                  fontWeight: FontWeight.bold
-                              )),
                         ),
                       ),
                     ),
-                  ),
-                  SizedBox(height: 50),
-                  Text(
-                    "OR",
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 40),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset("assets/images/google_icon.png"),
-                      SizedBox(
-                        width: 30,
-                      ),
-                      Image.asset("assets/images/facebook_icon.png"),
-                      SizedBox(
-                        width: 30,
-                      ),
-                      Image.asset("assets/images/apple_icon.png"),
-                    ],
-                  ),
-                  SizedBox(height: 40),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("Already have an account?", style: GoogleFonts.workSans(
-                          fontWeight: FontWeight.w300,
-                          fontSize: 16
-                      ),),
-                      SizedBox(width: 10),
-                      TextButton(
-                          onPressed: () {
-                            Navigator.pushReplacementNamed(context, Routes.login);
-                          },
-                          child: Text("Sign In", style: GoogleFonts.workSans(
-
-                              color: Colors.amber,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16
-                          ),)),
-                      Text("to continue", style: GoogleFonts.workSans(
-                          fontWeight: FontWeight.w300,
-                          fontSize: 16
-                      ))
-                    ],
-                  )
-                ],
-              )
-            )));
+                    SizedBox(height: 50),
+                    Text(
+                      "OR",
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 40),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset("assets/images/google_icon.png"),
+                        SizedBox(
+                          width: 30,
+                        ),
+                        Image.asset("assets/images/facebook_icon.png"),
+                        SizedBox(
+                          width: 30,
+                        ),
+                        Image.asset("assets/images/apple_icon.png"),
+                      ],
+                    ),
+                    SizedBox(height: 40),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Already have an account?",
+                          style: GoogleFonts.workSans(
+                              fontWeight: FontWeight.w300, fontSize: 16),
+                        ),
+                        SizedBox(width: 10),
+                        TextButton(
+                            onPressed: () {
+                              Navigator.pushReplacementNamed(
+                                  context, Routes.login);
+                            },
+                            child: Text(
+                              "Sign In",
+                              style: GoogleFonts.workSans(
+                                  color: Colors.amber,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16),
+                            )),
+                        Text("to continue",
+                            style: GoogleFonts.workSans(
+                                fontWeight: FontWeight.w300, fontSize: 16))
+                      ],
+                    )
+                  ],
+                ))));
   }
 }
 
@@ -291,7 +309,6 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final TextStyle headline4 = Theme.of(context).textTheme.headline4!;
 
-
     return Scaffold(
         body: SafeArea(
             child: ListView(
@@ -299,17 +316,12 @@ class _LoginScreenState extends State<LoginScreen> {
       children: [
         Text("Welcome Back",
             style: GoogleFonts.workSans(
-                fontWeight: FontWeight.w700,
-                textStyle: headline4
-            )),
+                fontWeight: FontWeight.w700, textStyle: headline4)),
         SizedBox(height: 20),
         Text(
             'Kindly provide the necessary details to  return to your activities',
             style: GoogleFonts.workSans(
-                fontWeight: FontWeight.w300,
-                fontSize: 16,
-                height: 1.8
-            )),
+                fontWeight: FontWeight.w300, fontSize: 16, height: 1.8)),
         SizedBox(height: 60),
         TextFormField(
           controller: _emailController,
@@ -379,76 +391,40 @@ class _LoginScreenState extends State<LoginScreen> {
                   Navigator.pushReplacementNamed(
                       context, Routes.forgotPassword);
                 },
-                child: Text("Forgot Password?", style: GoogleFonts.workSans(
-                    fontWeight: FontWeight.w300,
-                    fontSize: 14,
-                    color:Colors.white
-                ),)),
+                child: Text(
+                  "Forgot Password?",
+                  style: GoogleFonts.workSans(
+                      fontWeight: FontWeight.w300,
+                      fontSize: 14,
+                      color: Colors.white),
+                )),
           ],
         ),
         SizedBox(height: 10),
-        Padding(
-          padding: EdgeInsets.all(2.0),
-          child: Container(
-            decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                    color: Colors.black26,
-                    offset: Offset(0, 4),
-                    blurRadius: 5.0)
-              ],
-              gradient: DarkPalette.borderGradient1,
-              // color: Colors.deepPurple.shade300,
-              borderRadius: BorderRadius.circular(5),
-            ),
-            child: ElevatedButton(
-              style: ButtonStyle(
-                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5.0),
-                  ),
-                ),
-                minimumSize: MaterialStateProperty.all(Size(50, 50)),
-                backgroundColor: MaterialStateProperty.all(Colors.transparent),
-                // elevation: MaterialStateProperty.all(3),
-                shadowColor: MaterialStateProperty.all(Colors.transparent),
-              ),
-              onPressed: () async {
-                ApiBaseHelper api = ApiBaseHelper();
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                prefs.remove("token");
-                try{
-                  api.post("/login/", <String, String>{
-                    "username": _emailController.text.toLowerCase(),
-                    "password": _passwordController.text
-                  }, context: context).then((data) async {
-                    print("value is $data");
-                    await prefs.setString("token", data["token"]);
-                    await prefs.setString("email", data["email"]);
-                    await prefs.setString("display_name", data["display_name"]);
-                    Navigator.pushReplacementNamed(context, Routes.organizerHome);
-
-
-                  });
-                } catch (e){
-                  print("error is $e");
-                }
-
-              },
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  top: 10,
-                  bottom: 10,
-                ),
-                child: Text("Sign In",
-                    style: GoogleFonts.workSans(
-                    color: DarkPalette.darkDark,
-                    fontWeight: FontWeight.bold
-                )),
-              ),
-            ),
-          ),
-        ),
+        GoldButton(
+            buttonText: "Sign In",
+            onPressed: () async {
+              Future.delayed(Duration(seconds: 2), () {
+                print("You clicked this  button");
+              });
+              // ApiBaseHelper api = ApiBaseHelper();
+              // SharedPreferences prefs = await SharedPreferences.getInstance();
+              // prefs.remove("token");
+              // try{
+              //   api.post("/login/", <String, String>{
+              //     "username": _emailController.text.toLowerCase(),
+              //     "password": _passwordController.text
+              //   }, context: context).then((data) async {
+              //     print("value is $data");
+              //     await prefs.setString("token", data["token"]);
+              //     await prefs.setString("email", data["email"]);
+              //     await prefs.setString("display_name", data["display_name"]);
+              //     Navigator.pushReplacementNamed(context, Routes.organizerHome);
+              //   });
+              // } catch (e){
+              //   print("error is $e");
+              // }
+            }),
         SizedBox(height: 50),
         Text(
           "OR",
@@ -473,24 +449,21 @@ class _LoginScreenState extends State<LoginScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("Already have an account?", style: GoogleFonts.workSans(
-                fontWeight: FontWeight.w300,
-                fontSize: 16
-            )),
+            Text("Already have an account?",
+                style: GoogleFonts.workSans(
+                    fontWeight: FontWeight.w300, fontSize: 16)),
             TextButton(
                 onPressed: () {
                   Navigator.pushReplacementNamed(context, Routes.decision);
                 },
-                child: Text("Sign Up", style: GoogleFonts.workSans(
-
-                    color: Colors.amber,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16
-                ))),
-            Text("to continue", style: GoogleFonts.workSans(
-                fontWeight: FontWeight.w300,
-                fontSize: 16
-            ))
+                child: Text("Sign Up",
+                    style: GoogleFonts.workSans(
+                        color: Colors.amber,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16))),
+            Text("to continue",
+                style: GoogleFonts.workSans(
+                    fontWeight: FontWeight.w300, fontSize: 16))
           ],
         )
       ],
@@ -597,181 +570,164 @@ class _ForgotPasswordState extends State<ForgotPassword> {
   }
 }
 
-class RegisterPartyGuest extends StatefulWidget{
+class RegisterPartyGuest extends StatefulWidget {
   static const routeName = "/registerPartyGuest";
 
   @override
   _RegisterPartyGuest createState() => _RegisterPartyGuest();
 }
-class _RegisterPartyGuest extends State<RegisterPartyGuest>{
+
+class _RegisterPartyGuest extends State<RegisterPartyGuest> {
   FilePickerResult? result;
   TextEditingController _displayNameController = TextEditingController();
   final _displayNameKey = GlobalKey<FormState>();
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     final TextStyle headline4 = Theme.of(context).textTheme.headline4!;
 
     return Scaffold(
         body: SafeArea(
             child: ListView(
-              padding: EdgeInsets.only(top: 15, bottom: 20, left: 10, right: 10),
-              children: [
-                Text("Time to party",
-                    style: GoogleFonts.workSans(
-                        fontWeight: FontWeight.w700,
-                        textStyle: headline4
-                    )),
-                SizedBox(height: 20),
-                Text(
-                    'Kindly provide the necessary details to  return to your activities',
-                    style: GoogleFonts.workSans(
-                        fontWeight: FontWeight.w300,
-                        fontSize: 16,
-                        height: 1.8
-                    )),
-                SizedBox(height: 60),
-                Center(
-                  child: GestureDetector(
-                      onTap: () async {
-                        result = await FilePicker.platform.pickFiles(
-                            type: FileType.image
-                        );
-                        if (result != null) {
-                          setState(() {});
-                        } else {
-                          // User canceled the picker
-                        }
-                      },
-                      child:
-                      result == null ?  CircleAvatar(
-                    backgroundImage: AssetImage(
-                        "assets/images/avatar_upload.png"),
-                    radius: 50,
-                  ) : Container(
-                          width: 120.0,
-                          height: 120.0,
-                          decoration:  BoxDecoration(
-                              shape: BoxShape.circle,
-                              image: DecorationImage(
-                                  fit: BoxFit.fill,
-                                  image:  FileImage(
-                                      File("${result!.files.single.path}")
-                                  )
-                              )
-                          )
-                      ),)
+      padding: EdgeInsets.only(top: 15, bottom: 20, left: 10, right: 10),
+      children: [
+        Text("Time to party",
+            style: GoogleFonts.workSans(
+                fontWeight: FontWeight.w700, textStyle: headline4)),
+        SizedBox(height: 20),
+        Text(
+            'Kindly provide the necessary details to  return to your activities',
+            style: GoogleFonts.workSans(
+                fontWeight: FontWeight.w300, fontSize: 16, height: 1.8)),
+        SizedBox(height: 60),
+        Center(
+            child: GestureDetector(
+          onTap: () async {
+            result = await FilePicker.platform.pickFiles(type: FileType.image);
+            if (result != null) {
+              setState(() {});
+            } else {
+              // User canceled the picker
+            }
+          },
+          child: result == null
+              ? CircleAvatar(
+                  backgroundImage:
+                      AssetImage("assets/images/avatar_upload.png"),
+                  radius: 50,
+                )
+              : Container(
+                  width: 120.0,
+                  height: 120.0,
+                  decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                          fit: BoxFit.fill,
+                          image: FileImage(
+                              File("${result!.files.single.path}"))))),
+        )),
+        SizedBox(height: 20),
+        Text('Upload an image of yourself party style',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.workSans(
+                fontWeight: FontWeight.w300, fontSize: 16, height: 1.8)),
+        SizedBox(height: 30),
+        Form(
+            key: _displayNameKey,
+            child: TextFormField(
+              controller: _displayNameController,
+              textCapitalization: TextCapitalization.characters,
+
+              validator: (value) => value!.isEmpty ? "Cannot be empty" : null,
+              // textAlign: TextAlign.center,
+              decoration: new InputDecoration(
+                floatingLabelBehavior: FloatingLabelBehavior.always,
+                labelStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
+                focusedBorder: OutlineInputBorder(
+                    borderSide:
+                        BorderSide(color: Colors.white.withOpacity(0.7))),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white.withOpacity(0.7)),
                 ),
-                SizedBox(
-                  height:20
-                ),
-                Text(
-                    'Upload an image of yourself party style',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.workSans(
-                        fontWeight: FontWeight.w300,
-                        fontSize: 16,
-                        height: 1.8
-                    )),
-                SizedBox(height: 30),
-                Form(
-                  key: _displayNameKey,
-                  child: TextFormField(
-                    controller: _displayNameController,
-                    textCapitalization: TextCapitalization.characters,
-
-                    validator: (value) => value!.isEmpty ? "Cannot be empty" : null,
-                    // textAlign: TextAlign.center,
-                    decoration: new InputDecoration(
-                      floatingLabelBehavior: FloatingLabelBehavior.always,
-                      labelStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
-                      focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white.withOpacity(0.7))),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white.withOpacity(0.7)),
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: const BorderRadius.all(
-                          const Radius.circular(10.0),
-                        ),
-                      ),
-                      filled: true,
-                      hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
-                      fillColor: Colors.transparent,
-                      contentPadding: EdgeInsets.all(16),
-                      labelText: "Display Name",
-                    ),
-                  )
-                ),
-
-
-                SizedBox(height: 30),
-                Padding(
-                  padding: EdgeInsets.all(2.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.black26,
-                            offset: Offset(0, 4),
-                            blurRadius: 5.0)
-                      ],
-                      gradient: DarkPalette.borderGradient1,
-                      // color: Colors.deepPurple.shade300,
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child: ElevatedButton(
-                      style: ButtonStyle(
-                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5.0),
-                          ),
-                        ),
-                        minimumSize: MaterialStateProperty.all(Size(50, 50)),
-                        backgroundColor: MaterialStateProperty.all(Colors.transparent),
-                        // elevation: MaterialStateProperty.all(3),
-                        shadowColor: MaterialStateProperty.all(Colors.transparent),
-                      ),
-                      onPressed: () async {
-                        if(_displayNameKey.currentState!.validate()){
-                          ApiBaseHelper api = ApiBaseHelper();
-                          var data = <String, dynamic>{
-                            "device_id": await getDeviceId(),
-                            "display_name": _displayNameController.text,
-                          };
-                          if (result != null){
-                            Map image = {
-                              "file": base64Encode(File("${result!.files.single.path}").readAsBytesSync()),
-                              "filename": result!.files.single.path!.split("/").last
-                            };
-                            data["image"] = image;
-                          }
-
-                          api.post("/register/guest/", data).then((data) async {
-                            SharedPreferences prefs = await SharedPreferences.getInstance();
-                            prefs.remove("token");
-                            prefs.setString("display_name", _displayNameController.text);
-                            Navigator.pushReplacementNamed(context, Routes.guestHome);
-                          });
-                          }
-
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                          top: 10,
-                          bottom: 10,
-                        ),
-                        child: Text("Let's Party.",
-                            style: GoogleFonts.workSans(
-                                color: DarkPalette.darkDark,
-                                fontWeight: FontWeight.bold
-                            )),
-                      ),
-                    ),
+                border: OutlineInputBorder(
+                  borderRadius: const BorderRadius.all(
+                    const Radius.circular(10.0),
                   ),
                 ),
-
+                filled: true,
+                hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+                fillColor: Colors.transparent,
+                contentPadding: EdgeInsets.all(16),
+                labelText: "Display Name",
+              ),
+            )),
+        SizedBox(height: 30),
+        Padding(
+          padding: EdgeInsets.all(2.0),
+          child: Container(
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black26,
+                    offset: Offset(0, 4),
+                    blurRadius: 5.0)
               ],
-            )));
+              gradient: DarkPalette.borderGradient1,
+              // color: Colors.deepPurple.shade300,
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: ElevatedButton(
+              style: ButtonStyle(
+                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                  ),
+                ),
+                minimumSize: MaterialStateProperty.all(Size(50, 50)),
+                backgroundColor: MaterialStateProperty.all(Colors.transparent),
+                // elevation: MaterialStateProperty.all(3),
+                shadowColor: MaterialStateProperty.all(Colors.transparent),
+              ),
+              onPressed: () async {
+                if (_displayNameKey.currentState!.validate()) {
+                  ApiBaseHelper api = ApiBaseHelper();
+                  var data = <String, dynamic>{
+                    "device_id": await getDeviceId(),
+                    "display_name": _displayNameController.text,
+                  };
+                  if (result != null) {
+                    Map image = {
+                      "file": base64Encode(File("${result!.files.single.path}")
+                          .readAsBytesSync()),
+                      "filename": result!.files.single.path!.split("/").last
+                    };
+                    data["image"] = image;
+                  }
+
+                  api.post("/register/guest/", data).then((data) async {
+                    SharedPreferences prefs =
+                        await SharedPreferences.getInstance();
+                    prefs.remove("token");
+                    prefs.setString(
+                        "display_name", _displayNameController.text);
+                    Navigator.pushReplacementNamed(context, Routes.guestHome);
+                  });
+                }
+              },
+              child: Padding(
+                padding: const EdgeInsets.only(
+                  top: 10,
+                  bottom: 10,
+                ),
+                child: Text("Let's Party.",
+                    style: GoogleFonts.workSans(
+                        color: DarkPalette.darkDark,
+                        fontWeight: FontWeight.bold)),
+              ),
+            ),
+          ),
+        ),
+      ],
+    )));
   }
 }
