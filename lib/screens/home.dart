@@ -343,12 +343,14 @@ class _EventOrganizerHome extends State<EventOrganizerHome> {
                                     topRight: const Radius.circular(40.0),
                                   )),
                               padding: EdgeInsets.only(
-                                  top: 30, left: 20, right: 20, bottom: 20),
-                              height: MediaQuery.of(context).size.height * 0.8,
-                              child: CreateEventForm()),
+                                  top: 30, left: 20, right: 20, bottom: MediaQuery.of(context).viewInsets.bottom),
+                              height: MediaQuery.of(context).size.height * 0.7,
+                              child: CreateEventForm()
+                          ),
                           backgroundColor: Colors.transparent,
-                          context: context)
-                      .whenComplete(() => setState(() {
+                          context: context,
+                          isScrollControlled: true,
+                    ) .whenComplete(() => setState(() {
                             showFab = true;
                           }));
                 },

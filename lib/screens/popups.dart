@@ -713,7 +713,7 @@ class _CreateEventForm extends State<CreateEventForm> {
             )),
         Flexible(
           child: PageView(
-              physics: NeverScrollableScrollPhysics(),
+              // physics: NeverScrollableScrollPhysics(),
               controller: _pageController,
               children: [
                 SingleChildScrollView(
@@ -1083,7 +1083,6 @@ class _CreateEventForm extends State<CreateEventForm> {
       if (widget.event != null) {
         request = new http.MultipartRequest(
             "PUT", Uri.parse("${_api.baseurl}/event/${widget.event?.id}/"));
-        print('Putting');
       }
 
       request.headers.addAll({
