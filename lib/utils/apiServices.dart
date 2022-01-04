@@ -56,31 +56,26 @@ class ApiBaseHelper {
   String get baseurl => _baseUrl;
   BuildContext? context;
 
-
   Future<dynamic> get(String url) async {
     String? FCMdeviceId = await FirebaseMessaging.instance.getToken();
     print('Api Get, url $url');
     var responseJson;
-    SharedPreferences pref  = await SharedPreferences.getInstance();
+    SharedPreferences pref = await SharedPreferences.getInstance();
     String? token = await pref.getString("token");
-    String deviceId= await getDeviceId();
-
+    String deviceId = await getDeviceId();
 
     try {
-      Map<String, String> headers = {"Content-Type": "application/json",};
-      if (token != null && token.isNotEmpty){
-        headers.addAll(
-            {
-              HttpHeaders.authorizationHeader:
-              'Token $token',
-            }
-        );
-      } else {
+      Map<String, String> headers = {
+        "Content-Type": "application/json",
+      };
+      if (token != null && token.isNotEmpty) {
         headers.addAll({
-          "guest" : deviceId
+          HttpHeaders.authorizationHeader: 'Token $token',
         });
+      } else {
+        headers.addAll({"guest": deviceId});
       }
-      headers.addAll({"fcm-device-id":FCMdeviceId ?? ''});
+      headers.addAll({"fcm-device-id": FCMdeviceId ?? ''});
 
       final response = await http.get(
         Uri.parse(_baseUrl + url),
@@ -89,6 +84,7 @@ class ApiBaseHelper {
       responseJson = _returnResponse(response);
     } on SocketException {
       print('No net');
+      displayMessage("No Internet Connection");
       throw FetchDataException('No Internet connection');
     }
     print('api get received!');
@@ -96,201 +92,174 @@ class ApiBaseHelper {
     return responseJson;
   }
 
-
   Future<dynamic> post(String url, Map<String, dynamic> data,
       {BuildContext? context}) async {
     String? FCMdeviceId = await FirebaseMessaging.instance.getToken();
 
-    if (context != null){
+    if (context != null) {
       this.context = context;
     }
     print('Api Post, url $url');
     var responseJson;
-    SharedPreferences pref  = await SharedPreferences.getInstance();
+    SharedPreferences pref = await SharedPreferences.getInstance();
     String? token = await pref.getString("token");
-    String deviceId= await getDeviceId();
-
+    String deviceId = await getDeviceId();
 
     try {
-      Map<String, String> headers = {"Content-Type": "application/json",};
-      if (token != null && token.isNotEmpty){
-        headers.addAll(
-            {
-              HttpHeaders.authorizationHeader:
-              'Token $token',
-            }
-        );
-      } else {
-
+      Map<String, String> headers = {
+        "Content-Type": "application/json",
+      };
+      if (token != null && token.isNotEmpty) {
         headers.addAll({
-          "guest" : deviceId
+          HttpHeaders.authorizationHeader: 'Token $token',
         });
+      } else {
+        headers.addAll({"guest": deviceId});
       }
-      headers.addAll({"fcm-device-id":FCMdeviceId ?? ''});
+      headers.addAll({"fcm-device-id": FCMdeviceId ?? ''});
 
       final response = await http.post(Uri.parse(_baseUrl + url),
-          headers: headers,
-          body: json.encode(data));
+          headers: headers, body: json.encode(data));
 
       print("response is ${response.body}");
-
 
       responseJson = _returnResponse(response);
     } on SocketException {
       print('No net');
-
+      displayMessage("No Internet Connection");
       throw FetchDataException('No Internet connection');
     }
     print('api post received!');
     return responseJson;
   }
 
-  Future<dynamic> put(String url, Map<String, dynamic> data, {bool returnHttpResponse=false}) async {
+  Future<dynamic> put(String url, Map<String, dynamic> data,
+      {bool returnHttpResponse = false}) async {
     print('Api Put, url $url');
     var responseJson;
-    SharedPreferences pref  = await SharedPreferences.getInstance();
+    SharedPreferences pref = await SharedPreferences.getInstance();
     String? token = await pref.getString("token");
-    String deviceId= await getDeviceId();
+    String deviceId = await getDeviceId();
     String? FCMdeviceId = await FirebaseMessaging.instance.getToken();
 
-
-
     try {
-      Map<String, String> headers = {"Content-Type": "application/json",};
-      if (token != null && token.isNotEmpty){
-        headers.addAll(
-            {
-              HttpHeaders.authorizationHeader:
-              'Token $token',
-            }
-        );
-      } else {
+      Map<String, String> headers = {
+        "Content-Type": "application/json",
+      };
+      if (token != null && token.isNotEmpty) {
         headers.addAll({
-          "guest" : deviceId
+          HttpHeaders.authorizationHeader: 'Token $token',
         });
+      } else {
+        headers.addAll({"guest": deviceId});
       }
-      headers.addAll({"fcm-device-id":FCMdeviceId ?? ''});
+      headers.addAll({"fcm-device-id": FCMdeviceId ?? ''});
       print(data);
       final response = await http.put(Uri.parse(_baseUrl + url),
-          headers: headers,
-          body: json.encode(data));
+          headers: headers, body: json.encode(data));
 
-      if(returnHttpResponse){
+      if (returnHttpResponse) {
         return response;
       }
       print("response is ${response.body}");
 
-
       responseJson = _returnResponse(response);
     } on SocketException {
       print('No net');
+      displayMessage("No Internet Connection");
       throw FetchDataException('No Internet connection');
     }
     print('api post received!');
     return responseJson;
   }
-  Future<dynamic> patch(String url, Map<String, dynamic>? data) async {
 
+  Future<dynamic> patch(String url, Map<String, dynamic>? data) async {
     print('Api Post, url $url');
     var responseJson;
-    SharedPreferences pref  = await SharedPreferences.getInstance();
+    SharedPreferences pref = await SharedPreferences.getInstance();
     String? token = await pref.getString("token");
-    String deviceId= await getDeviceId();
+    String deviceId = await getDeviceId();
     String? FCMdeviceId = await FirebaseMessaging.instance.getToken();
 
-
     try {
-      Map<String, String> headers = {"Content-Type": "application/json",};
-      if (token != null && token.isNotEmpty){
-        headers.addAll(
-            {
-              HttpHeaders.authorizationHeader:
-              'Token $token',
-            }
-        );
-      } else {
+      Map<String, String> headers = {
+        "Content-Type": "application/json",
+      };
+      if (token != null && token.isNotEmpty) {
         headers.addAll({
-          "guest" : deviceId
+          HttpHeaders.authorizationHeader: 'Token $token',
         });
+      } else {
+        headers.addAll({"guest": deviceId});
       }
 
-      headers.addAll({"fcm-device-id":FCMdeviceId ?? ''});
+      headers.addAll({"fcm-device-id": FCMdeviceId ?? ''});
       final response = await http.patch(Uri.parse(_baseUrl + url),
-          headers: headers,
-          body: json.encode(data));
+          headers: headers, body: json.encode(data));
 
       print("response is ${response.body}");
 
-
       responseJson = _returnResponse(response);
     } on SocketException {
       print('No net');
+      displayMessage("No Internet Connection");
       throw FetchDataException('No Internet connection');
     }
     print('api post received!');
     return responseJson;
   }
-  Future<dynamic> delete(String url, Map<String, dynamic>? data) async {
 
+  Future<dynamic> delete(String url, Map<String, dynamic>? data) async {
     print('Api Post, url $url');
     var responseJson;
-    SharedPreferences pref  = await SharedPreferences.getInstance();
+    SharedPreferences pref = await SharedPreferences.getInstance();
     String? token = await pref.getString("token");
-    String deviceId= await getDeviceId();
+    String deviceId = await getDeviceId();
     String? FCMdeviceId = await FirebaseMessaging.instance.getToken();
 
-
     try {
-      Map<String, String> headers = {"Content-Type": "application/json",};
-      if (token != null && token.isNotEmpty){
-        headers.addAll(
-            {
-              HttpHeaders.authorizationHeader:
-              'Token $token',
-            }
-        );
-      } else {
+      Map<String, String> headers = {
+        "Content-Type": "application/json",
+      };
+      if (token != null && token.isNotEmpty) {
         headers.addAll({
-          "guest" : deviceId
+          HttpHeaders.authorizationHeader: 'Token $token',
         });
+      } else {
+        headers.addAll({"guest": deviceId});
       }
       String? FCMdeviceId = await FirebaseMessaging.instance.getToken();
-      headers.addAll({"fcm-device-id":FCMdeviceId ?? ''});
+      headers.addAll({"fcm-device-id": FCMdeviceId ?? ''});
       final response = await http.delete(Uri.parse(_baseUrl + url),
-          headers: headers,
-          body: json.encode(data));
+          headers: headers, body: json.encode(data));
 
       print("response is ${response.body}");
-
 
       responseJson = _returnResponse(response);
     } on SocketException {
       print('No net');
+      displayMessage("No Internet Connection");
       throw FetchDataException('No Internet connection');
     }
     print('api post received!');
     return responseJson;
   }
-  void displayMessage(String message){
-    if (this.context != null){
-      ScaffoldMessenger.of(
-          this.context!)
-          .showSnackBar(
-            SnackBar(
-            content: Text(
-              '$message',
-              textAlign: TextAlign
-                  .center,
-            ),
-            backgroundColor:
-            Colors.red,
-          )
-      );
+
+  void displayMessage(String message) {
+    if (this.context != null) {
+      ScaffoldMessenger.of(this.context!).showSnackBar(SnackBar(
+        content: Text(
+          '$message',
+          textAlign: TextAlign.center,
+        ),
+        backgroundColor: Colors.red,
+      ));
     }
   }
+
   dynamic _returnResponse(http.Response response) {
     print("status is ${response.statusCode}");
-    if (response.statusCode >= 400  &&  response.statusCode <= 511){
+    if (response.statusCode >= 400 && response.statusCode <= 511) {
       print("it falls in line");
       displayMessage('${response.body.toString()}');
     }
@@ -303,14 +272,15 @@ class ApiBaseHelper {
         var responseJson = json.decode(response.body.toString());
         return responseJson;
       case 400:
-         throw BadRequestException(response.body.toString());
+        throw BadRequestException(response.body.toString());
       case 401:
       case 403:
         throw UnauthorisedException(response.body.toString());
       case 500:
       default:
-      displayMessage('Error occured while Communication with Server with StatusCode : ${response.statusCode}');
-      throw FetchDataException(
+        displayMessage(
+            'Error occured while Communication with Server with StatusCode : ${response.statusCode}');
+        throw FetchDataException(
             'Error occured while Communication with Server with StatusCode : ${response.statusCode}');
     }
   }
