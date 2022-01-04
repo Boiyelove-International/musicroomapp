@@ -1621,6 +1621,7 @@ class _JoinEventForm extends State<JoinEventForm> {
             eventData = Event.fromJson(value);
           });
           _changePage(3, skip: true);
+          FocusScope.of(context).unfocus();
         });
       } catch (e) {
         setState(() {
