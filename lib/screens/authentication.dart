@@ -293,6 +293,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
        "email": profile['email'],
        "name": profile['first_name']+' '+profile['last_name'],
        "image_url": profile['picture']['data']['url'],
+       "social":"facebook"
      };
 
      _login(payload);
@@ -330,6 +331,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         "email": data?.email,
         "name": data?.displayName,
         "image_url": data?.photoUrl,
+        "social":"google"
       };
 
       _login(payload);
@@ -587,6 +589,7 @@ class _LoginScreenState extends State<LoginScreen> {
         "email": profile['email'],
         "name": profile['first_name']+' '+profile['last_name'],
         "image_url": profile['picture']['data']['url'],
+        "social":"facebook"
       };
 
       _login(payload);
@@ -624,6 +627,7 @@ class _LoginScreenState extends State<LoginScreen> {
         "email": data?.email,
         "name": data?.displayName,
         "image_url": data?.photoUrl,
+        "social":"google"
       };
 
       _login(payload);
