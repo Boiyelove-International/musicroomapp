@@ -52,5 +52,47 @@
         <key>NSAllowsArbitraryLoadsForMedia</key>
         <true/>
     </dict>
+    <!-- Put me in the [my_project]/ios/Runner/Info.plist file -->
+    <!-- Google Sign-in Section -->
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <!--
+                  Replace "411409147347869" with your Facebook App ID here.
+                  **NOTE**: The scheme needs to start with `fb` and then your ID.
+                -->
+                <string>fb411409147347869</string>
+            </array>
+        </dict>
+    	<dict>
+    		<key>CFBundleTypeRole</key>
+    		<string>Editor</string>
+    		<key>CFBundleURLSchemes</key>
+    		<array>
+    			<!-- TODO Replace this value: -->
+    			<!-- Copied from GoogleService-Info.plist key REVERSED_CLIENT_ID -->
+    			<string>com.googleusercontent.apps.1098978988225-rp2o34pv4ulhuro9qfreadl2eecf25tl</string>
+    		</array>
+    	</dict>
+    </array>
+    <!-- End of the Google Sign-in Section -->
+    <key>FacebookAppID</key>
+
+    <!-- Replace "411409147347869" with your Facebook App ID here. -->
+    <string>411409147347869</string>
+    <key>FacebookDisplayName</key>
+
+    <!-- Replace "YOUR_APP_NAME" with your Facebook App name. -->
+    <string>MusicRoom</string>
+
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+        <string>fbapi</string>
+        <string>fb-messenger-share-api</string>
+        <string>fbauth2</string>
+        <string>fbshareextension</string>
+    </array>
 </dict>
 </plist>
