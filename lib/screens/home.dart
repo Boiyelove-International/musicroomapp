@@ -171,10 +171,11 @@ class _EventOrganizerHome extends State<EventOrganizerHome> {
                                             context,
                                             MaterialPageRoute(
                                                 builder: (context) =>
-                                                    SearchResultScreen(
-                                                      url:
-                                                          "/search/?term=${_searchContoller.text}",
-                                                    )),
+                                                  SearchResultScreen(
+                                                    url:
+                                                        "/search/?term=${_searchContoller.text}",
+                                                  )
+                                            ),
                                           );
                                         }
                                       }),
@@ -578,7 +579,9 @@ class _PartyGuestHome extends State<PartyGuestHome> {
                             ),
                           ),
                         ),
-                      ]))),
+                      ])
+                    )
+                  ),
                   Container(
                     child: Column(mainAxisSize: MainAxisSize.min, children: [
                       SizedBox(height: 30),

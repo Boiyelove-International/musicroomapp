@@ -85,6 +85,7 @@ class _SearchResultScreen extends State<SearchResultScreen> {
                     itemBuilder: (context, index) {
                       return GestureDetector(
                           onTap: (){
+
                               MRselectSong2(dataItems[index]['song'], context);
                           },
                           child:Container(
@@ -111,7 +112,8 @@ class _SearchResultScreen extends State<SearchResultScreen> {
                                 subtitle: Text("${dataItems[index]['song']['artist_name']}y"),
 
 
-                              ))
+                              )
+                          )
                       );
                     },
                     separatorBuilder: (context, index) {
@@ -124,7 +126,17 @@ class _SearchResultScreen extends State<SearchResultScreen> {
                   itemBuilder: (context, index) {
                     return GestureDetector(
                         onTap: (){
-                          MRselectSong(dataItems[index], context, widget.event!, pushReplacement: true);
+                          if(widget.event == null){
+                            MRselectSong2(
+                                dataItems[index], context);
+                          }else{
+                            MRselectSong(
+                                dataItems[index],
+                                context,
+                                widget.event ?? null,
+                                pushReplacement: true
+                            );
+                          }
                         },
                         child:Container(
                             padding: EdgeInsets.all(5),
@@ -148,17 +160,29 @@ class _SearchResultScreen extends State<SearchResultScreen> {
                                   fontWeight: FontWeight.bold
                               )),
                               subtitle: Text("${dataItems[index]['artist_name']}y"),
-                              trailing: _userType == UserType.partyOrganizer ? Container(
-                                  padding: EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                      gradient: DarkPalette.borderGradient1,
-                                      shape: BoxShape.circle
-                                  ),
-                                  child: Icon(
-                                    IconlyBold.plus,
-                                    size: 20,
-                                    color: Colors.white,
-                                  )
+                              trailing: _userType == UserType.partyOrganizer ?
+                              GestureDetector(
+                                child: Container(
+                                    padding: EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                        gradient: DarkPalette.borderGradient1,
+                                        shape: BoxShape.circle
+                                    ),
+                                    child: Icon(
+                                      IconlyBold.plus,
+                                      size: 20,
+                                      color: Colors.white,
+                                    )
+                                ),
+                                onTap: (){
+                                  if(widget.event == null){
+                                    MRselectSong2(
+                                        dataItems[index],
+                                        context,
+                                        slideToEvenGrid: true
+                                    );
+                                  }
+                                },
                               ) : null,
 
                             ))

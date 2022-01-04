@@ -1198,7 +1198,8 @@ class _CreateEventForm extends State<CreateEventForm> {
 class SuggestEventForm extends StatefulWidget {
   SongModel? song;
   UserType? userType;
-  SuggestEventForm({this.song, this.userType});
+  bool slideToEvenGrid;
+  SuggestEventForm({this.song, this.userType, this.slideToEvenGrid=false});
 
   @override
   _SuggestEventForm createState() => _SuggestEventForm();
@@ -1213,6 +1214,15 @@ class _SuggestEventForm extends State<SuggestEventForm> {
   SongModel get song => widget.song!;
   Event? _event;
   ApiBaseHelper _api = ApiBaseHelper();
+
+  @override
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+    if(widget.slideToEvenGrid){
+      _pageController = PageController(initialPage: 1);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1318,29 +1328,30 @@ class _SuggestEventForm extends State<SuggestEventForm> {
               if (snapshot.hasData) {
                 var itemList = snapshot.data as List;
                 if (itemList.isNotEmpty) {
-                  return GridView.builder(
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  return Flexible(
+                    child: GridView.builder(
+                        shrinkWrap: true,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           // maxCrossAxisExtent: 300,
-                          mainAxisExtent: 230,
-                          // childAspectRatio: 2 / 3,
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 20,
-                          mainAxisSpacing: 20),
-                      itemCount: itemList.length,
-                      itemBuilder: (context, index) {
-                        Event event = Event.fromJson(itemList[index]);
-                        return GestureDetector(
-                            onTap: () {
-                              _event = event;
-                              suggest();
-                            },
-                            child: EventCardGold(
-                                title: "${event.name}",
-                                artist: "${event.organizer}",
-                                image: "${event.image}"));
-                      });
+                            mainAxisExtent: 230,
+                            // childAspectRatio: 2 / 3,
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 20,
+                            mainAxisSpacing: 20),
+                        itemCount: itemList.length,
+                        itemBuilder: (context, index) {
+                          Event event = Event.fromJson(itemList[index]);
+                          return GestureDetector(
+                              onTap: () {
+                                _event = event;
+                                suggest();
+                              },
+                              child: EventCardGold(
+                                  title: "${event.name}",
+                                  artist: "${event.organizer}",
+                                  image: "${event.image}"));
+                        }),
+                  );
                 }
                 return EmptyContent();
               } else if (snapshot.hasError) {

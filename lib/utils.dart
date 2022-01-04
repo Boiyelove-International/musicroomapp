@@ -158,7 +158,11 @@ extension StringExtension on String {
   }
 }
 
-MRselectSong(Map dataItem, BuildContext context, Event event, {bool pushReplacement=false}){
+MRselectSong(Map dataItem, BuildContext context, Event? event, {bool pushReplacement=false}){
+  if(event == null){
+
+    return;
+  }
   showModalBottomSheet(
       isScrollControlled: true,
       context: context,
@@ -184,7 +188,7 @@ MRselectSong(Map dataItem, BuildContext context, Event event, {bool pushReplacem
       });
 }
 
-MRselectSong2(Map dataItem, BuildContext context){
+MRselectSong2(Map dataItem, BuildContext context, {bool slideToEvenGrid = false}){
   showModalBottomSheet<void>(
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
@@ -197,10 +201,12 @@ MRselectSong2(Map dataItem, BuildContext context){
               topRight: const Radius.circular(40.0),
             )),
         padding: EdgeInsets.only(
-            top: 30, left: 20, right: 20, bottom: 20),
+            top: 30, left: 20, right: 20, bottom: 20
+        ),
         height: MediaQuery.of(context).size.height * 0.9,
         child: SuggestEventForm(
           userType: UserType.partyGuest,
+          slideToEvenGrid: slideToEvenGrid,
           song: SongModel(
               title: dataItem['song_title'],
               artist: dataItem['artist_name'],
