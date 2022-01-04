@@ -564,6 +564,7 @@ class _RegisterPartyGuest extends State<RegisterPartyGuest> {
   FilePickerResult? result;
   TextEditingController _displayNameController = TextEditingController();
   final _displayNameKey = GlobalKey<FormState>();
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -645,72 +646,47 @@ class _RegisterPartyGuest extends State<RegisterPartyGuest> {
               ),
             )),
         SizedBox(height: 30),
-        Padding(
-          padding: EdgeInsets.all(2.0),
-          child: Container(
-            decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                    color: Colors.black26,
-                    offset: Offset(0, 4),
-                    blurRadius: 5.0)
-              ],
-              gradient: DarkPalette.borderGradient1,
-              // color: Colors.deepPurple.shade300,
-              borderRadius: BorderRadius.circular(5),
-            ),
-            child: ElevatedButton(
-              style: ButtonStyle(
-                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5.0),
-                  ),
-                ),
-                minimumSize: MaterialStateProperty.all(Size(50, 50)),
-                backgroundColor: MaterialStateProperty.all(Colors.transparent),
-                // elevation: MaterialStateProperty.all(3),
-                shadowColor: MaterialStateProperty.all(Colors.transparent),
-              ),
-              onPressed: () async {
-                if (_displayNameKey.currentState!.validate()) {
-                  ApiBaseHelper api = ApiBaseHelper();
-                  var data = <String, dynamic>{
-                    "device_id": await getDeviceId(),
-                    "display_name": _displayNameController.text,
-                  };
-                  if (result != null) {
-                    Map image = {
-                      "file": base64Encode(File("${result!.files.single.path}")
-                          .readAsBytesSync()),
-                      "filename": result!.files.single.path!.split("/").last
-                    };
-                    data["image"] = image;
-                  }
-
-                  api.post("/register/guest/", data).then((data) async {
-                    SharedPreferences prefs =
-                        await SharedPreferences.getInstance();
-                    prefs.remove("token");
-                    prefs.setString(
-                        "display_name", _displayNameController.text);
-                    Navigator.pushReplacementNamed(context, Routes.guestHome);
-                  });
-                }
-              },
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  top: 10,
-                  bottom: 10,
-                ),
-                child: Text("Let's Party.",
-                    style: GoogleFonts.workSans(
-                        color: DarkPalette.darkDark,
-                        fontWeight: FontWeight.bold)),
-              ),
-            ),
-          ),
-        ),
+        GoldButton(
+            isLoading: isLoading,
+            onPressed: _registerGuest,
+            buttonText: "Let's Party.")
       ],
     )));
+  }
+
+  _registerGuest() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    if (_displayNameKey.currentState!.validate()) {
+      try {
+        ApiBaseHelper api = ApiBaseHelper();
+        var data = <String, dynamic>{
+          "device_id": await getDeviceId(),
+          "display_name": _displayNameController.text,
+        };
+        if (result != null) {
+          Map image = {
+            "file": base64Encode(
+                File("${result!.files.single.path}").readAsBytesSync()),
+            "filename": result!.files.single.path!.split("/").last
+          };
+          data["image"] = image;
+        }
+
+        api.post("/register/guest/", data).then((data) async {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          prefs.remove("token");
+          prefs.setString("display_name", _displayNameController.text);
+          Navigator.pushReplacementNamed(context, Routes.guestHome);
+        });
+      } catch (e) {
+        setState(() {
+          isLoading = false;
+        });
+        print("error is $e");
+      }
+    }
   }
 }
