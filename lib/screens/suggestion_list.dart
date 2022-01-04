@@ -3,6 +3,7 @@ import 'package:focused_menu/focused_menu.dart';
 import 'package:focused_menu/modals.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
+import 'package:musicroom/screens/popups.dart';
 import 'package:musicroom/screens/search.dart';
 import 'package:musicroom/styles.dart';
 import 'package:musicroom/utils.dart';
@@ -245,90 +246,121 @@ class SongSuggestion extends StatelessWidget{
       default:{}
     }
 
-    return Container(
-        padding: EdgeInsets.all(10),
-        decoration: BoxDecoration(
-            color: DarkPalette.darkGrey1,
-            borderRadius: BorderRadius.circular(15)),
-        child: Row(children: [
-          Container(
-            height: 90,
-            width: 90,
-            decoration: BoxDecoration(
-                image: DecorationImage(
-                    fit: BoxFit.cover,
-                    image: NetworkImage("${suggestion['song']['album_art']}"))),
-          ),
-          SizedBox(width: 10),
-          Flexible(
-            child: Column(
-              // mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      "${suggestion['song']['song_title']}",
-                      style: TextStyle(
-                          fontSize:
-                          MediaQuery.of(context).size.width *
-                              0.05,
-                          fontWeight: FontWeight.w900,
-                      )
-                    ),
-                    Spacer(),
-                    this.showTrailing ? FocusedMenuHolder(
-                        openWithTap: true,
-                        child: Container(
-                          padding: EdgeInsets.all(5),
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: DarkPalette.borderGradient1),
-                          child: Center(
-                            child: Icon(menuIcon,
-                                size: 15, color: Colors.white),
-                          ),
-                        ),
-                        onPressed: () {
-
-                        },
-                        menuItems: menuItems
-                    ) : Container()
-                  ],
-                ),
-                SizedBox(
-                    height: MediaQuery.of(context).size.width * 0.02),
-                Text("${suggestion['song']['artist_name']}",
-                    style: TextStyle(
-                        fontSize: MediaQuery.of(context).size.width *
-                            0.028)),
-                SizedBox(
-                    height: MediaQuery.of(context).size.width * 0.02),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Flexible(
-                        child: Container(
-                          width: MediaQuery.of(context).size.width * 0.26,
-                          height: 20,
-                          child: Stack(
-                            clipBehavior: Clip.none,
-                            children: MRbuildAttendeeIcons(
-                                event, radius: 12
-                            )
-                          ),
-                        )),
-                    Text(
-                      "${_buildSuggestedNumber()} people suggested",
-                      style: TextStyle(fontSize: 10),
-                    )
-                  ],
-                )
-              ],
+    return GestureDetector(
+      child: Container(
+          padding: EdgeInsets.all(10),
+          decoration: BoxDecoration(
+              color: DarkPalette.darkGrey1,
+              borderRadius: BorderRadius.circular(15)),
+          child: Row(children: [
+            Container(
+              height: 90,
+              width: 90,
+              decoration: BoxDecoration(
+                  image: DecorationImage(
+                      fit: BoxFit.cover,
+                      image: NetworkImage("${suggestion['song']['album_art']}"))),
             ),
-          )
-        ]));
+            SizedBox(width: 10),
+            Flexible(
+              child: Column(
+                // mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        "${suggestion['song']['song_title']}",
+                        style: TextStyle(
+                            fontSize:
+                            MediaQuery.of(context).size.width *
+                                0.05,
+                            fontWeight: FontWeight.w900,
+                        )
+                      ),
+                      Spacer(),
+                      this.showTrailing ? FocusedMenuHolder(
+                          openWithTap: true,
+                          child: Container(
+                            padding: EdgeInsets.all(5),
+                            decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: DarkPalette.borderGradient1),
+                            child: Center(
+                              child: Icon(menuIcon,
+                                  size: 15, color: Colors.white),
+                            ),
+                          ),
+                          onPressed: () {
+
+                          },
+                          menuItems: menuItems
+                      ) : Container()
+                    ],
+                  ),
+                  SizedBox(
+                      height: MediaQuery.of(context).size.width * 0.02),
+                  Text("${suggestion['song']['artist_name']}",
+                      style: TextStyle(
+                          fontSize: MediaQuery.of(context).size.width *
+                              0.028)),
+                  SizedBox(
+                      height: MediaQuery.of(context).size.width * 0.02),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Flexible(
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.26,
+                            height: 20,
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: MRbuildAttendeeIcons(
+                                  event, radius: 12
+                              )
+                            ),
+                          )),
+                      Text(
+                        "${_buildSuggestedNumber()} people suggested",
+                        style: TextStyle(fontSize: 10),
+                      )
+                    ],
+                  )
+                ],
+              ),
+            )
+          ])),
+      onTap: (){
+        _buildAudioPlayer(context);
+      },
+    );
+  }
+
+  _buildAudioPlayer(BuildContext context){
+    print(suggestion);
+    showModalBottomSheet<void>(
+        builder: (BuildContext context) => Container(
+            decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: new BorderRadius.only(
+                  topLeft: const Radius.circular(40.0),
+                  topRight: const Radius.circular(40.0),
+                )),
+            padding: EdgeInsets.only(top: 10, left: 20, right: 20, bottom: 20),
+            height: MediaQuery.of(context).size.height *0.7,
+            child: AudioPlayerScreen(song: SongModel(
+                title: suggestion['song']['song_title'],
+                artist: suggestion['song']['artist_name'],
+                album_art: suggestion['song']['album_art'],
+                previewUrl: suggestion['song']['song_url'],
+                apple_song_id: suggestion['song']['apple_song_id']
+            ))
+        ),
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        context: context
+    );
   }
 
   String _buildSuggestedNumber(){
