@@ -344,7 +344,7 @@ class _EventOrganizerHome extends State<EventOrganizerHome> {
                                   )),
                               padding: EdgeInsets.only(
                                   top: 30, left: 20, right: 20, bottom: MediaQuery.of(context).viewInsets.bottom),
-                              height: MediaQuery.of(context).size.height * 0.7,
+                              height: MediaQuery.of(context).size.height * 0.7  ,
                               child: CreateEventForm()
                           ),
                           backgroundColor: Colors.transparent,

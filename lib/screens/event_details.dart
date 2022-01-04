@@ -5,6 +5,7 @@ import 'package:iconly/iconly.dart';
 import 'package:intl/intl.dart';
 import 'package:musicroom/screens/playlist.dart';
 import 'package:musicroom/screens/popups.dart';
+import 'package:musicroom/screens/suggestion_list.dart';
 import 'package:musicroom/screens/yourRoom.dart';
 import 'package:musicroom/utils/apiServices.dart';
 import 'package:musicroom/utils/models.dart';
@@ -198,7 +199,16 @@ class _EventDetail extends State<EventDetail> {
                               GestureDetector(
                                 onTap: () {
                                   Navigator.of(context)
-                                      .pushNamed(Routes.allSuggestions);
+                                      .push(MaterialPageRoute(
+                                      builder: (context)=>
+                                          SuggestionScreen(
+                                              suggestions: _event.suggestions ?? [],
+                                              title: "All Suggestion",
+                                              event: _event,
+                                              callBack:_allSuggestionActionHandler
+                                          )
+                                    )
+                                  );
                                 },
                                 child: Container(
                                   width:
@@ -239,8 +249,16 @@ class _EventDetail extends State<EventDetail> {
                               ),
                               GestureDetector(
                                   onTap: () {
-                                    Navigator.of(context).pushNamed(
-                                        Routes.acceptedSuggestions);
+                                    Navigator.of(context)
+                                        .push(MaterialPageRoute(
+                                        builder: (context)=>
+                                            SuggestionScreen(
+                                                suggestions: _event.suggestions?.where((element) => element['accepted'] == true).toList()  ?? [],
+                                                title: "Accepted Suggestion",
+                                                event: _event,
+                                                callBack:_allSuggestionActionHandler
+                                            )
+                                    ));
                                   },
                                   child: Container(
                                     width: MediaQuery.of(context)
@@ -275,7 +293,8 @@ class _EventDetail extends State<EventDetail> {
                                             ),
                                           ],
                                         )),
-                                  )),
+                                  )
+                              ),
                             ],
                           ),
                           SizedBox(height: 50),
@@ -296,6 +315,18 @@ class _EventDetail extends State<EventDetail> {
         ),
       ),
     );
+
+  }
+
+  _allSuggestionActionHandler(int suggestion_id, bool action)async {
+    print(action);
+    Map<String, dynamic> payload = {
+      "suggestion_id":suggestion_id,
+      "accept_suggestion":action
+    };
+    ApiBaseHelper _api = ApiBaseHelper();
+    _api.patch("/event/${_event.id}/suggestions/",
+        payload);
 
   }
 

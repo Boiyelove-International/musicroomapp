@@ -60,17 +60,16 @@ class _EventDetailPartyGuest extends State<EventDetailPartyGuest> {
       guestSuggestions = guestResponse;
     });
   }
-
   Widget get _attendees => ListView.separated(
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
       itemBuilder: (context, index) {
+        Map attendee = event.attendees[index];
         return Row(
           children: [
             CircleAvatar(
               radius: 25,
-              backgroundImage:
-              NetworkImage("${event.organizer_display_picture}"),
+              backgroundImage:NetworkImage(attendee['profile_photo']?? ''),
             ),
             SizedBox(
               width: 20,
@@ -80,12 +79,12 @@ class _EventDetailPartyGuest extends State<EventDetailPartyGuest> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    "${event.organizer}",
+                    "${attendee['display_name']}",
                     style:
                     TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 3),
-                  Text("Organizer",
+                  Text("Attendee",
                       style: TextStyle(
                         fontSize: 10,
                       ))
@@ -96,7 +95,8 @@ class _EventDetailPartyGuest extends State<EventDetailPartyGuest> {
       separatorBuilder: (context, index) {
         return SizedBox(height: 20);
       },
-      itemCount: 15);
+      itemCount: event.attendees.length
+  );
   Widget get _timingBox => Container(
       padding: EdgeInsets.all(10.0),
       decoration: BoxDecoration(
