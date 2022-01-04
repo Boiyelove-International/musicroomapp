@@ -1438,6 +1438,9 @@ class _JoinEventForm extends State<JoinEventForm> {
   Event? eventData;
   TextStyle? subtitle2;
 
+  bool isLoading = false;
+  bool isLoadingJoin = false;
+
   @override
   void didChangeDependencies() {
     // TODO: implement didChangeDependencies
@@ -1602,6 +1605,32 @@ class _JoinEventForm extends State<JoinEventForm> {
       );
 
   final _eventCodeForm = GlobalKey<FormState>();
+
+  _submitCode() {
+    setState(() {
+      isLoading = true;
+    });
+
+    if (_eventCodeForm.currentState!.validate()) {
+      try {
+        String q =
+            _codeBox1.text + _codeBox2.text + _codeBox3.text + _codeBox4.text;
+
+        _api.get("/event/join/?q=$q").then((value) {
+          setState(() {
+            eventData = Event.fromJson(value);
+          });
+          _changePage(3, skip: true);
+        });
+      } catch (e) {
+        setState(() {
+          isLoading = false;
+        });
+        print("error is $e");
+      }
+    }
+  }
+
   Widget get _partyCodeForm => Column(
         children: [
           Text(
@@ -1747,60 +1776,15 @@ class _JoinEventForm extends State<JoinEventForm> {
             ),
           ),
           SizedBox(height: 40),
-          Row(children: [
-            Expanded(
-                child: Container(
-              decoration: BoxDecoration(
-                boxShadow: [
-                  BoxShadow(
-                      color: Colors.black26,
-                      offset: Offset(0, 4),
-                      blurRadius: 5.0)
-                ],
-                gradient: DarkPalette.borderGradient1,
-                // color: Colors.deepPurple.shade300,
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: ElevatedButton(
-                style: ButtonStyle(
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                  ),
-                  minimumSize: MaterialStateProperty.all(Size(50, 50)),
-                  backgroundColor:
-                      MaterialStateProperty.all(Colors.transparent),
-                  // elevation: MaterialStateProperty.all(3),
-                  shadowColor: MaterialStateProperty.all(Colors.transparent),
-                ),
-                onPressed: () {
-                  if (_eventCodeForm.currentState!.validate()) {
-                    String q = _codeBox1.text +
-                        _codeBox2.text +
-                        _codeBox3.text +
-                        _codeBox4.text;
-
-                    _api.get("/event/join/?q=$q").then((value) {
-                      setState(() {
-                        eventData = Event.fromJson(value);
-                      });
-                      _changePage(3, skip: true);
-                    });
-                  }
-                },
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                    top: 10,
-                    bottom: 10,
-                  ),
-                  child: Text("Let's get going",
-                      style: TextStyle(
-                          color: Colors.black, fontWeight: FontWeight.bold)),
-                ),
-              ),
-            ))
-          ])
+          Row(
+            children: [
+              Expanded(
+                  child: GoldButton(
+                      isLoading: isLoading,
+                      onPressed: _submitCode,
+                      buttonText: "Let's get going"))
+            ],
+          )
         ],
       );
 
@@ -1944,46 +1928,10 @@ class _JoinEventForm extends State<JoinEventForm> {
                       Row(
                         children: [
                           Expanded(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                boxShadow: [
-                                  BoxShadow(
-                                      color: Colors.black26,
-                                      offset: Offset(0, 4),
-                                      blurRadius: 5.0)
-                                ],
-                                gradient: DarkPalette.borderGradient1,
-                                // color: Colors.deepPurple.shade300,
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                              child: ElevatedButton(
-                                style: ButtonStyle(
-                                  shape: MaterialStateProperty.all<
-                                      RoundedRectangleBorder>(
-                                    RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(5.0),
-                                    ),
-                                  ),
-                                  minimumSize:
-                                      MaterialStateProperty.all(Size(50, 50)),
-                                  backgroundColor: MaterialStateProperty.all(
-                                      Colors.transparent),
-                                  // elevation: MaterialStateProperty.all(3),
-                                  shadowColor: MaterialStateProperty.all(
-                                      Colors.transparent),
-                                ),
-                                onPressed: _joinEvent,
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                    top: 10,
-                                    bottom: 10,
-                                  ),
-                                  child: Text("Attend this Event",
-                                      style: GoogleFonts.workSans(
-                                          color: DarkPalette.darkDark,
-                                          fontWeight: FontWeight.bold)),
-                                ),
-                              ),
+                            child: GoldButton(
+                              isLoading: isLoadingJoin,
+                              onPressed: _joinEvent,
+                              buttonText: "Attend this Event",
                             ),
                           )
                         ],
@@ -2063,10 +2011,20 @@ class _JoinEventForm extends State<JoinEventForm> {
       ]);
 
   _joinEvent() async {
-    bool joined = await eventData!.joinEvent();
-    print(joined);
-    if (joined) {
-      _changePage(5);
+    setState(() {
+      isLoadingJoin = true;
+    });
+    try {
+      bool joined = await eventData!.joinEvent();
+      print(joined);
+      if (joined) {
+        _changePage(5);
+      }
+    } catch (e) {
+      setState(() {
+        isLoadingJoin = false;
+      });
+      print("error is $e");
     }
   }
 }
