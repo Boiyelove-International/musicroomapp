@@ -296,6 +296,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -403,28 +404,9 @@ class _LoginScreenState extends State<LoginScreen> {
         SizedBox(height: 10),
         GoldButton(
             buttonText: "Sign In",
-            onPressed: () async {
-              Future.delayed(Duration(seconds: 2), () {
-                print("You clicked this  button");
-              });
-              // ApiBaseHelper api = ApiBaseHelper();
-              // SharedPreferences prefs = await SharedPreferences.getInstance();
-              // prefs.remove("token");
-              // try{
-              //   api.post("/login/", <String, String>{
-              //     "username": _emailController.text.toLowerCase(),
-              //     "password": _passwordController.text
-              //   }, context: context).then((data) async {
-              //     print("value is $data");
-              //     await prefs.setString("token", data["token"]);
-              //     await prefs.setString("email", data["email"]);
-              //     await prefs.setString("display_name", data["display_name"]);
-              //     Navigator.pushReplacementNamed(context, Routes.organizerHome);
-              //   });
-              // } catch (e){
-              //   print("error is $e");
-              // }
-            }),
+            isLoading: isLoading,
+            onPressed: _login
+        ),
         SizedBox(height: 50),
         Text(
           "OR",
@@ -468,6 +450,29 @@ class _LoginScreenState extends State<LoginScreen> {
         )
       ],
     )));
+  }
+
+  _login() async{
+    setState(() { isLoading = true;  });
+
+    ApiBaseHelper api = ApiBaseHelper();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove("token");
+    try{
+      await api.post("/login/", <String, String>{
+        "username": _emailController.text.toLowerCase(),
+        "password": _passwordController.text
+      }, context: context).then((data) async {
+        print("value is $data");
+        await prefs.setString("token", data["token"]);
+        await prefs.setString("email", data["email"]);
+        await prefs.setString("display_name", data["display_name"]);
+        Navigator.pushReplacementNamed(context, Routes.organizerHome);
+      });
+      setState(() { isLoading = true;  });
+    } catch (e){
+      print("error is $e");
+    }
   }
 }
 

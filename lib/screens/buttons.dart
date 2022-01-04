@@ -3,21 +3,21 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../styles.dart';
 
-class GoldButton extends StatefulWidget {
-  Function onPressed;
+class GoldButton extends StatelessWidget {
+  Function() onPressed;
   String buttonText;
-  GoldButton({Key? key, required this.onPressed, required this.buttonText})
+  bool isLoading;
+  GoldButton({
+    Key? key,
+    required this.onPressed,
+    required this.buttonText,
+    this.isLoading = false
+  })
       : super(key: key);
 
   @override
-  _GoldButton createState() => _GoldButton();
-}
-
-class _GoldButton extends State<GoldButton> {
-  bool loading = false;
-
-  @override
   Widget build(BuildContext context) {
+    print(isLoading);
     return Padding(
       padding: EdgeInsets.all(2.0),
       child: Container(
@@ -42,33 +42,24 @@ class _GoldButton extends State<GoldButton> {
             // elevation: MaterialStateProperty.all(3),
             shadowColor: MaterialStateProperty.all(Colors.transparent),
           ),
-          onPressed: () async {
-            if (!loading) {
-              setState(() {
-                loading = true;
-              });
-              widget.onPressed();
-              setState(() {
-                loading = false;
-              });
-            }
-          },
+          onPressed: onPressed,
           child: Padding(
             padding: const EdgeInsets.only(
               top: 10,
               bottom: 10,
             ),
-            child: loading
+            child: isLoading
                 ? CircularProgressIndicator(
+              color: DarkPalette.darkDark,
+            )
+                : Text(buttonText,
+                style: GoogleFonts.workSans(
                     color: DarkPalette.darkDark,
-                  )
-                : Text(widget.buttonText,
-                    style: GoogleFonts.workSans(
-                        color: DarkPalette.darkDark,
-                        fontWeight: FontWeight.bold)),
+                    fontWeight: FontWeight.bold)),
           ),
         ),
       ),
     );
   }
 }
+
