@@ -9,6 +9,7 @@ import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:musicroom/screens/buttons.dart';
 import 'package:musicroom/screens/empty_content.dart';
 import 'package:musicroom/screens/event_card_gold.dart';
 import 'package:musicroom/screens/event_details.dart';
@@ -653,6 +654,8 @@ class _CreateEventForm extends State<CreateEventForm> {
   Event? eventItem;
   int _currentPage = 0;
 
+  bool isLoading = false;
+
   void _changePage(int currPage) {
     if (currPage < 0) return;
 
@@ -1042,6 +1045,7 @@ class _CreateEventForm extends State<CreateEventForm> {
                   ? Image.asset("assets/images/upload_image_banner.png")
                   : Image.file(
                       File("${result!.files.single.path}"),
+                      height: MediaQuery.of(context).size.height * .2,
                       fit: BoxFit.cover,
                       width: double.infinity,
                     ),
@@ -1054,93 +1058,71 @@ class _CreateEventForm extends State<CreateEventForm> {
         SizedBox(height: 20),
         Row(children: [
           Expanded(
-              child: Container(
-            decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                    color: Colors.black26,
-                    offset: Offset(0, 4),
-                    blurRadius: 5.0)
-              ],
-              gradient: DarkPalette.borderGradient1,
-              // color: Colors.deepPurple.shade300,
-              borderRadius: BorderRadius.circular(5),
-            ),
-            child: ElevatedButton(
-              style: ButtonStyle(
-                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5.0),
-                  ),
-                ),
-                minimumSize: MaterialStateProperty.all(Size(50, 50)),
-                backgroundColor: MaterialStateProperty.all(Colors.transparent),
-                // elevation: MaterialStateProperty.all(3),
-                shadowColor: MaterialStateProperty.all(Colors.transparent),
-              ),
-              onPressed: _submit,
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  top: 10,
-                  bottom: 10,
-                ),
-                child: Text("Proceed",
-                    style: TextStyle(
-                        color: Colors.black, fontWeight: FontWeight.bold)),
-              ),
-            ),
-          ))
+              child: GoldButton(
+                  isLoading: isLoading,
+                  onPressed: _submit,
+                  buttonText: "Proceed"))
         ])
       ]));
 
   _submit() async {
     if (result == null && widget.event == null) return;
 
+    setState(() {
+      isLoading = true;
+    });
     SharedPreferences pref = await SharedPreferences.getInstance();
     String? token = pref.getString("token");
     ApiBaseHelper _api = ApiBaseHelper();
 
-    var request =
-        new http.MultipartRequest("POST", Uri.parse("${_api.baseurl}/events/"));
+    try {
+      var request = new http.MultipartRequest(
+          "POST", Uri.parse("${_api.baseurl}/events/"));
 
-    if (widget.event != null) {
-      request = new http.MultipartRequest(
-          "PUT", Uri.parse("${_api.baseurl}/event/${widget.event?.id}/"));
-      print('Putting');
-    }
+      if (widget.event != null) {
+        request = new http.MultipartRequest(
+            "PUT", Uri.parse("${_api.baseurl}/event/${widget.event?.id}/"));
+        print('Putting');
+      }
 
-    request.headers.addAll({
-      HttpHeaders.authorizationHeader: 'Token $token',
-    });
-    request.fields["name"] = _eventNameController.text;
-    request.fields["about"] = _aboutEventController.text;
-    request.fields["event_time"] = _eventTimeController.text;
-    request.fields["event_date"] = _selectedDate;
+      request.headers.addAll({
+        HttpHeaders.authorizationHeader: 'Token $token',
+      });
+      request.fields["name"] = _eventNameController.text;
+      request.fields["about"] = _aboutEventController.text;
+      request.fields["event_time"] = _eventTimeController.text;
+      request.fields["event_date"] = _selectedDate;
 
-    if (result != null) {
-      request.files.add(await http.MultipartFile.fromPath(
-          'image', "${result!.files.single.path}"));
-    }
+      if (result != null) {
+        request.files.add(await http.MultipartFile.fromPath(
+            'image', "${result!.files.single.path}"));
+      }
 
-    var response = await request.send();
-    print(response.statusCode);
-    if (response.statusCode == 201) {
-      //Event created
-      String data = await response.stream.bytesToString();
-      var item = jsonDecode(data);
-      eventItem = Event.fromJson(item);
-      _changePage(3);
-      return;
-    }
+      var response = await request.send();
+      print(response.statusCode);
+      if (response.statusCode == 201) {
+        //Event created
+        String data = await response.stream.bytesToString();
+        var item = jsonDecode(data);
+        eventItem = Event.fromJson(item);
+        _changePage(3);
+        return;
+      }
 
-    if (response.statusCode == 200) {
-      //Event updated
-      String data = await response.stream.bytesToString();
-      var item = jsonDecode(data);
-      // if(widget.callback != null){
-      widget.callback!(Event.fromJson(item));
-      // }
-      return;
+      if (response.statusCode == 200) {
+        //Event updated
+        String data = await response.stream.bytesToString();
+        var item = jsonDecode(data);
+        // if(widget.callback != null){
+        widget.callback!(Event.fromJson(item));
+        // }
+        return;
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      print("error is $e");
     }
   }
 
