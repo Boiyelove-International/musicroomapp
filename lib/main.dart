@@ -32,7 +32,7 @@ void main() {
 
   FCMService();
 
-  runApp( MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -68,13 +68,15 @@ class MyApp extends StatelessWidget {
           // Routes.allSuggestions: (BuildContext context) => SuggestionScreen(title: "All Suggestions", suggestionType: SuggestionType.All,),
           // Routes.acceptedSuggestions: (BuildContext context) => SuggestionScreen(suggestionType: SuggestionType.Accepted, title: "Accepted Suggestions"),
           // Routes.partyPlaylist: (BuildContext context) => PartyPlayList(),
-          Routes.premium:  (BuildContext context) => PremiumScreen(),
+          Routes.premium: (BuildContext context) => PremiumScreen(),
           Routes.subscription: (BuildContext context) => SubscriptionScreen(),
-          Routes.yourRoom:  (BuildContext context) => YourRoom(),
-          Routes.advert:  (BuildContext context) => Advert(),
-          Routes.registerPartyGuest : (BuildContext context) => RegisterPartyGuest(),
-          Routes.partyGuestProfile: (BuildContext context)=> PartyGuestProfile(),
-          Routes.eventCardList:  (BuildContext context)=> EventListScreen(),
+          Routes.yourRoom: (BuildContext context) => YourRoom(),
+          Routes.advert: (BuildContext context) => Advert(),
+          Routes.registerPartyGuest: (BuildContext context) =>
+              RegisterPartyGuest(),
+          Routes.partyGuestProfile: (BuildContext context) =>
+              PartyGuestProfile(),
+          Routes.eventCardList: (BuildContext context) => EventListScreen(),
         });
   }
 }
@@ -139,17 +141,21 @@ class OnboardPageModel extends StatelessWidget {
               child: Container(
                 height: MediaQuery.of(context).size.height * 0.5,
                 decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage("$image"),
-                  fit: BoxFit.contain
-                )
-                ),
+                    image: DecorationImage(
+                        image: AssetImage("$image"), fit: BoxFit.contain)),
               )),
           SizedBox(height: 10),
           Text("$heading",
-              style: GoogleFonts.workSans(textStyle: headline4, fontWeight: FontWeight.w700, height:1.3)),
+              style: GoogleFonts.workSans(
+                  textStyle: headline4,
+                  fontWeight: FontWeight.w700,
+                  height: 1.3)),
           SizedBox(height: 25),
-          Text("$subtitle", style: GoogleFonts.workSans(textStyle: subtitle2, fontWeight: FontWeight.w300, height:2)),
+          Text("$subtitle",
+              style: GoogleFonts.workSans(
+                  textStyle: subtitle2,
+                  fontWeight: FontWeight.w300,
+                  height: 2)),
         ]));
   }
 }
@@ -165,7 +171,6 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
   int currPage = 0;
   PageController _onboardPagesController = PageController(initialPage: 0);
   late Timer _timer;
-
 
   List<Widget> _onboardPages = [
     OnboardPageModel(
@@ -244,11 +249,15 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
                                 backgroundColor: MaterialStateProperty.all<Color>(
                                     Colors.transparent),
                                 padding: MaterialStateProperty.all<EdgeInsets>(
-                                    EdgeInsets.only(right: 60, left: 60, top:18, bottom: 18)),
-                                foregroundColor: MaterialStateProperty.all<Color>(
-                                    DarkPalette.darkGold),
-                                shape: MaterialStateProperty.all<
-                                        RoundedRectangleBorder>(
+                                    EdgeInsets.only(
+                                        right: 60,
+                                        left: 60,
+                                        top: 18,
+                                        bottom: 18)),
+                                foregroundColor:
+                                    MaterialStateProperty.all<Color>(
+                                        DarkPalette.darkGold),
+                                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                                     RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(5.0),
                                         side: BorderSide(color: DarkPalette.darkGold)))),
@@ -256,8 +265,7 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
                               Navigator.pushReplacementNamed(
                                   context, Routes.decision);
                             },
-                            child: Text("Get Started", style:GoogleFonts.workSans(fontSize: 10,
-                                fontWeight: FontWeight.w600, height: 1.3)))
+                            child: Text("Get Started", style: GoogleFonts.workSans(fontSize: 10, fontWeight: FontWeight.w600, height: 1.3)))
                       ],
                     )
                   ],
@@ -289,15 +297,14 @@ class _DecisionPageState extends State<DecisionPage> {
                     children: [
                       Text("Let's make a decision.",
                           style: GoogleFonts.workSans(
-                            fontWeight: FontWeight.w700,
-                            textStyle: headline4
-                          )),
+                              fontWeight: FontWeight.w700,
+                              textStyle: headline4)),
                       SizedBox(height: 20),
-                      Text("What would you be suing this application as",
-                      style: GoogleFonts.workSans(
-                        textStyle: subtitle2,
-                        fontWeight: FontWeight.w300
-                      ),),
+                      Text(
+                        "What would you be suing this application as",
+                        style: GoogleFonts.workSans(
+                            textStyle: subtitle2, fontWeight: FontWeight.w300),
+                      ),
                       SizedBox(height: 50),
                       Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -340,12 +347,12 @@ class _DecisionPageState extends State<DecisionPage> {
                                         child: Padding(
                                             padding: EdgeInsets.all(15),
                                             child: Text("DJ / Event Center",
+                                                textAlign: TextAlign.center,
                                                 style: GoogleFonts.workSans(
-                                                  textStyle: subtitle2,
+                                                    textStyle: subtitle2,
                                                     color: DarkPalette.darkDark,
                                                     fontWeight:
-                                                    FontWeight.w400
-                                                )))),
+                                                        FontWeight.w400)))),
                                   ),
                                   Visibility(
                                     visible: _selectedUserType ==
@@ -405,12 +412,12 @@ class _DecisionPageState extends State<DecisionPage> {
                                           child: Padding(
                                               padding: EdgeInsets.all(15),
                                               child: Text("Event Guest",
-                                                  style:GoogleFonts.workSans(
-                                                  textStyle: subtitle2,
-                                                  color: DarkPalette.darkDark,
-                                                  fontWeight:
-                                                  FontWeight.w400
-                                              )))),
+                                                  style: GoogleFonts.workSans(
+                                                      textStyle: subtitle2,
+                                                      color:
+                                                          DarkPalette.darkDark,
+                                                      fontWeight:
+                                                          FontWeight.w400)))),
                                     ),
                                     Visibility(
                                       visible: _selectedUserType ==
@@ -431,82 +438,85 @@ class _DecisionPageState extends State<DecisionPage> {
                                 )),
                           ]),
                       SizedBox(height: 50),
-                      _selectedUserType == UserType.partyOrganizer ?
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton(
-                                style: ButtonStyle(
-                                    textStyle: MaterialStateProperty.all<TextStyle>(
-                                        TextStyle(fontSize: 10)),
-                                    backgroundColor: MaterialStateProperty.all<Color>(
-                                        Colors.transparent),
-                                    padding: MaterialStateProperty.all<EdgeInsets>(
-                                        EdgeInsets.only(
-                                            top: 20,
-                                            right: 40,
-                                            left: 40,
-                                            bottom: 20)),
-                                    foregroundColor: MaterialStateProperty.all<Color>(
-                                        DarkPalette.darkGold),
-                                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(5.0),
-                                        side: BorderSide(color: DarkPalette.darkGold)))),
-                                onPressed: () {
-                                  Navigator.of(context).pushNamed(
-                                      Routes.registerOrganizer);
-
-                                },
-                                child: Text("Let's Get Going",
-                                    style: GoogleFonts.workSans(
-                                        fontSize: 12,
-                                        fontWeight:
-                                        FontWeight.w700
-                                    ))),
-                          )
-                        ],
-                      ) : Row(children: [
-                        Expanded(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                boxShadow: [
-                                  BoxShadow(
-                                      color: Colors.black26,
-                                      offset: Offset(0, 4),
-                                      blurRadius: 5.0)
-                                ],
-                                gradient: DarkPalette.borderGradient1,
-                                // color: Colors.deepPurple.shade300,
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                              child: ElevatedButton(
-                                style: ButtonStyle(
-                                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                                    RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(5.0),
+                      _selectedUserType == UserType.partyOrganizer
+                          ? Row(
+                              children: [
+                                Expanded(
+                                  child: ElevatedButton(
+                                      style: ButtonStyle(
+                                          textStyle:
+                                              MaterialStateProperty.all<TextStyle>(
+                                                  TextStyle(fontSize: 10)),
+                                          backgroundColor:
+                                              MaterialStateProperty.all<Color>(
+                                                  Colors.transparent),
+                                          padding: MaterialStateProperty.all<EdgeInsets>(
+                                              EdgeInsets.only(
+                                                  top: 20,
+                                                  right: 40,
+                                                  left: 40,
+                                                  bottom: 20)),
+                                          foregroundColor:
+                                              MaterialStateProperty.all<Color>(
+                                                  DarkPalette.darkGold),
+                                          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                              RoundedRectangleBorder(borderRadius: BorderRadius.circular(5.0), side: BorderSide(color: DarkPalette.darkGold)))),
+                                      onPressed: () {
+                                        Navigator.of(context).pushNamed(
+                                            Routes.registerOrganizer);
+                                      },
+                                      child: Text("Let's Get Going", style: GoogleFonts.workSans(fontSize: 12, fontWeight: FontWeight.w700))),
+                                )
+                              ],
+                            )
+                          : Row(children: [
+                              Expanded(
+                                  child: Container(
+                                decoration: BoxDecoration(
+                                  boxShadow: [
+                                    BoxShadow(
+                                        color: Colors.black26,
+                                        offset: Offset(0, 4),
+                                        blurRadius: 5.0)
+                                  ],
+                                  gradient: DarkPalette.borderGradient1,
+                                  // color: Colors.deepPurple.shade300,
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                                child: ElevatedButton(
+                                  style: ButtonStyle(
+                                    shape: MaterialStateProperty.all<
+                                        RoundedRectangleBorder>(
+                                      RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(5.0),
+                                      ),
                                     ),
+                                    minimumSize:
+                                        MaterialStateProperty.all(Size(50, 50)),
+                                    backgroundColor: MaterialStateProperty.all(
+                                        Colors.transparent),
+                                    // elevation: MaterialStateProperty.all(3),
+                                    shadowColor: MaterialStateProperty.all(
+                                        Colors.transparent),
                                   ),
-                                  minimumSize: MaterialStateProperty.all(Size(50, 50)),
-                                  backgroundColor: MaterialStateProperty.all(Colors.transparent),
-                                  // elevation: MaterialStateProperty.all(3),
-                                  shadowColor: MaterialStateProperty.all(Colors.transparent),
-                                ),
-                                onPressed: () {
-                                  Navigator.of(context).pushNamed(
-                                      Routes.registerPartyGuest);
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                    top: 10,
-                                    bottom: 10,
+                                  onPressed: () {
+                                    Navigator.of(context)
+                                        .pushNamed(Routes.registerPartyGuest);
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                      top: 10,
+                                      bottom: 10,
+                                    ),
+                                    child: Text("Let's get going",
+                                        style: TextStyle(
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.bold)),
                                   ),
-                                  child: Text("Let's get going",
-                                      style: TextStyle(
-                                          color: Colors.black, fontWeight: FontWeight.bold)),
                                 ),
-                              ),
-                            ))
-                      ])
+                              ))
+                            ])
                     ]))));
   }
 }
