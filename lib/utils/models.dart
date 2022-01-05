@@ -81,6 +81,7 @@ class Event{
   String? image;
   String? code;
   String? organizer;
+  String? startsIn;
   List attendees =  [];
   List? suggestions =[];
   int suggestersCount = 0;
@@ -98,6 +99,7 @@ class Event{
     required this.code,
     required this.organizer,
     required this.attendees,
+    this.startsIn,
     this.suggestions,
     required this.suggestersCount,
   });
@@ -107,9 +109,10 @@ class Event{
 
   factory Event.fromJson(Map<String, dynamic> data){
     String s  = data["event_time"];
-    TimeOfDay _event_time = TimeOfDay(hour:int.parse(s.split(":")[0]),minute: int.parse(s.split(":")[1]));
+    TimeOfDay _event_time = TimeOfDay(hour:int.parse(s.split(":")[0]), minute: int.parse(s.split(":")[1]));
     DateFormat format = new DateFormat("yyy-mm-dd");
     DateTime _event_date = format.parse(data["event_date"]);
+    _event_date = DateTime(_event_date.year, _event_date.month, _event_date.day, _event_time.hour, _event_time.minute);
     // event_time =
     // data is {'id': 2, 
     // 'organizer_display_picture': None, 
@@ -125,6 +128,17 @@ class Event{
     // 'attendees': [], 
     // 'suggestions': []}
 
+    DateTime _now = DateTime.now();
+    int inMinutes = _event_date.difference(_now).inMinutes;
+    int inHours = _event_date.difference(_now).inHours;
+    if(inHours < 0) inHours = 0;
+    if(inMinutes < 0) inMinutes = 0;
+    // print("${_now.day} -- ${_now.hour} -- ${_now.minute}");
+    // print("Date time ${_event_date.toString()} >>> ${_event_date.difference(_now).inHours}");
+    String startsIn = "${inHours}h: ${(inMinutes - (inHours*60)).abs()}m";
+
+
+
     return Event(
       id : data["id"],
       about: data["about"],
@@ -136,6 +150,7 @@ class Event{
       event_date: _event_date,
       image: data["image"],
       code: data["code"],
+      startsIn: startsIn,
       organizer: data["organizer"].toString(),
       attendees: data["attendees"]?? [],
       suggestions: data["suggestions"]?? [],

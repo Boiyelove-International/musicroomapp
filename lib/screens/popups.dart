@@ -672,25 +672,28 @@ class _CreateEventForm extends State<CreateEventForm> {
   }
 
   @override
-  void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
-    super.didChangeDependencies();
-
+  void initState() {
+    // TODO: implement initState
+    super.initState();
     if (widget.event != null) {
-      Event event = widget.event!;
-      var pickedDate = event.event_date;
-      _eventNameController.text = event.name!;
-      _aboutEventController.text = event.about!;
-      _eventTimeController.text = event.event_time.format(context);
-      _eventDateController.text =
-          DateFormat("dd MMMM, yyyy").format(event.event_date);
-      _selectedDate =
-          "${pickedDate.year}-${pickedDate.month}-${pickedDate.day}";
+      Future.delayed(Duration(milliseconds: 100), (){
+        Event event = widget.event!;
+        var pickedDate = event.event_date;
+        _eventNameController.text = event.name!;
+        _aboutEventController.text = event.about!;
+        _eventTimeController.text = event.event_time.format(context);
+        _eventDateController.text =
+            DateFormat("dd MMMM, yyyy").format(event.event_date);
+        _selectedDate =
+        "${pickedDate.year}-${pickedDate.month}-${pickedDate.day}";
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    print("widget.event?.image");
+    print(widget.event?.image);
     return Column(
       children: [
         Visibility(
@@ -1083,6 +1086,7 @@ class _CreateEventForm extends State<CreateEventForm> {
         request = new http.MultipartRequest(
             "PATCH", Uri.parse("${_api.baseurl}/event/${widget.event?.id}/"));
       }
+
 
       request.headers.addAll({
         HttpHeaders.authorizationHeader: 'Token $token',
@@ -1832,7 +1836,7 @@ class _JoinEventForm extends State<JoinEventForm> {
                                   borderRadius: BorderRadius.circular(30),
                                   color: DarkPalette.darkYellow),
                               child: Text(
-                                "Starts in 4hr:25m:20s",
+                                "Starts in ${eventData?.startsIn}",
                                 style: GoogleFonts.workSans(
                                     fontWeight: FontWeight.w300,
                                     fontSize: 12,

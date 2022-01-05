@@ -421,7 +421,7 @@ class _EventDetail extends State<EventDetail> {
       ),
       child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: [Text("Starts in"), Text("24h: 30m")]));
+          children: [Text("Starts in"), Text("${_event.startsIn}")]));
 
   Widget get _backButton => IconButton(
         icon: Icon(IconlyBold.arrow_left),
@@ -442,8 +442,7 @@ class _EventDetail extends State<EventDetail> {
                       topLeft: const Radius.circular(40.0),
                       topRight: const Radius.circular(40.0),
                     )),
-                padding:
-                    EdgeInsets.only(top: 10, left: 20, right: 20, bottom: 20),
+                padding: EdgeInsets.only(top: 10, left: 20, right: 20, bottom: MediaQuery.of(context).viewInsets.bottom),
                 height: MediaQuery.of(context).size.height * 0.6,
                 child: CreateEventForm(
                   event: _event,
@@ -455,7 +454,9 @@ class _EventDetail extends State<EventDetail> {
                   },
                 )),
             backgroundColor: Colors.transparent,
-            context: context)
+            context: context,
+            isScrollControlled: true
+    )
         .whenComplete(() {});
   }
 

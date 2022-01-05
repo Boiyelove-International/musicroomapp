@@ -102,7 +102,7 @@ class _EventListScreen extends State<EventListScreen> {
                                                     .min,
                                                 children: [
                                                   Text("Starts in"),
-                                                  Text("24h: 30m")
+                                                  Text("${event.startsIn}")
                                                 ])))),
                                 Positioned.fill(
                                     child: Align(

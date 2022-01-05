@@ -251,7 +251,7 @@ class _EventOrganizerHome extends State<EventOrganizerHome> {
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
                                                   Text("Starts in"),
-                                                  Text("24h: 30m")
+                                                  Text("${event.startsIn}")
                                                 ])))),
                                 Positioned.fill(
                                     child: Align(
@@ -350,7 +350,7 @@ class _EventOrganizerHome extends State<EventOrganizerHome> {
                             left: 20,
                             right: 20,
                             bottom: MediaQuery.of(context).viewInsets.bottom),
-                        height: MediaQuery.of(context).size.height * 0.5,
+                        height: MediaQuery.of(context).size.height * 0.58,
                         child: CreateEventForm()),
                     backgroundColor: Colors.transparent,
                     context: context,
