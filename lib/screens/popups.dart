@@ -1081,7 +1081,7 @@ class _CreateEventForm extends State<CreateEventForm> {
 
       if (widget.event != null) {
         request = new http.MultipartRequest(
-            "PUT", Uri.parse("${_api.baseurl}/event/${widget.event?.id}/"));
+            "PATCH", Uri.parse("${_api.baseurl}/event/${widget.event?.id}/"));
       }
 
       request.headers.addAll({

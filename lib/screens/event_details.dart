@@ -12,15 +12,16 @@ import 'package:musicroom/utils/models.dart';
 import '../routes.dart';
 import '../styles.dart';
 
-
 class EventDetail extends StatefulWidget {
   static const String routeName = "/eventDetail";
 
-  EventDetail({Key? key,
-    this.userType = UserType.partyGuest,
-    this.url, this.data,
-    required this.event
-  }): super(key: key);
+  EventDetail(
+      {Key? key,
+      this.userType = UserType.partyGuest,
+      this.url,
+      this.data,
+      required this.event})
+      : super(key: key);
 
   UserType? userType;
   Map<dynamic, dynamic>? data;
@@ -36,25 +37,25 @@ class _EventDetail extends State<EventDetail> {
   bool _showAbout = false;
   late Widget _rightContext = Container();
   Event get _event => widget.event;
-  set _event(Event value){
+  set _event(Event value) {
     widget.event = value;
   }
 
   @override
   Widget build(BuildContext context) {
-
-    switch (widget.userType){
-      case UserType.partyGuest:{
-        _rightContext = _contextMenuDots;
-        _showAbout = false;
-      }
-      break;
-      case UserType.partyOrganizer:{
-        _rightContext = _contextMenuDots;
-        _showAbout = true;
-
-      }
-      break;
+    switch (widget.userType) {
+      case UserType.partyGuest:
+        {
+          _rightContext = _contextMenuDots;
+          _showAbout = false;
+        }
+        break;
+      case UserType.partyOrganizer:
+        {
+          _rightContext = _contextMenuDots;
+          _showAbout = true;
+        }
+        break;
     }
 
     return Scaffold(
@@ -70,32 +71,27 @@ class _EventDetail extends State<EventDetail> {
               decoration: BoxDecoration(
                   image: DecorationImage(
                       fit: BoxFit.cover,
-                      image: NetworkImage(_event.image??'')
-                  )
-              ),
+                      image: NetworkImage(_event.image ?? ''))),
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
                   Positioned(
                       left: 2,
                       top: 30,
-                      child:
-                      _showAttendees ? _backButton : _timingBox),
+                      child: _showAttendees ? _backButton : _timingBox),
                   Positioned(
                       right: 2,
                       top: 30,
-                      child:
-                      _showAttendees ? _timingBox : _rightContext),
+                      child: _showAttendees ? _timingBox : _rightContext),
                   Positioned(
                     right: 0,
                     bottom: -40,
                     child: GestureDetector(
                         onTap: () {
                           // Navigator.of(context).pushNamed(Routes.partyPlaylist);
-                          Navigator.of(context).
-                          push(
-                              MaterialPageRoute(builder: (context)=> PartyPlayList(event: _event))
-                          );
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) =>
+                                  PartyPlayList(event: _event)));
                         },
                         child: Container(
                           height: 80,
@@ -106,27 +102,24 @@ class _EventDetail extends State<EventDetail> {
                           ),
                           child: Center(
                               child: Image.asset("assets/images/music.png",
-                                  height: 100, width: 100)
-                          ),
+                                  height: 100, width: 100)),
                         )),
                   ),
                   Positioned.fill(
                       child: Align(
-                        alignment: Alignment.topCenter,
-                        child: GestureDetector(
-                            onTap: (){
-                              Navigator.pop(context);
-                            },
-                            child: Container(
-                              width: MediaQuery.of(context).size.width *  0.3,
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(10)
-                              ),
-                              height:3,
-                            )
-                        ),
-                      )),
+                    alignment: Alignment.topCenter,
+                    child: GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        child: Container(
+                          width: MediaQuery.of(context).size.width * 0.3,
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10)),
+                          height: 3,
+                        )),
+                  )),
                 ],
               ),
             ),
@@ -153,8 +146,8 @@ class _EventDetail extends State<EventDetail> {
                         children: [
                           CircleAvatar(
                             radius: 25,
-                            backgroundImage:
-                            NetworkImage(_event.organizer_display_picture ?? ''),
+                            backgroundImage: NetworkImage(
+                                _event.organizer_display_picture ?? ''),
                           ),
                           SizedBox(
                             width: 20,
@@ -181,163 +174,163 @@ class _EventDetail extends State<EventDetail> {
                       _showAttendees
                           ? _attendees
                           : Column(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildAttendeeToggle(),
-                          SizedBox(height: 70),
-                          Text(
-                            "Party Stats",
-                            style: TextStyle(
-                                fontSize: 25,
-                                fontWeight: FontWeight.w900),
-                          ),
-                          SizedBox(height: 20),
-                          Row(
-                            children: [
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.of(context)
-                                      .push(MaterialPageRoute(
-                                      builder: (context)=>
-                                          SuggestionScreen(
-                                              suggestions: _event.suggestions ?? [],
-                                              title: "All Suggestion",
-                                              event: _event,
-                                              callBack:_allSuggestionActionHandler
-                                          )
-                                    )
-                                  );
-                                },
-                                child: Container(
-                                  width:
-                                  MediaQuery.of(context).size.width *
-                                      0.45,
-                                  padding: EdgeInsets.all(20),
-                                  decoration: BoxDecoration(
-                                      color: DarkPalette.darkGrey1,
-                                      borderRadius:
-                                      BorderRadius.circular(10)),
-                                  child: Center(
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Image.asset(
-                                            "assets/images/waving_hand.png",
-                                            height: 30,
-                                          ),
-                                          SizedBox(height: 15),
-                                          Text("${_event.suggestions?.length ?? 0}",
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                  fontSize: 30,
-                                                  fontWeight:
-                                                  FontWeight.w900)),
-                                          SizedBox(height: 15),
-                                          Text(
-                                            "Total Suggestions",
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(fontSize: 8),
-                                          ),
-                                        ],
-                                      )),
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildAttendeeToggle(),
+                                SizedBox(height: 70),
+                                Text(
+                                  "Party Stats",
+                                  style: TextStyle(
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.w900),
                                 ),
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                              GestureDetector(
-                                  onTap: () {
-                                    Navigator.of(context)
-                                        .push(MaterialPageRoute(
-                                        builder: (context)=>
-                                            SuggestionScreen(
-                                                suggestions: _event.suggestions?.where((element) => element['accepted'] == true).toList()  ?? [],
-                                                title: "Accepted Suggestion",
+                                SizedBox(height: 20),
+                                Row(
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.of(context).push(MaterialPageRoute(
+                                            builder: (context) => SuggestionScreen(
+                                                suggestions:
+                                                    _event.suggestions ?? [],
+                                                title: "All Suggestion",
                                                 event: _event,
-                                                callBack:_allSuggestionActionHandler
-                                            )
-                                    ));
-                                  },
-                                  child: Container(
-                                    width: MediaQuery.of(context)
-                                        .size
-                                        .width *
-                                        0.45,
-                                    padding: EdgeInsets.all(20),
-                                    decoration: BoxDecoration(
-                                        gradient:
-                                        DarkPalette.borderGradient1,
-                                        borderRadius:
-                                        BorderRadius.circular(10)),
-                                    child: Center(
-                                        child: Column(
+                                                callBack:
+                                                    _allSuggestionActionHandler)));
+                                      },
+                                      child: Container(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.45,
+                                        padding: EdgeInsets.all(20),
+                                        decoration: BoxDecoration(
+                                            color: DarkPalette.darkGrey1,
+                                            borderRadius:
+                                                BorderRadius.circular(10)),
+                                        child: Center(
+                                            child: Column(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             Image.asset(
-                                              "assets/images/thumbs_up.png",
+                                              "assets/images/waving_hand.png",
                                               height: 30,
                                             ),
                                             SizedBox(height: 15),
-                                            Text(_getAcceptedSuggestion(),
+                                            Text(
+                                                "${_event.suggestions?.length ?? 0}",
+                                                textAlign: TextAlign.center,
                                                 style: TextStyle(
                                                     fontSize: 30,
                                                     fontWeight:
-                                                    FontWeight.w900)),
+                                                        FontWeight.w900)),
                                             SizedBox(height: 15),
                                             Text(
-                                              "Accepted Suggestions",
+                                              "Total Suggestions",
                                               textAlign: TextAlign.center,
                                               style: TextStyle(fontSize: 8),
                                             ),
                                           ],
                                         )),
-                                  )
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 50),
-                          Text(
-                            "About",
-                            style: TextStyle(
-                                fontSize: 25,
-                                fontWeight: FontWeight.w900),
-                          ),
-                          SizedBox(height: 20),
-                          Text(
-                              "${_event.about}"),
-                          SizedBox(height: 20),
-                        ],
-                      )
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 10,
+                                    ),
+                                    GestureDetector(
+                                        onTap: () {
+                                          Navigator.of(context).push(MaterialPageRoute(
+                                              builder: (context) => SuggestionScreen(
+                                                  suggestions: _event
+                                                          .suggestions
+                                                          ?.where((element) =>
+                                                              element[
+                                                                  'accepted'] ==
+                                                              true)
+                                                          .toList() ??
+                                                      [],
+                                                  title: "Accepted Suggestion",
+                                                  event: _event,
+                                                  callBack:
+                                                      _allSuggestionActionHandler)));
+                                        },
+                                        child: Container(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.45,
+                                          padding: EdgeInsets.all(20),
+                                          decoration: BoxDecoration(
+                                              gradient:
+                                                  DarkPalette.borderGradient1,
+                                              borderRadius:
+                                                  BorderRadius.circular(10)),
+                                          child: Center(
+                                              child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Image.asset(
+                                                "assets/images/thumbs_up.png",
+                                                height: 30,
+                                              ),
+                                              SizedBox(height: 15),
+                                              Text(_getAcceptedSuggestion(),
+                                                  style: TextStyle(
+                                                      fontSize: 30,
+                                                      fontWeight:
+                                                          FontWeight.w900)),
+                                              SizedBox(height: 15),
+                                              Text(
+                                                "Accepted Suggestions",
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(fontSize: 8),
+                                              ),
+                                            ],
+                                          )),
+                                        )),
+                                  ],
+                                ),
+                                SizedBox(height: 50),
+                                Text(
+                                  "About",
+                                  style: TextStyle(
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.w900),
+                                ),
+                                SizedBox(height: 20),
+                                Text("${_event.about}"),
+                                SizedBox(height: 20),
+                              ],
+                            )
                     ]))
           ],
         ),
       ),
     );
-
   }
 
-  _allSuggestionActionHandler(int suggestion_id, bool action)async {
+  _allSuggestionActionHandler(int suggestion_id, bool action) async {
     print(action);
     Map<String, dynamic> payload = {
-      "suggestion_id":suggestion_id,
-      "accept_suggestion":action
+      "suggestion_id": suggestion_id,
+      "accept_suggestion": action
     };
     ApiBaseHelper _api = ApiBaseHelper();
-    _api.patch("/event/${_event.id}/suggestions/",
-        payload);
-
+    _api.patch("/event/${_event.id}/suggestions/", payload);
   }
 
-  String _getAcceptedSuggestion(){
+  String _getAcceptedSuggestion() {
     int accepted = 0;
-    accepted = _event.suggestions!.where((element) => element['accepted'] == 'accepted').toList().length;
+    accepted = _event.suggestions!
+        .where((element) => element['accepted'] == 'accepted')
+        .toList()
+        .length;
     return accepted.toString();
   }
 
-  Widget _buildAttendeeToggle(){
-    if(_event.attendees.length == 0) return Container();
+  Widget _buildAttendeeToggle() {
+    if (_event.attendees.length == 0) return Container();
 
     Map attendee = _event.attendees[0];
 
@@ -351,23 +344,19 @@ class _EventDetail extends State<EventDetail> {
           width: 20,
         ),
         Column(
-            crossAxisAlignment:
-            CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 "${attendee['display_name']}",
-                style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 3),
               Text("Attendee",
                   style: TextStyle(
                     fontSize: 10,
                   ))
-            ]
-        ),
+            ]),
         Spacer(),
         InkWell(
           onTap: () {
@@ -398,7 +387,7 @@ class _EventDetail extends State<EventDetail> {
           children: [
             CircleAvatar(
               radius: 25,
-              backgroundImage:NetworkImage(attendee['profile_photo']?? ''),
+              backgroundImage: NetworkImage(attendee['profile_photo'] ?? ''),
             ),
             SizedBox(
               width: 20,
@@ -409,8 +398,7 @@ class _EventDetail extends State<EventDetail> {
                 children: [
                   Text(
                     "${attendee['display_name']}",
-                    style:
-                    TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 3),
                   Text("Attendee",
@@ -424,8 +412,7 @@ class _EventDetail extends State<EventDetail> {
       separatorBuilder: (context, index) {
         return SizedBox(height: 20);
       },
-      itemCount: _event.attendees.length
-  );
+      itemCount: _event.attendees.length);
   Widget get _timingBox => Container(
       padding: EdgeInsets.all(10.0),
       decoration: BoxDecoration(
@@ -434,80 +421,78 @@ class _EventDetail extends State<EventDetail> {
       ),
       child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: [Text("Starts in"), Text("24h: 30m")])
-  );
+          children: [Text("Starts in"), Text("24h: 30m")]));
 
   Widget get _backButton => IconButton(
-    icon: Icon(IconlyBold.arrow_left),
-    color: Colors.white,
-    onPressed: () {
-      setState(() {
-        _showAttendees = false;
-      });
-    },
-  );
+        icon: Icon(IconlyBold.arrow_left),
+        color: Colors.white,
+        onPressed: () {
+          setState(() {
+            _showAttendees = false;
+          });
+        },
+      );
 
-  toggleEditEvent(){
+  toggleEditEvent() {
     showModalBottomSheet<void>(
-        builder: (BuildContext context) => Container(
-            decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: new BorderRadius.only(
-                  topLeft: const Radius.circular(40.0),
-                  topRight: const Radius.circular(40.0),
+            builder: (BuildContext context) => Container(
+                decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: new BorderRadius.only(
+                      topLeft: const Radius.circular(40.0),
+                      topRight: const Radius.circular(40.0),
+                    )),
+                padding:
+                    EdgeInsets.only(top: 10, left: 20, right: 20, bottom: 20),
+                height: MediaQuery.of(context).size.height * 0.6,
+                child: CreateEventForm(
+                  event: _event,
+                  callback: (Event updateEvent) {
+                    setState(() {
+                      _event = updateEvent;
+                    });
+                    Navigator.pop(context);
+                  },
                 )),
-            padding: EdgeInsets.only(top: 10, left: 20, right: 20, bottom: 20),
-            height: MediaQuery.of(context).size.height * 0.6,
-            child: CreateEventForm(
-              event: _event,
-              callback: (Event updateEvent){
-                setState(() { _event = updateEvent;   });
-                Navigator.pop(context);
-              },
-            )
-        ),
-        backgroundColor: Colors.transparent,
-        context: context
-    ).whenComplete((){
-
-    });
+            backgroundColor: Colors.transparent,
+            context: context)
+        .whenComplete(() {});
   }
-  _deleteEvent()async {
+
+  _deleteEvent() async {
     ApiBaseHelper _api = ApiBaseHelper();
     _api.delete("/event/${_event.id}/", {});
-    Navigator.pop(context, {"rm_event":_event.id});
+    Navigator.pop(context, {"rm_event": _event.id});
   }
+
   Widget get _contextMenuDots => FocusedMenuHolder(
-      openWithTap: true,
-      menuWidth: MediaQuery.of(context).size.width * 0.4,
-      child: Icon(Icons.more_vert, color: Colors.white, size: 50),
-      onPressed: () {},
-      menuItems: <FocusedMenuItem>[
-        FocusedMenuItem(
-            title: Padding(
-                padding: EdgeInsets.all(4),
-                child: Text(
-                  "Share Event",
-                  style: TextStyle(color: Colors.black),
-                )),
-            onPressed: () {
-              Navigator.of(context).push(
-                  MaterialPageRoute(
-                      builder: (context)=> YourRoom(
-                        code: _event.code!,
-                      )
-                  )
-              );
-            }),
-        FocusedMenuItem(
-            title: Text("Edit Event", style: TextStyle(color: Colors.black)),
-            onPressed: () {
-              toggleEditEvent();
-            }
-        ),
-        FocusedMenuItem(
-            title: Text("Delete Event", style: TextStyle(color: Colors.red)),
-            onPressed: _deleteEvent
-        )
-      ]);
+          openWithTap: true,
+          menuWidth: MediaQuery.of(context).size.width * 0.4,
+          child: Icon(Icons.more_vert, color: Colors.white, size: 50),
+          onPressed: () {},
+          menuItems: <FocusedMenuItem>[
+            FocusedMenuItem(
+                title: Padding(
+                    padding: EdgeInsets.all(4),
+                    child: Text(
+                      "Share Event",
+                      style: TextStyle(color: Colors.black),
+                    )),
+                onPressed: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => YourRoom(
+                            code: _event.code!,
+                          )));
+                }),
+            FocusedMenuItem(
+                title:
+                    Text("Edit Event", style: TextStyle(color: Colors.black)),
+                onPressed: () {
+                  toggleEditEvent();
+                }),
+            FocusedMenuItem(
+                title:
+                    Text("Delete Event", style: TextStyle(color: Colors.red)),
+                onPressed: _deleteEvent)
+          ]);
 }
