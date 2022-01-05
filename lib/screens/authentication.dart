@@ -209,8 +209,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         GestureDetector(
-                            child: Image.asset("assets/images/google_icon.png"),
-                          onTap: (){
+                          child: Image.asset("assets/images/google_icon.png"),
+                          onTap: () {
                             _googleSocialLogin();
                           },
                         ),
@@ -218,8 +218,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           width: 30,
                         ),
                         GestureDetector(
-                            child: Image.asset("assets/images/facebook_icon.png"),
-                            onTap: _facebookSocialLogin,
+                          child: Image.asset("assets/images/facebook_icon.png"),
+                          onTap: _facebookSocialLogin,
                         ),
                         SizedBox(
                           width: 30,
@@ -258,17 +258,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ))));
   }
 
-  _facebookSocialLogin()async {
+  _facebookSocialLogin() async {
     final facebookLogin = FacebookLogin();
     final result = await facebookLogin.logIn(['email']);
 
     switch (result.status) {
       case FacebookLoginStatus.loggedIn:
-         print(result);
-         _getFacebookDetails(result);
+        print(result);
+        _getFacebookDetails(result);
         break;
       case FacebookLoginStatus.cancelledByUser:
-         print('was canceled');
+        print('was canceled');
         break;
       case FacebookLoginStatus.error:
         print("Facebook error");
@@ -276,36 +276,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
-  _getFacebookDetails(FacebookLoginResult result)async {
+  _getFacebookDetails(FacebookLoginResult result) async {
     setState(() {
       isLoading = true;
     });
-   try{
-     final token = result.accessToken.token;
-     final graphResponse = await http.get(
-         Uri.parse("https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,picture,email&access_token=${result.accessToken.token}")
-     );
-     final profile = jsonDecode(graphResponse.body);
-     print(profile);
-     Map<String, dynamic> payload = {
-       "access_token" : result.accessToken.token,
-       "id_token" : result.accessToken.userId,
-       "email": profile['email'],
-       "name": profile['first_name']+' '+profile['last_name'],
-       "image_url": profile['picture']['data']['url'],
-       "social":"facebook"
-     };
+    try {
+      final token = result.accessToken.token;
+      final graphResponse = await http.get(Uri.parse(
+          "https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,picture,email&access_token=${result.accessToken.token}"));
+      final profile = jsonDecode(graphResponse.body);
+      print(profile);
+      Map<String, dynamic> payload = {
+        "access_token": result.accessToken.token,
+        "id_token": result.accessToken.userId,
+        "email": profile['email'],
+        "name": profile['first_name'] + ' ' + profile['last_name'],
+        "image_url": profile['picture']['data']['url'],
+        "social": "facebook"
+      };
 
-     _login(payload);
-   }catch(e){
-     print(e);
-   }
+      _login(payload);
+    } catch (e) {
+      print(e);
+    }
 
     setState(() {
       isLoading = false;
     });
   }
-  _googleSocialLogin()async {
+
+  _googleSocialLogin() async {
     GoogleSignIn _googleSignIn = GoogleSignIn(
       scopes: [
         'email',
@@ -326,23 +326,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
       print(data?.id);
 
       Map<String, dynamic> payload = {
-        "access_token" : userCredential?.accessToken,
-        "id_token" : userCredential?.idToken,
+        "access_token": userCredential?.accessToken,
+        "id_token": userCredential?.idToken,
         "email": data?.email,
         "name": data?.displayName,
         "image_url": data?.photoUrl,
-        "social":"google"
+        "social": "google"
       };
 
       _login(payload);
-
     } catch (error) {
       print(error);
     }
     setState(() {
       isLoading = false;
     });
-
   }
 
   _login(Map<String, dynamic> payload) async {
@@ -354,11 +352,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     try {
-      api.post(
-          "/login/",
-          payload,
-          context: context
-      ).then((data) async {
+      api.post("/login/", payload, context: context).then((data) async {
         print("value is $data");
         await prefs.setString("token", data["token"]);
         await prefs.setString("email", data["email"]);
@@ -389,13 +383,13 @@ class _LoginScreenState extends State<LoginScreen> {
   TextEditingController _passwordController = TextEditingController();
   bool isLoading = false;
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    _emailController.text = "roland@boiyelove.website";
-    _passwordController.text = "somepassword";
-  }
+  // @override
+  // void initState() {
+  //   // TODO: implement initState
+  //   super.initState();
+  //   _emailController.text = "roland@boiyelove.website";
+  //   _passwordController.text = "somepassword";
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -494,12 +488,14 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         SizedBox(height: 10),
         GoldButton(
-            buttonText: "Sign In", isLoading: isLoading, onPressed:(){
+            buttonText: "Sign In",
+            isLoading: isLoading,
+            onPressed: () {
               _login({
                 "username": _emailController.text.toLowerCase(),
                 "password": _passwordController.text
               });
-        }),
+            }),
         SizedBox(height: 50),
         Text(
           "OR",
@@ -510,7 +506,7 @@ class _LoginScreenState extends State<LoginScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             GestureDetector(
-              onTap: (){
+              onTap: () {
                 _googleSocialLogin();
               },
               child: Image.asset("assets/images/google_icon.png"),
@@ -519,10 +515,10 @@ class _LoginScreenState extends State<LoginScreen> {
               width: 20,
             ),
             GestureDetector(
-                child: Image.asset("assets/images/facebook_icon.png"),
-                onTap: (){
-                  _facebookSocialLogin();
-                },
+              child: Image.asset("assets/images/facebook_icon.png"),
+              onTap: () {
+                _facebookSocialLogin();
+              },
             ),
             SizedBox(
               width: 20,
@@ -555,7 +551,7 @@ class _LoginScreenState extends State<LoginScreen> {
     )));
   }
 
-  _facebookSocialLogin()async {
+  _facebookSocialLogin() async {
     final facebookLogin = FacebookLogin();
     final result = await facebookLogin.logIn(['email']);
 
@@ -572,28 +568,28 @@ class _LoginScreenState extends State<LoginScreen> {
         break;
     }
   }
-  _getFacebookDetails(FacebookLoginResult result)async {
+
+  _getFacebookDetails(FacebookLoginResult result) async {
     setState(() {
       isLoading = true;
     });
-    try{
+    try {
       final token = result.accessToken.token;
-      final graphResponse = await http.get(
-          Uri.parse("https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,picture,email&access_token=${result.accessToken.token}")
-      );
+      final graphResponse = await http.get(Uri.parse(
+          "https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,picture,email&access_token=${result.accessToken.token}"));
       final profile = jsonDecode(graphResponse.body);
       print(profile);
       Map<String, dynamic> payload = {
-        "access_token" : result.accessToken.token,
-        "id_token" : result.accessToken.userId,
+        "access_token": result.accessToken.token,
+        "id_token": result.accessToken.userId,
         "email": profile['email'],
-        "name": profile['first_name']+' '+profile['last_name'],
+        "name": profile['first_name'] + ' ' + profile['last_name'],
         "image_url": profile['picture']['data']['url'],
-        "social":"facebook"
+        "social": "facebook"
       };
 
       _login(payload);
-    }catch(e){
+    } catch (e) {
       print(e);
     }
 
@@ -601,7 +597,8 @@ class _LoginScreenState extends State<LoginScreen> {
       isLoading = false;
     });
   }
-  _googleSocialLogin()async {
+
+  _googleSocialLogin() async {
     GoogleSignIn _googleSignIn = GoogleSignIn(
       scopes: [
         'email',
@@ -622,23 +619,21 @@ class _LoginScreenState extends State<LoginScreen> {
       print(data?.id);
 
       Map<String, dynamic> payload = {
-        "access_token" : userCredential?.accessToken,
-        "id_token" : userCredential?.idToken,
+        "access_token": userCredential?.accessToken,
+        "id_token": userCredential?.idToken,
         "email": data?.email,
         "name": data?.displayName,
         "image_url": data?.photoUrl,
-        "social":"google"
+        "social": "google"
       };
 
       _login(payload);
-
     } catch (error) {
       print(error);
     }
     setState(() {
       isLoading = false;
     });
-
   }
 
   _login(Map<String, dynamic> payload) async {
@@ -650,11 +645,7 @@ class _LoginScreenState extends State<LoginScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.remove("token");
     try {
-      api.post(
-              "/login/",
-              payload,
-              context: context)
-          .then((data) async {
+      api.post("/login/", payload, context: context).then((data) async {
         print("value is $data");
         await prefs.setString("token", data["token"]);
         await prefs.setString("email", data["email"]);
@@ -671,7 +662,6 @@ class _LoginScreenState extends State<LoginScreen> {
       print("error is $e");
     }
   }
-
 }
 
 class ForgotPassword extends StatefulWidget {
