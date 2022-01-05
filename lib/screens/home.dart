@@ -67,13 +67,16 @@ class _EventOrganizerHome extends State<EventOrganizerHome> {
                     fontSize: 20, fontWeight: FontWeight.w300),
               ),
               SizedBox(width: 5),
-              Text(
+              Flexible(
+                  child: Text(
                 "$display_name",
+                overflow: TextOverflow.ellipsis,
+                softWrap: true,
                 style: GoogleFonts.workSans(
                   fontWeight: FontWeight.w700,
                   fontSize: 27,
                 ),
-              )
+              ))
             ],
           ),
           actions: [
@@ -171,11 +174,10 @@ class _EventOrganizerHome extends State<EventOrganizerHome> {
                                             context,
                                             MaterialPageRoute(
                                                 builder: (context) =>
-                                                  SearchResultScreen(
-                                                    url:
-                                                        "/search/?term=${_searchContoller.text}",
-                                                  )
-                                            ),
+                                                    SearchResultScreen(
+                                                      url:
+                                                          "/search/?term=${_searchContoller.text}",
+                                                    )),
                                           );
                                         }
                                       }),
@@ -325,7 +327,7 @@ class _EventOrganizerHome extends State<EventOrganizerHome> {
                       },
                       childCount: _events.length, // 1000 list items
                     )),
-                  )
+                  ),
                 ]))),
         floatingActionButton: Visibility(
             visible: showFab,
@@ -336,31 +338,29 @@ class _EventOrganizerHome extends State<EventOrganizerHome> {
                     showFab = false;
                   });
                   showModalBottomSheet<void>(
-                          builder: (BuildContext context) => Container(
-                              decoration: BoxDecoration(
-                                  color: Colors.red,
-                                  borderRadius: new BorderRadius.only(
-                                    topLeft: const Radius.circular(40.0),
-                                    topRight: const Radius.circular(40.0),
-                                  )),
-                              padding: EdgeInsets.only(
-                                  top: 30, left: 20, right: 20, bottom: MediaQuery.of(context).viewInsets.bottom),
-                              height: MediaQuery.of(context).size.height * 0.7  ,
-                              child: CreateEventForm()
-                          ),
-                          backgroundColor: Colors.transparent,
-                          context: context,
-                          isScrollControlled: true,
-                    ) .whenComplete(() => setState(() {
-                            showFab = true;
-                          }));
+                    builder: (BuildContext context) => Container(
+                        decoration: BoxDecoration(
+                            color: Colors.black,
+                            borderRadius: new BorderRadius.only(
+                              topLeft: const Radius.circular(40.0),
+                              topRight: const Radius.circular(40.0),
+                            )),
+                        padding: EdgeInsets.only(
+                            top: 30,
+                            left: 20,
+                            right: 20,
+                            bottom: MediaQuery.of(context).viewInsets.bottom),
+                        height: MediaQuery.of(context).size.height * 0.5,
+                        child: CreateEventForm()),
+                    backgroundColor: Colors.transparent,
+                    context: context,
+                    isScrollControlled: true,
+                  ).whenComplete(() => setState(() {
+                        showFab = true;
+                      }));
                 },
                 label: Text("Create an Event",
-                    style: TextStyle(color: Colors.black)
-                )
-            )
-        )
-    );
+                    style: TextStyle(color: Colors.black)))));
   }
 
   _gotoEventPage(eventItem) {
@@ -478,6 +478,7 @@ class _PartyGuestHome extends State<PartyGuestHome> {
               SizedBox(width: 5),
               Text(
                 "${display_name}",
+                overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.workSans(
                   fontWeight: FontWeight.w700,
                   fontSize: 27,
@@ -579,9 +580,7 @@ class _PartyGuestHome extends State<PartyGuestHome> {
                             ),
                           ),
                         ),
-                      ])
-                    )
-                  ),
+                      ]))),
                   Container(
                     child: Column(mainAxisSize: MainAxisSize.min, children: [
                       SizedBox(height: 30),

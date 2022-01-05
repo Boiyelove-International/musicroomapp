@@ -63,7 +63,7 @@
                   Replace "411409147347869" with your Facebook App ID here.
                   **NOTE**: The scheme needs to start with `fb` and then your ID.
                 -->
-                <string>fb411409147347869</string>
+                <string>fb471028527989498</string>
             </array>
         </dict>
     	<dict>
@@ -80,8 +80,8 @@
     <!-- End of the Google Sign-in Section -->
     <key>FacebookAppID</key>
 
-    <!-- Replace "411409147347869" with your Facebook App ID here. -->
-    <string>411409147347869</string>
+    <!-- Replace "471028527989498" with your Facebook App ID here. -->
+    <string>471028527989498</string>
     <key>FacebookDisplayName</key>
 
     <!-- Replace "YOUR_APP_NAME" with your Facebook App name. -->

@@ -713,7 +713,7 @@ class _CreateEventForm extends State<CreateEventForm> {
             )),
         Flexible(
           child: PageView(
-              // physics: NeverScrollableScrollPhysics(),
+              physics: NeverScrollableScrollPhysics(),
               controller: _pageController,
               children: [
                 SingleChildScrollView(
@@ -1061,8 +1061,7 @@ class _CreateEventForm extends State<CreateEventForm> {
               child: GoldButton(
                   isLoading: isLoading,
                   onPressed: _submit,
-                  buttonText: "Proceed")
-          )
+                  buttonText: "Proceed"))
         ])
       ]));
 
@@ -1199,7 +1198,7 @@ class SuggestEventForm extends StatefulWidget {
   SongModel? song;
   UserType? userType;
   bool slideToEvenGrid;
-  SuggestEventForm({this.song, this.userType, this.slideToEvenGrid=false});
+  SuggestEventForm({this.song, this.userType, this.slideToEvenGrid = false});
 
   @override
   _SuggestEventForm createState() => _SuggestEventForm();
@@ -1219,7 +1218,7 @@ class _SuggestEventForm extends State<SuggestEventForm> {
   void didChangeDependencies() {
     // TODO: implement didChangeDependencies
     super.didChangeDependencies();
-    if(widget.slideToEvenGrid){
+    if (widget.slideToEvenGrid) {
       _pageController = PageController(initialPage: 1);
     }
   }
@@ -1332,7 +1331,7 @@ class _SuggestEventForm extends State<SuggestEventForm> {
                     child: GridView.builder(
                         shrinkWrap: true,
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          // maxCrossAxisExtent: 300,
+                            // maxCrossAxisExtent: 300,
                             mainAxisExtent: 230,
                             // childAspectRatio: 2 / 3,
                             crossAxisCount: 2,
