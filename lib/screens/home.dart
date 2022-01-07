@@ -104,231 +104,243 @@ class _EventOrganizerHome extends State<EventOrganizerHome> {
         body: SafeArea(
             top: true,
             bottom: true,
-            child: Padding(
-                padding: EdgeInsets.only(top: 10, left: 10, right: 10),
-                child: CustomScrollView(slivers: [
-                  SliverToBoxAdapter(
-                    child: Container(
-                        height: MediaQuery.of(context).size.height * 0.3,
-                        margin: EdgeInsets.only(top: 20, bottom: 20),
-                        decoration: BoxDecoration(
-                            border: Border.all(),
-                            borderRadius: BorderRadius.all(Radius.circular(15)),
-                            image: DecorationImage(
-                              image: AssetImage(
-                                  "assets/images/home-gradient-bg.png"),
-                              fit: BoxFit.cover,
-                            )),
-                        padding: EdgeInsets.only(left: 15, right: 15),
-                        child: Center(
-                            child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                              Text(
-                                "Find your hits and favourties and add them to events, let's go.",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold,
-                                    height: 2),
-                              ),
-                              SizedBox(height: 20),
-                              TextFormField(
-                                controller: _searchContoller,
-                                validator: (value) {
-                                  if (value!.isEmpty || value == null) {
-                                    return "Enter a search query";
-                                  }
-                                },
-                                autofocus: false,
-                                autocorrect: false,
-                                style: TextStyle(color: Colors.black),
-                                decoration: InputDecoration(
-                                  border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(7.0),
-                                      borderSide: BorderSide(
-                                          color: Colors.transparent)),
-                                  enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(7.0),
-                                      borderSide: BorderSide(
-                                          color: Colors.transparent)),
-                                  focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(7.0),
-                                      borderSide: BorderSide(
-                                          color: Colors.transparent)),
-                                  filled: true,
-                                  fillColor: Colors.white,
-                                  hintText: "Find those hits",
-                                  hintStyle: TextStyle(fontSize: 13),
-                                  contentPadding: EdgeInsets.only(
-                                      left: 15, right: 15, top: 5, bottom: 5),
-                                  suffixIcon: IconButton(
-                                      icon: Icon(
-                                        IconlyBold.search,
-                                        color: DarkPalette.darkGold,
-                                      ),
-                                      onPressed: () {
-                                        if (_searchContoller.text != null &&
-                                            _searchContoller.text.isNotEmpty) {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    SearchResultScreen(
-                                                      url:
-                                                          "/search/?term=${_searchContoller.text}",
-                                                    )),
-                                          );
-                                        }
-                                      }),
+            child: RefreshIndicator(
+              onRefresh: _loadEvents,
+              child: Padding(
+                  padding: EdgeInsets.only(top: 10, left: 10, right: 10),
+                  child: CustomScrollView(slivers: [
+                    SliverToBoxAdapter(
+                      child: Container(
+                          height: MediaQuery.of(context).size.height * 0.3,
+                          margin: EdgeInsets.only(top: 20, bottom: 20),
+                          decoration: BoxDecoration(
+                              border: Border.all(),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(15)),
+                              image: DecorationImage(
+                                image: AssetImage(
+                                    "assets/images/home-gradient-bg.png"),
+                                fit: BoxFit.cover,
+                              )),
+                          padding: EdgeInsets.only(left: 15, right: 15),
+                          child: Center(
+                              child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                Text(
+                                  "Find your hits and favourties and add them to events, let's go.",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                      height: 2),
                                 ),
-                              ),
-                            ]))),
-                  ),
-                  SliverAppBar(
-                      backgroundColor: Colors.transparent,
-                      pinned: true,
-                      flexibleSpace: Padding(
-                          padding: EdgeInsets.only(
-                              left: 5, right: 5, top: 5, bottom: 10),
-                          child: Row(
-                            children: [
-                              Text("Your Events",
-                                  style: GoogleFonts.workSans(
-                                      fontSize: 23,
-                                      fontWeight: FontWeight.w700)),
-                              Spacer(),
-                              Transform.rotate(
-                                  angle: 90 * math.pi / 180,
-                                  child: IconButton(
-                                      onPressed: () {
-                                        showFab = false;
-                                        showModalBottomSheet(
-                                            context: context,
-                                            backgroundColor: Colors.transparent,
-                                            builder: (context) {
-                                              return PopupWidget(
-                                                popup: Popup.eventFilter,
-                                              );
-                                            }).whenComplete(() => setState(() {
-                                              showFab = true;
-                                            }));
-                                      },
-                                      icon: Icon(
-                                        IconlyBold.filter,
-                                        color: DarkPalette.darkGold,
-                                      )))
-                            ],
-                          ))),
-                  Visibility(
-                    child: _eventSkeleton(count: 4),
-                    visible: loadingEvents,
-                    replacement: SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                      (BuildContext context, int index) {
-                        Event event = _events[index];
-
-                        return InkWell(
-                          child: Container(
-                            height: 300,
-                            width: 300,
-                            padding: EdgeInsets.all(10.0),
-                            margin: EdgeInsets.only(top: 20, bottom: 20),
-                            child: Stack(
+                                SizedBox(height: 20),
+                                TextFormField(
+                                  controller: _searchContoller,
+                                  validator: (value) {
+                                    if (value!.isEmpty || value == null) {
+                                      return "Enter a search query";
+                                    }
+                                  },
+                                  autofocus: false,
+                                  autocorrect: false,
+                                  style: TextStyle(color: Colors.black),
+                                  decoration: InputDecoration(
+                                    border: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(7.0),
+                                        borderSide: BorderSide(
+                                            color: Colors.transparent)),
+                                    enabledBorder: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(7.0),
+                                        borderSide: BorderSide(
+                                            color: Colors.transparent)),
+                                    focusedBorder: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(7.0),
+                                        borderSide: BorderSide(
+                                            color: Colors.transparent)),
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    hintText: "Find those hits",
+                                    hintStyle: TextStyle(fontSize: 13),
+                                    contentPadding: EdgeInsets.only(
+                                        left: 15, right: 15, top: 5, bottom: 5),
+                                    suffixIcon: IconButton(
+                                        icon: Icon(
+                                          IconlyBold.search,
+                                          color: DarkPalette.darkGold,
+                                        ),
+                                        onPressed: () {
+                                          if (_searchContoller.text != null &&
+                                              _searchContoller
+                                                  .text.isNotEmpty) {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      SearchResultScreen(
+                                                        url:
+                                                            "/search/?term=${_searchContoller.text}",
+                                                      )),
+                                            );
+                                          }
+                                        }),
+                                  ),
+                                ),
+                              ]))),
+                    ),
+                    SliverAppBar(
+                        backgroundColor: Colors.transparent,
+                        pinned: true,
+                        flexibleSpace: Padding(
+                            padding: EdgeInsets.only(
+                                left: 5, right: 5, top: 5, bottom: 10),
+                            child: Row(
                               children: [
-                                Positioned.fill(
-                                    child: Align(
-                                        alignment: Alignment.topRight,
-                                        child: Container(
-                                            padding: EdgeInsets.all(10.0),
-                                            decoration: BoxDecoration(
-                                              color:
-                                                  Colors.white.withOpacity(0.2),
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                            ),
-                                            child: Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Text("Starts in"),
-                                                  Text("${event.startsIn}")
-                                                ])))),
-                                Positioned.fill(
-                                    child: Align(
-                                        alignment: Alignment.bottomCenter,
-                                        child: Container(
-                                            padding: EdgeInsets.only(
-                                                top: 20,
-                                                bottom: 20,
-                                                left: 20,
-                                                right: 20),
-                                            decoration: BoxDecoration(
-                                              color:
-                                                  Colors.white.withOpacity(0.2),
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
-                                            ),
-                                            child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  Flexible(
-                                                      child: Column(
-                                                          mainAxisSize:
-                                                              MainAxisSize.min,
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
-                                                          children: [
-                                                        Text("${event.name}",
-                                                            style: TextStyle(
-                                                                fontSize: 15,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w900)),
-                                                        SizedBox(height: 10),
-                                                        Text(
-                                                            "Hosted by - ${event.organizer}",
-                                                            style: TextStyle(
-                                                                fontSize: 10))
-                                                      ])),
-                                                  Flexible(
-                                                      child: Container(
-                                                    width:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .width *
-                                                            0.3,
-                                                    height: 35,
-                                                    child: Stack(
-                                                      children:
-                                                          MRbuildAttendeeIcons(
-                                                              event,
-                                                              alignment:
-                                                                  "right"),
-                                                    ),
-                                                  ))
-                                                ]))))
+                                Text("Your Events",
+                                    style: GoogleFonts.workSans(
+                                        fontSize: 23,
+                                        fontWeight: FontWeight.w700)),
+                                Spacer(),
+                                Transform.rotate(
+                                    angle: 90 * math.pi / 180,
+                                    child: IconButton(
+                                        onPressed: () {
+                                          showFab = false;
+                                          showModalBottomSheet(
+                                                  context: context,
+                                                  backgroundColor:
+                                                      Colors.transparent,
+                                                  builder: (context) {
+                                                    return PopupWidget(
+                                                      popup: Popup.eventFilter,
+                                                    );
+                                                  })
+                                              .whenComplete(() => setState(() {
+                                                    showFab = true;
+                                                  }));
+                                        },
+                                        icon: Icon(
+                                          IconlyBold.filter,
+                                          color: DarkPalette.darkGold,
+                                        )))
                               ],
+                            ))),
+                    Visibility(
+                      child: _eventSkeleton(count: 4),
+                      visible: loadingEvents,
+                      replacement: SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                        (BuildContext context, int index) {
+                          Event event = _events[index];
+
+                          return InkWell(
+                            child: Container(
+                              height: 300,
+                              width: 300,
+                              padding: EdgeInsets.all(10.0),
+                              margin: EdgeInsets.only(top: 20, bottom: 20),
+                              child: Stack(
+                                children: [
+                                  Positioned.fill(
+                                      child: Align(
+                                          alignment: Alignment.topRight,
+                                          child: Container(
+                                              padding: EdgeInsets.all(10.0),
+                                              decoration: BoxDecoration(
+                                                color: Colors.white
+                                                    .withOpacity(0.2),
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                              ),
+                                              child: Column(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    Text("Starts in"),
+                                                    Text("${event.startsIn}")
+                                                  ])))),
+                                  Positioned.fill(
+                                      child: Align(
+                                          alignment: Alignment.bottomCenter,
+                                          child: Container(
+                                              padding: EdgeInsets.only(
+                                                  top: 20,
+                                                  bottom: 20,
+                                                  left: 20,
+                                                  right: 20),
+                                              decoration: BoxDecoration(
+                                                color: Colors.white
+                                                    .withOpacity(0.2),
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                              ),
+                                              child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    Flexible(
+                                                        child: Column(
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .min,
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .center,
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                          Text("${event.name}",
+                                                              style: TextStyle(
+                                                                  fontSize: 15,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w900)),
+                                                          SizedBox(height: 10),
+                                                          Text(
+                                                              "Hosted by - ${event.organizer}",
+                                                              style: TextStyle(
+                                                                  fontSize: 10))
+                                                        ])),
+                                                    Flexible(
+                                                        child: Container(
+                                                      width:
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .width *
+                                                              0.3,
+                                                      height: 35,
+                                                      child: Stack(
+                                                        children:
+                                                            MRbuildAttendeeIcons(
+                                                                event,
+                                                                alignment:
+                                                                    "right"),
+                                                      ),
+                                                    ))
+                                                  ]))))
+                                ],
+                              ),
+                              decoration: BoxDecoration(
+                                  image: DecorationImage(
+                                      fit: BoxFit.cover,
+                                      image: NetworkImage(event.image ?? ''))),
                             ),
-                            decoration: BoxDecoration(
-                                image: DecorationImage(
-                                    fit: BoxFit.cover,
-                                    image: NetworkImage(event.image ?? ''))),
-                          ),
-                          onTap: () {
-                            _gotoEventPage(event);
-                          },
-                        );
-                      },
-                      childCount: _events.length, // 1000 list items
-                    )),
-                  ),
-                ]))),
+                            onTap: () {
+                              _gotoEventPage(event);
+                            },
+                          );
+                        },
+                        childCount: _events.length, // 1000 list items
+                      )),
+                    ),
+                  ])),
+            )),
         floatingActionButton: Visibility(
             visible: showFab,
             child: FloatingActionButton.extended(
@@ -385,7 +397,7 @@ class _EventOrganizerHome extends State<EventOrganizerHome> {
     });
   }
 
-  _loadEvents() async {
+  Future<void> _loadEvents() async {
     setState(() {
       loadingEvents = true;
     });
