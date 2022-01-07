@@ -94,60 +94,82 @@ class GradientBorder extends Border {
         width = width;
 }
 
-Future<String> getDeviceId() async {
-String deviceName;
-String deviceVersion;
-late String identifier;
-final DeviceInfoPlugin deviceInfoPlugin = new DeviceInfoPlugin();
-try {
-if (Platform.isAndroid) {
-var build = await deviceInfoPlugin.androidInfo;
-deviceName = build.model;
-deviceVersion = build.version.toString();
-identifier = build.androidId;  //UUID for Android
-} else if (Platform.isIOS) {
-var data = await deviceInfoPlugin.iosInfo;
-deviceName = data.name;
-deviceVersion = data.systemVersion;
-identifier = data.identifierForVendor;  //UUID for iOS
-}
-} on PlatformException {
-print('Failed to get platform version');
-}
+Future<Map<String, String>> getDeviceData() async {
+  late String deviceName;
+  late String deviceVersion;
+  late String identifier;
+  final DeviceInfoPlugin deviceInfoPlugin = new DeviceInfoPlugin();
+  try {
+    if (Platform.isAndroid) {
+      var build = await deviceInfoPlugin.androidInfo;
+      deviceName = build.model;
+      deviceVersion = build.version.toString();
+      identifier = build.androidId; //UUID for Android
+    } else if (Platform.isIOS) {
+      var data = await deviceInfoPlugin.iosInfo;
+      deviceName = data.name;
+      deviceVersion = data.systemVersion;
+      identifier = data.identifierForVendor; //UUID for iOS
+    }
+  } on PlatformException {
+    print('Failed to get platform version');
+  }
 
 //if (!mounted) return;
-return identifier;
+  return {
+    "deviceName": deviceName,
+    "deviceVersion": deviceVersion,
+    "deviceId": identifier,
+    "deviceOS": Platform.operatingSystem
+  };
 }
 
-List<Widget> MRbuildAttendeeIcons(Event event, {
-  String alignment = 'left',
-  double? radius
-}){
+Future<String> getDeviceId() async {
+  String deviceName;
+  String deviceVersion;
+  late String identifier;
+  final DeviceInfoPlugin deviceInfoPlugin = new DeviceInfoPlugin();
+  try {
+    if (Platform.isAndroid) {
+      var build = await deviceInfoPlugin.androidInfo;
+      deviceName = build.model;
+      deviceVersion = build.version.toString();
+      identifier = build.androidId; //UUID for Android
+    } else if (Platform.isIOS) {
+      var data = await deviceInfoPlugin.iosInfo;
+      deviceName = data.name;
+      deviceVersion = data.systemVersion;
+      identifier = data.identifierForVendor; //UUID for iOS
+    }
+  } on PlatformException {
+    print('Failed to get platform version');
+  }
+
+//if (!mounted) return;
+  return identifier;
+}
+
+List<Widget> MRbuildAttendeeIcons(Event event,
+    {String alignment = 'left', double? radius}) {
   List<Widget> icons = [];
   double count = 0;
 
   List temp = event.attendees;
-  if(temp.length >= 2 ){
+  if (temp.length >= 2) {
     temp = temp.sublist(0, 3);
   }
-  temp.forEach((e){
+  temp.forEach((e) {
     Widget avatar = CircleAvatar(
-        backgroundImage:NetworkImage(e['profile_photo'] ?? ''),
-        radius: radius ?? 19,
+      backgroundImage: NetworkImage(e['profile_photo'] ?? ''),
+      radius: radius ?? 19,
     );
-    if(alignment == 'right'){
-      icons.add(Positioned(
-          right: count,
-          child:avatar
-      ));
-    }else{
-      icons.add(Positioned(
-          left: count,
-          child:avatar
-      ));
+    if (alignment == 'right') {
+      icons.add(Positioned(right: count, child: avatar));
+    } else {
+      icons.add(Positioned(left: count, child: avatar));
     }
 
-    count+=15;
+    count += 15;
   });
   return icons;
 }
@@ -158,16 +180,16 @@ extension StringExtension on String {
   }
 }
 
-MRselectSong(Map dataItem, BuildContext context, Event? event, {bool pushReplacement=false}){
-  if(event == null){
-
+MRselectSong(Map dataItem, BuildContext context, Event? event,
+    {bool pushReplacement = false}) {
+  if (event == null) {
     return;
   }
   showModalBottomSheet(
       isScrollControlled: true,
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context){
+      builder: (context) {
         return Wrap(
           children: [
             PopupWidget(
@@ -180,15 +202,14 @@ MRselectSong(Map dataItem, BuildContext context, Event? event, {bool pushReplace
                     artist: dataItem['artist_name'],
                     album_art: dataItem['album_art'],
                     previewUrl: dataItem['song_url'],
-                    apple_song_id: dataItem['apple_song_id']
-                )
-            )
+                    apple_song_id: dataItem['apple_song_id']))
           ],
         );
       });
 }
 
-MRselectSong2(Map dataItem, BuildContext context, {bool slideToEvenGrid = false}){
+MRselectSong2(Map dataItem, BuildContext context,
+    {bool slideToEvenGrid = false}) {
   showModalBottomSheet<void>(
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
@@ -200,9 +221,7 @@ MRselectSong2(Map dataItem, BuildContext context, {bool slideToEvenGrid = false}
               topLeft: const Radius.circular(40.0),
               topRight: const Radius.circular(40.0),
             )),
-        padding: EdgeInsets.only(
-            top: 30, left: 20, right: 20, bottom: 20
-        ),
+        padding: EdgeInsets.only(top: 30, left: 20, right: 20, bottom: 20),
         height: MediaQuery.of(context).size.height * 0.9,
         child: SuggestEventForm(
           userType: UserType.partyGuest,
@@ -212,8 +231,7 @@ MRselectSong2(Map dataItem, BuildContext context, {bool slideToEvenGrid = false}
               artist: dataItem['artist_name'],
               album_art: dataItem['album_art'],
               previewUrl: dataItem['song_url'],
-              apple_song_id: dataItem['apple_song_id']
-          ),
+              apple_song_id: dataItem['apple_song_id']),
         )),
   );
 }

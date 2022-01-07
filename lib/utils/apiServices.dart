@@ -104,6 +104,7 @@ class ApiBaseHelper {
     SharedPreferences pref = await SharedPreferences.getInstance();
     String? token = await pref.getString("token");
     String deviceId = await getDeviceId();
+    Map<String, String> userClient = await getDeviceData();
 
     try {
       Map<String, String> headers = {
@@ -117,6 +118,7 @@ class ApiBaseHelper {
         headers.addAll({"guest": deviceId});
       }
       headers.addAll({"fcm-device-id": FCMdeviceId ?? ''});
+      headers.addAll(userClient);
 
       final response = await http.post(Uri.parse(_baseUrl + url),
           headers: headers, body: json.encode(data));

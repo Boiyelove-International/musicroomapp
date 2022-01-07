@@ -383,13 +383,13 @@ class _LoginScreenState extends State<LoginScreen> {
   TextEditingController _passwordController = TextEditingController();
   bool isLoading = false;
 
-  // @override
-  // void initState() {
-  //   // TODO: implement initState
-  //   super.initState();
-  //   _emailController.text = "roland@boiyelove.website";
-  //   _passwordController.text = "somepassword";
-  // }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _emailController.text = "roland@boiyelove.website";
+    _passwordController.text = "somepassword";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -535,7 +535,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     fontWeight: FontWeight.w300, fontSize: 16)),
             TextButton(
                 onPressed: () {
-                  Navigator.pushReplacementNamed(context, Routes.decision);
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                      Routes.decision, (Route<dynamic> route) => false);
                 },
                 child: Text("Sign Up",
                     style: GoogleFonts.workSans(
@@ -653,7 +654,8 @@ class _LoginScreenState extends State<LoginScreen> {
         setState(() {
           isLoading = false;
         });
-        Navigator.pushReplacementNamed(context, Routes.organizerHome);
+        Navigator.of(context).pushNamedAndRemoveUntil(
+            Routes.organizerHome, (Route<dynamic> route) => false);
       });
     } catch (e) {
       setState(() {

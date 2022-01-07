@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
+import 'package:musicroom/main.dart';
 import 'package:musicroom/styles.dart';
 import 'package:musicroom/utils/apiServices.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -66,10 +67,12 @@ class _ProfileScreen extends State<ProfileScreen> {
           actions: [
             IconButton(
                 onPressed: () {
-                  Navigator.of(context).pushNamed(Routes.yourRoom);
+                  Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (context) => DecisionPage()),
+                      (Route<dynamic> route) => false);
                 },
                 color: DarkPalette.darkGold,
-                icon: Icon(IconlyBold.scan))
+                icon: Icon(Icons.power_settings_new_outlined))
           ],
         ),
         body: SafeArea(
@@ -86,16 +89,15 @@ class _ProfileScreen extends State<ProfileScreen> {
                   ))),
               InkWell(
                   onTap: () async {
-                    FilePickerResult? result = await FilePicker.platform.pickFiles(
-                      type: FileType.image
-                    );
+                    FilePickerResult? result = await FilePicker.platform
+                        .pickFiles(type: FileType.image);
                     if (result != null) {
                       File file = File("${result.files.single.path}");
                     } else {
                       // User canceled the picker
                     }
                   },
-                  child:Text("Change Profile picture",
+                  child: Text("Change Profile picture",
                       style: GoogleFonts.workSans(
                           fontWeight: FontWeight.w300, fontSize: 16))),
               SizedBox(height: 20),
@@ -435,8 +437,12 @@ class _ProfileScreen extends State<ProfileScreen> {
                                                         fontSize: 18,
                                                         color: Colors.amber)),
                                                 onPressed: () {
-                                                  if (newPasswordController1.text.trim() ==
-                                                      newPasswordController2.text.trim()) {
+                                                  if (newPasswordController1
+                                                          .text
+                                                          .trim() ==
+                                                      newPasswordController2
+                                                          .text
+                                                          .trim()) {
                                                     ApiBaseHelper api =
                                                         ApiBaseHelper();
                                                     api.post(
@@ -444,24 +450,26 @@ class _ProfileScreen extends State<ProfileScreen> {
                                                         {
                                                           "old_password":
                                                               oldPasswordController
-                                                                  .text.trim(),
+                                                                  .text
+                                                                  .trim(),
                                                           "new_password":
-                                                          newPasswordController1
-                                                              .text.trim(),
+                                                              newPasswordController1
+                                                                  .text
+                                                                  .trim(),
                                                         }).then((data) async {
                                                       Navigator.pop(context);
                                                       ScaffoldMessenger.of(
-                                                          context)
+                                                              context)
                                                           .showSnackBar(
-                                                          SnackBar(
-                                                            content: Text(
-                                                              'Password updated',
-                                                              textAlign: TextAlign
-                                                                  .center,
-                                                            ),
-                                                            backgroundColor:
+                                                              SnackBar(
+                                                        content: Text(
+                                                          'Password updated',
+                                                          textAlign:
+                                                              TextAlign.center,
+                                                        ),
+                                                        backgroundColor:
                                                             Colors.green,
-                                                          ));
+                                                      ));
                                                     });
                                                   }
                                                 },
@@ -781,15 +789,13 @@ class _ProfileScreen extends State<ProfileScreen> {
   }
 }
 
-
-class PartyGuestProfile extends StatefulWidget{
+class PartyGuestProfile extends StatefulWidget {
   static const String routeName = "/partyGuestProfile";
   @override
   _PartyGuestProfile createState() => _PartyGuestProfile();
 }
 
-class _PartyGuestProfile extends State<PartyGuestProfile>{
-
+class _PartyGuestProfile extends State<PartyGuestProfile> {
   String _enteredText = '';
   String? email = "partymixers@gmail.com";
   String? display_name = "PartyMixers";
@@ -829,6 +835,16 @@ class _PartyGuestProfile extends State<PartyGuestProfile>{
         title: Text("Profile"),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: [
+          IconButton(
+              onPressed: () {
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (context) => DecisionPage()),
+                    (Route<dynamic> route) => false);
+              },
+              color: DarkPalette.darkGold,
+              icon: Icon(Icons.power_settings_new_outlined))
+        ],
       ),
       body: SafeArea(
           top: true,
@@ -838,22 +854,23 @@ class _PartyGuestProfile extends State<PartyGuestProfile>{
                 padding: EdgeInsets.all(20),
                 child: Center(
                     child: CircleAvatar(
-                      radius: 60,
-                      backgroundImage: AssetImage(
-                          "assets/images/avatars/organizer-profile-icon.png"),
-                    ))),
+                  radius: 60,
+                  backgroundImage: AssetImage(
+                      "assets/images/avatars/organizer-profile-icon.png"),
+                ))),
             InkWell(
-              onTap: () async {
-                FilePickerResult? result = await FilePicker.platform.pickFiles();
-                if (result != null) {
-                  File file = File("${result.files.single.path}");
-                } else {
-                  // User canceled the picker
-                }
-              },
-                child:Text("Change Profile picture",
-                style: GoogleFonts.workSans(
-                    fontWeight: FontWeight.w300, fontSize: 16))),
+                onTap: () async {
+                  FilePickerResult? result =
+                      await FilePicker.platform.pickFiles();
+                  if (result != null) {
+                    File file = File("${result.files.single.path}");
+                  } else {
+                    // User canceled the picker
+                  }
+                },
+                child: Text("Change Profile picture",
+                    style: GoogleFonts.workSans(
+                        fontWeight: FontWeight.w300, fontSize: 16))),
             SizedBox(height: 20),
             Expanded(
                 child: Container(
@@ -898,44 +915,42 @@ class _PartyGuestProfile extends State<PartyGuestProfile>{
                                               // print("something happened");
 
                                               SharedPreferences prefs =
-                                              await SharedPreferences
-                                                  .getInstance();
+                                                  await SharedPreferences
+                                                      .getInstance();
                                               // String? token = prefs.getString("token");
                                               // print("token is $token");
 
-                                              if (displayNameController
-                                                  .text !=
-                                                  null &&
+                                              if (displayNameController.text !=
+                                                      null &&
                                                   displayNameController
                                                       .text.isNotEmpty) {
                                                 ApiBaseHelper api =
-                                                ApiBaseHelper();
+                                                    ApiBaseHelper();
                                                 api.post(
                                                     "/account-settings/change_name/",
                                                     {
                                                       "display_name":
-                                                      displayNameController
-                                                          .text
+                                                          displayNameController
+                                                              .text
                                                     }).then((data) async {
                                                   await prefs.setString(
                                                       "display_name",
                                                       data["display_name"]);
                                                   setState(() {
-                                                    display_name = data[
-                                                    "display_name"];
+                                                    display_name =
+                                                        data["display_name"];
                                                     Navigator.pop(context);
                                                     ScaffoldMessenger.of(
-                                                        context)
-                                                        .showSnackBar(
-                                                        SnackBar(
-                                                          content: Text(
-                                                            'Display name updated..',
-                                                            textAlign: TextAlign
-                                                                .center,
-                                                          ),
-                                                          backgroundColor:
+                                                            context)
+                                                        .showSnackBar(SnackBar(
+                                                      content: Text(
+                                                        'Display name updated..',
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                      ),
+                                                      backgroundColor:
                                                           Colors.green,
-                                                        ));
+                                                    ));
                                                   });
                                                 });
                                               }
@@ -944,14 +959,14 @@ class _PartyGuestProfile extends State<PartyGuestProfile>{
                                         ],
                                         shape: RoundedRectangleBorder(
                                             borderRadius:
-                                            BorderRadius.circular(10)),
+                                                BorderRadius.circular(10)),
                                         backgroundColor: Colors.black,
                                         elevation: 16,
                                         content: Container(
                                           padding: EdgeInsets.all(10),
                                           child: Column(
                                             crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                                CrossAxisAlignment.start,
                                             mainAxisSize: MainAxisSize.min,
                                             children: <Widget>[
                                               SizedBox(height: 20),
@@ -960,11 +975,11 @@ class _PartyGuestProfile extends State<PartyGuestProfile>{
                                                 style: GoogleFonts.workSans(
                                                     fontSize: 20,
                                                     fontWeight:
-                                                    FontWeight.bold),
+                                                        FontWeight.bold),
                                               ),
                                               TextField(
                                                 controller:
-                                                displayNameController,
+                                                    displayNameController,
                                                 onChanged: (value) {
                                                   setState(() {
                                                     _enteredText = value;
@@ -972,19 +987,19 @@ class _PartyGuestProfile extends State<PartyGuestProfile>{
                                                 },
                                                 decoration: InputDecoration(
                                                     enabledBorder:
-                                                    UnderlineInputBorder(
+                                                        UnderlineInputBorder(
                                                       borderSide: BorderSide(
                                                           color: DarkPalette
                                                               .darkYellow),
                                                     ),
                                                     focusedBorder:
-                                                    UnderlineInputBorder(
+                                                        UnderlineInputBorder(
                                                       borderSide: BorderSide(
                                                           color: DarkPalette
                                                               .darkYellow),
                                                     ),
                                                     counterText:
-                                                    '${_enteredText.length.toString()} character(s)'),
+                                                        '${_enteredText.length.toString()} character(s)'),
                                               ),
                                             ],
                                           ),
@@ -995,7 +1010,7 @@ class _PartyGuestProfile extends State<PartyGuestProfile>{
                                 },
                                 child: Row(
                                   mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text("Display Name",
                                         style: GoogleFonts.workSans(
@@ -1013,13 +1028,11 @@ class _PartyGuestProfile extends State<PartyGuestProfile>{
                           SizedBox(height: 35),
                           Text("SETTINGS",
                               style: GoogleFonts.workSans(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 16)),
+                                  fontWeight: FontWeight.w700, fontSize: 16)),
                           Container(
                             padding: EdgeInsets.only(top: 30, bottom: 5),
                             child: Row(
-                              mainAxisAlignment:
-                              MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text("Enable Dark Mode",
                                     style: GoogleFonts.workSans(
@@ -1035,8 +1048,7 @@ class _PartyGuestProfile extends State<PartyGuestProfile>{
                           Container(
                             padding: EdgeInsets.only(top: 20, bottom: 5),
                             child: Row(
-                              mainAxisAlignment:
-                              MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text("Turn off Notifications",
                                     style: GoogleFonts.workSans(
@@ -1053,8 +1065,7 @@ class _PartyGuestProfile extends State<PartyGuestProfile>{
                           SizedBox(height: 20),
                           Text("Send Feedbacks & communicate with us",
                               style: GoogleFonts.workSans(
-                                  fontWeight: FontWeight.w300,
-                                  fontSize: 16)),
+                                  fontWeight: FontWeight.w300, fontSize: 16)),
                           SizedBox(height: 20),
                           Row(children: [
                             InkWell(
@@ -1063,8 +1074,7 @@ class _PartyGuestProfile extends State<PartyGuestProfile>{
                                     padding: EdgeInsets.all(12),
                                     decoration: BoxDecoration(
                                         color: DarkPalette.darkYellow,
-                                        borderRadius:
-                                        BorderRadius.circular(5)),
+                                        borderRadius: BorderRadius.circular(5)),
                                     child: Icon(FeatherIcons.facebook,
                                         color: Colors.amber))),
                             SizedBox(
@@ -1076,8 +1086,7 @@ class _PartyGuestProfile extends State<PartyGuestProfile>{
                                     padding: EdgeInsets.all(12),
                                     decoration: BoxDecoration(
                                         color: DarkPalette.darkYellow,
-                                        borderRadius:
-                                        BorderRadius.circular(5)),
+                                        borderRadius: BorderRadius.circular(5)),
                                     child: Icon(FeatherIcons.twitter,
                                         color: Colors.amber))),
                             SizedBox(
@@ -1089,8 +1098,7 @@ class _PartyGuestProfile extends State<PartyGuestProfile>{
                                   padding: EdgeInsets.all(12),
                                   decoration: BoxDecoration(
                                       color: DarkPalette.darkYellow,
-                                      borderRadius:
-                                      BorderRadius.circular(5)),
+                                      borderRadius: BorderRadius.circular(5)),
                                   child: Icon(FeatherIcons.instagram,
                                       color: Colors.amber),
                                 )),
@@ -1103,8 +1111,7 @@ class _PartyGuestProfile extends State<PartyGuestProfile>{
                                   padding: EdgeInsets.all(12),
                                   decoration: BoxDecoration(
                                       color: DarkPalette.darkYellow,
-                                      borderRadius:
-                                      BorderRadius.circular(5)),
+                                      borderRadius: BorderRadius.circular(5)),
                                   child: Icon(FeatherIcons.mail,
                                       color: Colors.amber),
                                 )),
@@ -1117,8 +1124,7 @@ class _PartyGuestProfile extends State<PartyGuestProfile>{
                                   padding: EdgeInsets.all(12),
                                   decoration: BoxDecoration(
                                       color: DarkPalette.darkYellow,
-                                      borderRadius:
-                                      BorderRadius.circular(5)),
+                                      borderRadius: BorderRadius.circular(5)),
                                   child: Icon(FeatherIcons.phone,
                                       color: Colors.amber),
                                 )),
