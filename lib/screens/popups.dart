@@ -676,7 +676,7 @@ class _CreateEventForm extends State<CreateEventForm> {
     // TODO: implement initState
     super.initState();
     if (widget.event != null) {
-      Future.delayed(Duration(milliseconds: 100), (){
+      Future.delayed(Duration(milliseconds: 100), () {
         Event event = widget.event!;
         var pickedDate = event.event_date;
         _eventNameController.text = event.name!;
@@ -685,7 +685,7 @@ class _CreateEventForm extends State<CreateEventForm> {
         _eventDateController.text =
             DateFormat("dd MMMM, yyyy").format(event.event_date);
         _selectedDate =
-        "${pickedDate.year}-${pickedDate.month}-${pickedDate.day}";
+            "${pickedDate.year}-${pickedDate.month}-${pickedDate.day}";
       });
     }
   }
@@ -1087,7 +1087,6 @@ class _CreateEventForm extends State<CreateEventForm> {
             "PATCH", Uri.parse("${_api.baseurl}/event/${widget.event?.id}/"));
       }
 
-
       request.headers.addAll({
         HttpHeaders.authorizationHeader: 'Token $token',
       });
@@ -1416,6 +1415,7 @@ class _SuggestEventForm extends State<SuggestEventForm> {
             "pk": _event?.id,
           },
           returnHttpResponse: true);
+      print("response is ${response.body}");
 
       if (response.statusCode == 201) {
         _changePage(2);
@@ -1493,16 +1493,9 @@ class _JoinEventForm extends State<JoinEventForm> {
   Widget get _eventChoice => Column(
         children: [
           Text(
-            "Yay!! We partying soon.",
+            "Yay!! Let's party.",
             style: GoogleFonts.workSans(
                 fontWeight: FontWeight.w700, fontSize: 20, height: 2),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 10),
-          Text(
-            "Choose your preferred method to join this event",
-            style: GoogleFonts.workSans(
-                fontWeight: FontWeight.w300, fontSize: 16, height: 1.8),
             textAlign: TextAlign.center,
           ),
           SizedBox(height: 30),
@@ -1628,8 +1621,10 @@ class _JoinEventForm extends State<JoinEventForm> {
       try {
         String q =
             _codeBox1.text + _codeBox2.text + _codeBox3.text + _codeBox4.text;
+        q = q.toUpperCase();
 
         _api.get("/event/join/?q=$q").then((value) {
+          print("event join response is value");
           setState(() {
             eventData = Event.fromJson(value);
           });
@@ -1640,22 +1635,22 @@ class _JoinEventForm extends State<JoinEventForm> {
         setState(() {
           isLoading = false;
         });
-        print("error is $e");
+        print("event join error is $e");
       }
     }
   }
 
   Widget get _partyCodeForm => Column(
         children: [
+          // Text(
+          //   "Provide a code",
+          //   style: GoogleFonts.workSans(
+          //       fontWeight: FontWeight.w700, fontSize: 20, height: 2),
+          //   textAlign: TextAlign.center,
+          // ),
+          // SizedBox(height: 20),
           Text(
-            "Provide a code",
-            style: GoogleFonts.workSans(
-                fontWeight: FontWeight.w700, fontSize: 20, height: 2),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 20),
-          Text(
-            "Kindly enter the party code to join the party of your choice",
+            "Enter code to join event",
             style: GoogleFonts.workSans(
                 fontWeight: FontWeight.w300, fontSize: 16, height: 1.8),
             textAlign: TextAlign.center,
@@ -1796,7 +1791,7 @@ class _JoinEventForm extends State<JoinEventForm> {
                   child: GoldButton(
                       isLoading: isLoading,
                       onPressed: _submitCode,
-                      buttonText: "Let's get going"))
+                      buttonText: "Let's crack on!"))
             ],
           )
         ],
@@ -1964,12 +1959,11 @@ class _JoinEventForm extends State<JoinEventForm> {
           child: Image.asset("assets/images/event_created_success.png"),
         ),
         SizedBox(height: 20),
-        Text("Yay!! You're through the door.",
+        Text("Yay, You're in!",
             style: GoogleFonts.workSans(
                 fontSize: 23, fontWeight: FontWeight.bold)),
         SizedBox(height: 20),
-        Text(
-            "Proceed to the event page to start suggesting songs or you can always do that later.",
+        Text("Start suggesting songs or do it later.",
             style: GoogleFonts.workSans(
                 fontSize: 15, fontWeight: FontWeight.w300, height: 1.5),
             textAlign: TextAlign.center),

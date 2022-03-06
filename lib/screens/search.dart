@@ -11,15 +11,15 @@ import 'package:musicroom/utils.dart';
 import 'package:musicroom/utils/apiServices.dart';
 import 'package:musicroom/utils/models.dart';
 
-
 class SearchResultScreen extends StatefulWidget {
-  SearchResultScreen({Key? key,
-    this.title = "Search Results",
-    this.url,
-    this.actions,
-    this.event,
-    this.type
-  }) : super(key: key);
+  SearchResultScreen(
+      {Key? key,
+      this.title = "Search Results",
+      this.url,
+      this.actions,
+      this.event,
+      this.type})
+      : super(key: key);
 
   String? title;
   String? type;
@@ -46,7 +46,6 @@ class _SearchResultScreen extends State<SearchResultScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(IconlyBold.arrow_left),
@@ -55,47 +54,91 @@ class _SearchResultScreen extends State<SearchResultScreen> {
             Navigator.pop(context);
           },
         ),
-        title: Text("${widget.title}",
-        style: GoogleFonts.workSans(
-          fontSize: 20,
-          fontWeight: FontWeight.w700
-        ),),
+        title: Text(
+          "${widget.title}",
+          style:
+              GoogleFonts.workSans(fontSize: 20, fontWeight: FontWeight.w700),
+        ),
         centerTitle: false,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        actions: widget.actions != null ?  widget.actions : [],
+        actions: widget.actions != null ? widget.actions : [],
       ),
       body: SafeArea(
-        top: true,
-        bottom: true,
-        child: FutureBuilder(
-          future: _api.get("${widget.url}"),
-          builder: (BuildContext context, AsyncSnapshot snapshot) {
+          top: true,
+          bottom: true,
+          child: FutureBuilder(
+            future: _api.get("${widget.url}"),
+            builder: (BuildContext context, AsyncSnapshot snapshot) {
+              if (snapshot.hasData) {
+                List dataItems = snapshot.data;
+                print("data length is ${dataItems.length}");
+                if (dataItems.isEmpty) {
+                  return EmptyContent();
+                }
 
-            if (snapshot.hasData) {
-              List dataItems = snapshot.data;
-              print("data length is ${dataItems.length}");
-              if (dataItems.isEmpty){
-                return EmptyContent();
-              }
-
-              if(widget.type == 'suggestions'){
+                if (widget.type == 'suggestions') {
+                  return ListView.separated(
+                      padding: EdgeInsets.only(top: 30, left: 18, right: 18),
+                      itemBuilder: (context, index) {
+                        return GestureDetector(
+                            onTap: () {
+                              MRselectSong2(dataItems[index]['song'], context);
+                            },
+                            child: Container(
+                                padding: EdgeInsets.all(5),
+                                decoration: BoxDecoration(
+                                    color: DarkPalette.darkGrey1,
+                                    borderRadius: BorderRadius.circular(15)),
+                                child: ListTile(
+                                  leading: CachedNetworkImage(
+                                    imageUrl:
+                                        "${dataItems[index]['song']['album_art']}",
+                                    placeholder: (context, url) => SizedBox(
+                                      height: 10,
+                                      width: 10,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 1.0,
+                                        color: Colors.amber,
+                                      ),
+                                    ),
+                                    errorWidget: (context, url, error) =>
+                                        Icon(Icons.error),
+                                  ),
+                                  title: Text(
+                                      "${dataItems[index]['song']['song_title']}",
+                                      style: GoogleFonts.workSans(
+                                          fontWeight: FontWeight.bold)),
+                                  subtitle: Text(
+                                      "${dataItems[index]['song']['artist_name']}"),
+                                )));
+                      },
+                      separatorBuilder: (context, index) {
+                        return SizedBox(height: 30);
+                      },
+                      itemCount: dataItems.length);
+                }
                 return ListView.separated(
                     padding: EdgeInsets.only(top: 30, left: 18, right: 18),
                     itemBuilder: (context, index) {
                       return GestureDetector(
-                          onTap: (){
-
-                              MRselectSong2(dataItems[index]['song'], context);
+                          onTap: () {
+                            if (widget.event == null) {
+                              MRselectSong2(dataItems[index], context);
+                            } else {
+                              MRselectSong(dataItems[index], context,
+                                  widget.event ?? null,
+                                  pushReplacement: true);
+                            }
                           },
-                          child:Container(
+                          child: Container(
                               padding: EdgeInsets.all(5),
                               decoration: BoxDecoration(
                                   color: DarkPalette.darkGrey1,
                                   borderRadius: BorderRadius.circular(15)),
                               child: ListTile(
                                 leading: CachedNetworkImage(
-                                  imageUrl: "${dataItems[index]['song']['album_art']}",
+                                  imageUrl: "${dataItems[index]['album_art']}",
                                   placeholder: (context, url) => SizedBox(
                                     height: 10,
                                     width: 10,
@@ -104,122 +147,66 @@ class _SearchResultScreen extends State<SearchResultScreen> {
                                       color: Colors.amber,
                                     ),
                                   ),
-                                  errorWidget: (context, url, error) => Icon(Icons.error),
+                                  errorWidget: (context, url, error) =>
+                                      Icon(Icons.error),
                                 ),
-                                title: Text("${dataItems[index]['song']['song_title']}", style:GoogleFonts.workSans(
-                                    fontWeight: FontWeight.bold
-                                )),
-                                subtitle: Text("${dataItems[index]['song']['artist_name']}y"),
-
-
-                              )
-                          )
-                      );
+                                title: Text("${dataItems[index]['song_title']}",
+                                    style: GoogleFonts.workSans(
+                                        fontWeight: FontWeight.bold)),
+                                subtitle:
+                                    Text("${dataItems[index]['artist_name']}"),
+                                trailing: _userType == UserType.partyOrganizer
+                                    ? GestureDetector(
+                                        child: Container(
+                                            padding: EdgeInsets.all(10),
+                                            decoration: BoxDecoration(
+                                                gradient:
+                                                    DarkPalette.borderGradient1,
+                                                shape: BoxShape.circle),
+                                            child: Icon(
+                                              IconlyBold.plus,
+                                              size: 20,
+                                              color: Colors.white,
+                                            )),
+                                        onTap: () {
+                                          if (widget.event == null) {
+                                            MRselectSong2(
+                                                dataItems[index], context,
+                                                slideToEvenGrid: true);
+                                          }
+                                        },
+                                      )
+                                    : null,
+                              )));
                     },
                     separatorBuilder: (context, index) {
                       return SizedBox(height: 30);
                     },
                     itemCount: dataItems.length);
+              } else if (snapshot.hasError) {
+                return Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(IconlyBold.danger),
+                      Text("Oops! something went wrong")
+                    ],
+                  ),
+                );
               }
-              return ListView.separated(
-                  padding: EdgeInsets.only(top: 30, left: 18, right: 18),
-                  itemBuilder: (context, index) {
-                    return GestureDetector(
-                        onTap: (){
-                          if(widget.event == null){
-                            MRselectSong2(
-                                dataItems[index], context);
-                          }else{
-                            MRselectSong(
-                                dataItems[index],
-                                context,
-                                widget.event ?? null,
-                                pushReplacement: true
-                            );
-                          }
-                        },
-                        child:Container(
-                            padding: EdgeInsets.all(5),
-                            decoration: BoxDecoration(
-                                color: DarkPalette.darkGrey1,
-                                borderRadius: BorderRadius.circular(15)),
-                            child: ListTile(
-                              leading: CachedNetworkImage(
-                                imageUrl: "${dataItems[index]['album_art']}",
-                                placeholder: (context, url) => SizedBox(
-                                  height: 10,
-                                  width: 10,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 1.0,
-                                    color: Colors.amber,
-                                  ),
-                                ),
-                                errorWidget: (context, url, error) => Icon(Icons.error),
-                              ),
-                              title: Text("${dataItems[index]['song_title']}", style:GoogleFonts.workSans(
-                                  fontWeight: FontWeight.bold
-                              )),
-                              subtitle: Text("${dataItems[index]['artist_name']}y"),
-                              trailing: _userType == UserType.partyOrganizer ?
-                              GestureDetector(
-                                child: Container(
-                                    padding: EdgeInsets.all(10),
-                                    decoration: BoxDecoration(
-                                        gradient: DarkPalette.borderGradient1,
-                                        shape: BoxShape.circle
-                                    ),
-                                    child: Icon(
-                                      IconlyBold.plus,
-                                      size: 20,
-                                      color: Colors.white,
-                                    )
-                                ),
-                                onTap: (){
-                                  if(widget.event == null){
-                                    MRselectSong2(
-                                        dataItems[index],
-                                        context,
-                                        slideToEvenGrid: true
-                                    );
-                                  }
-                                },
-                              ) : null,
-
-                            ))
-                    );
-                  },
-                  separatorBuilder: (context, index) {
-                    return SizedBox(height: 30);
-                  },
-                  itemCount: dataItems.length);
-            } else if (snapshot.hasError) {
-             return Center(
-               child: Column(
-                 mainAxisSize: MainAxisSize.min,
-                 children: [
-                   Icon(IconlyBold.danger),
-                   Text("Oops! something went wrong")
-                 ],
-               ),
-             );
-            }
-            return Center(
-                child: CircularProgressIndicator(
-                  color: Colors.amber,
-                  strokeWidth: 2,
-                )
-            );
-          },
-        )
-      ),
+              return Center(
+                  child: CircularProgressIndicator(
+                color: Colors.amber,
+                strokeWidth: 2,
+              ));
+            },
+          )),
     );
   }
 
-
-
-  _searchTerm()async {
+  _searchTerm() async {
     ApiBaseHelper _api = ApiBaseHelper();
-    Map<String, dynamic> response = await _api.get(widget.url?? '');
+    Map<String, dynamic> response = await _api.get(widget.url ?? '');
     print(response);
   }
 }

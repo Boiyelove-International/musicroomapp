@@ -70,7 +70,7 @@ class MyApp extends StatelessWidget {
           // Routes.partyPlaylist: (BuildContext context) => PartyPlayList(),
           Routes.premium: (BuildContext context) => PremiumScreen(),
           Routes.subscription: (BuildContext context) => SubscriptionScreen(),
-          Routes.yourRoom: (BuildContext context) => YourRoom(),
+          // Routes.yourRoom: (BuildContext context) => YourRoom(),
           Routes.advert: (BuildContext context) => Advert(),
           Routes.registerPartyGuest: (BuildContext context) =>
               RegisterPartyGuest(),
@@ -122,12 +122,12 @@ class _SplashScreenState extends State<SplashScreen> {
 class OnboardPageModel extends StatelessWidget {
   String image;
   String heading;
-  String subtitle;
+  String? subtitle;
 
   OnboardPageModel({
     required this.image,
     required this.heading,
-    required this.subtitle,
+    this.subtitle,
   });
 
   Widget build(BuildContext context) {
@@ -135,28 +135,38 @@ class OnboardPageModel extends StatelessWidget {
     final TextStyle subtitle2 = Theme.of(context).textTheme.subtitle2!;
     return Padding(
         padding: EdgeInsets.all(5),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Padding(
-              padding: EdgeInsets.all(2),
-              child: Container(
-                height: MediaQuery.of(context).size.height * 0.5,
-                decoration: BoxDecoration(
-                    image: DecorationImage(
-                        image: AssetImage("$image"), fit: BoxFit.contain)),
-              )),
-          SizedBox(height: 10),
-          Text("$heading",
-              style: GoogleFonts.workSans(
-                  textStyle: headline4,
-                  fontWeight: FontWeight.w700,
-                  height: 1.3)),
-          SizedBox(height: 25),
-          Text("$subtitle",
-              style: GoogleFonts.workSans(
-                  textStyle: subtitle2,
-                  fontWeight: FontWeight.w300,
-                  height: 2)),
-        ]));
+        child: Center(
+          child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Padding(
+                    padding: EdgeInsets.all(2),
+                    child: Container(
+                      height: MediaQuery.of(context).size.height * 0.5,
+                      decoration: BoxDecoration(
+                          image: DecorationImage(
+                              image: AssetImage("$image"),
+                              fit: BoxFit.contain)),
+                    )),
+                SizedBox(height: 10),
+                Text("$heading",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.workSans(
+                        textStyle: headline4,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 25,
+                        height: 1.3)),
+                SizedBox(height: 15),
+                Text(subtitle ?? "",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.workSans(
+                        textStyle: subtitle2,
+                        fontWeight: FontWeight.w300,
+                        fontSize: 18,
+                        height: 2)),
+              ]),
+        ));
   }
 }
 
@@ -175,19 +185,16 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
   List<Widget> _onboardPages = [
     OnboardPageModel(
         image: "assets/images/onboard_1.png",
-        heading: "Because we know you like to party!",
-        subtitle:
-            "Tired of not having a say on which song is being played at a party? Music room solves this for you."),
+        heading: "We know you love to party",
+        subtitle: "Have a say in the Music"),
     OnboardPageModel(
-        image: "assets/images/onboard_2.png",
-        heading: "Because we know you like to party!",
-        subtitle:
-            "Tired of not having a say on which song is being played at a party? Music room solves this for you."),
+      image: "assets/images/onboard_2.png",
+      heading: "Suggest the songs you want to hear!",
+    ),
     OnboardPageModel(
-        image: "assets/images/onboard_3.png",
-        heading: "Because we know you like to party!",
-        subtitle:
-            "Tired of not having a say on which song is being played at a party? Music room solves this for you.")
+      image: "assets/images/onboard_3.png",
+      heading: "Music to my soul",
+    ),
   ];
 
   @override
@@ -295,16 +302,10 @@ class _DecisionPageState extends State<DecisionPage> {
                 child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Let's make a decision.",
+                      Text("Are you a host or a guest?",
                           style: GoogleFonts.workSans(
                               fontWeight: FontWeight.w700,
                               textStyle: headline4)),
-                      SizedBox(height: 20),
-                      Text(
-                        "What would you be suing this application as",
-                        style: GoogleFonts.workSans(
-                            textStyle: subtitle2, fontWeight: FontWeight.w300),
-                      ),
                       SizedBox(height: 50),
                       Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -346,7 +347,7 @@ class _DecisionPageState extends State<DecisionPage> {
                                         alignment: Alignment.bottomCenter,
                                         child: Padding(
                                             padding: EdgeInsets.all(15),
-                                            child: Text("DJ / Event Center",
+                                            child: Text("Host",
                                                 textAlign: TextAlign.center,
                                                 style: GoogleFonts.workSans(
                                                     textStyle: subtitle2,
@@ -411,7 +412,7 @@ class _DecisionPageState extends State<DecisionPage> {
                                           alignment: Alignment.bottomCenter,
                                           child: Padding(
                                               padding: EdgeInsets.all(15),
-                                              child: Text("Event Guest",
+                                              child: Text("Guest",
                                                   style: GoogleFonts.workSans(
                                                       textStyle: subtitle2,
                                                       color:
@@ -465,7 +466,7 @@ class _DecisionPageState extends State<DecisionPage> {
                                         Navigator.of(context).pushNamed(
                                             Routes.registerOrganizer);
                                       },
-                                      child: Text("Let's Get Going", style: GoogleFonts.workSans(fontSize: 12, fontWeight: FontWeight.w700))),
+                                      child: Text("Let’s crack on!", style: GoogleFonts.workSans(fontSize: 12, fontWeight: FontWeight.w700))),
                                 )
                               ],
                             )

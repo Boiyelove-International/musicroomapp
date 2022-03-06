@@ -128,7 +128,7 @@ class _EventOrganizerHome extends State<EventOrganizerHome> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                 Text(
-                                  "Find your hits and favourties and add them to events, let's go.",
+                                  "Find and add songs to your event.",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                       color: Colors.black,
@@ -164,7 +164,7 @@ class _EventOrganizerHome extends State<EventOrganizerHome> {
                                             color: Colors.transparent)),
                                     filled: true,
                                     fillColor: Colors.white,
-                                    hintText: "Find those hits",
+                                    hintText: "Search",
                                     hintStyle: TextStyle(fontSize: 13),
                                     contentPadding: EdgeInsets.only(
                                         left: 15, right: 15, top: 5, bottom: 5),
@@ -371,7 +371,7 @@ class _EventOrganizerHome extends State<EventOrganizerHome> {
                         showFab = true;
                       }));
                 },
-                label: Text("Create an Event",
+                label: Text("Create Event",
                     style: TextStyle(color: Colors.black)))));
   }
 
@@ -488,14 +488,16 @@ class _PartyGuestHome extends State<PartyGuestHome> {
                     fontSize: 27, fontWeight: FontWeight.w300),
               ),
               SizedBox(width: 5),
-              Text(
-                "${display_name}",
+              Flexible(
+                  child: Text(
+                "$display_name",
                 overflow: TextOverflow.ellipsis,
+                softWrap: true,
                 style: GoogleFonts.workSans(
                   fontWeight: FontWeight.w700,
                   fontSize: 27,
                 ),
-              )
+              ))
             ],
           ),
           actions: [
@@ -517,85 +519,116 @@ class _PartyGuestHome extends State<PartyGuestHome> {
             child: Padding(
                 padding: EdgeInsets.only(top: 10, left: 10, right: 10),
                 child: ListView(children: [
-                  Container(
-                      height: MediaQuery.of(context).size.height * 0.3,
-                      margin: EdgeInsets.only(top: 20, bottom: 20),
-                      decoration: BoxDecoration(
-                          border: Border.all(),
-                          borderRadius: BorderRadius.all(Radius.circular(15)),
-                          image: DecorationImage(
-                            image: AssetImage(
-                                "assets/images/home-gradient-bg.png"),
-                            fit: BoxFit.cover,
-                          )),
-                      padding: EdgeInsets.only(left: 15, right: 15),
-                      child: Center(
-                          child:
-                              Column(mainAxisSize: MainAxisSize.min, children: [
-                        Text(
-                          "Find your hits and favourties and add them to events, let's go.",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
-                              height: 2),
-                        ),
-                        SizedBox(height: 20),
-                        TextFormField(
-                          controller: _searchContoller,
-                          validator: (value) {
-                            if (value!.isEmpty || value == null) {
-                              return "Enter a search query";
-                            }
-                          },
-                          autofocus: false,
-                          autocorrect: false,
-                          style: TextStyle(color: Colors.black),
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(7.0),
-                                borderSide:
-                                    BorderSide(color: Colors.transparent)),
-                            enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(7.0),
-                                borderSide:
-                                    BorderSide(color: Colors.transparent)),
-                            focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(7.0),
-                                borderSide:
-                                    BorderSide(color: Colors.transparent)),
-                            filled: true,
-                            fillColor: Colors.white,
-                            hintText: "Find those hits",
-                            hintStyle: TextStyle(fontSize: 13),
-                            contentPadding: EdgeInsets.only(
-                                left: 15, right: 15, top: 5, bottom: 5),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                IconlyBold.search,
-                                color: DarkPalette.darkGold,
-                              ),
-                              onPressed: () {
-                                if (_searchContoller.text != null &&
-                                    _searchContoller.text.isNotEmpty) {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            SearchResultScreen(
-                                              url:
-                                                  "/search/?term=${_searchContoller.text}",
-                                            )),
-                                  );
-                                }
-                              },
-                            ),
+                  FutureBuilder(
+                      future: _api.get("/events/"),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          var itemList = snapshot.data as List;
+
+                          if (itemList.isNotEmpty) {
+                            return Container(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.3,
+                                margin: EdgeInsets.only(top: 20, bottom: 50),
+                                decoration: BoxDecoration(
+                                    border: Border.all(),
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(15)),
+                                    image: DecorationImage(
+                                      image: AssetImage(
+                                          "assets/images/home-gradient-bg.png"),
+                                      fit: BoxFit.cover,
+                                    )),
+                                padding: EdgeInsets.only(left: 15, right: 15),
+                                child: Center(
+                                    child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                      Text(
+                                        "Find and add songs to your event.",
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.bold,
+                                            height: 2),
+                                      ),
+                                      SizedBox(height: 20),
+                                      TextFormField(
+                                        controller: _searchContoller,
+                                        validator: (value) {
+                                          if (value!.isEmpty || value == null) {
+                                            return "Enter a search query";
+                                          }
+                                        },
+                                        autofocus: false,
+                                        autocorrect: false,
+                                        style: TextStyle(color: Colors.black),
+                                        decoration: InputDecoration(
+                                          border: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(7.0),
+                                              borderSide: BorderSide(
+                                                  color: Colors.transparent)),
+                                          enabledBorder: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(7.0),
+                                              borderSide: BorderSide(
+                                                  color: Colors.transparent)),
+                                          focusedBorder: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(7.0),
+                                              borderSide: BorderSide(
+                                                  color: Colors.transparent)),
+                                          filled: true,
+                                          fillColor: Colors.white,
+                                          hintText: "Search",
+                                          hintStyle: TextStyle(fontSize: 13),
+                                          contentPadding: EdgeInsets.only(
+                                              left: 15,
+                                              right: 15,
+                                              top: 5,
+                                              bottom: 5),
+                                          suffixIcon: IconButton(
+                                            icon: Icon(
+                                              IconlyBold.search,
+                                              color: DarkPalette.darkGold,
+                                            ),
+                                            onPressed: () {
+                                              if (_searchContoller.text !=
+                                                      null &&
+                                                  _searchContoller
+                                                      .text.isNotEmpty) {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          SearchResultScreen(
+                                                            url:
+                                                                "/search/?term=${_searchContoller.text}",
+                                                          )),
+                                                );
+                                              }
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                    ])));
+                          }
+                          return Container();
+                        } else if (snapshot.hasError) {
+                          return Center(
+                            child: Text("Oops Something went wrong"),
+                          );
+                        }
+                        return Center(
+                          child: CircularProgressIndicator(
+                            color: Colors.amber,
+                            strokeWidth: 1,
                           ),
-                        ),
-                      ]))),
+                        );
+                      }),
                   Container(
                     child: Column(mainAxisSize: MainAxisSize.min, children: [
-                      SizedBox(height: 30),
                       Row(
                         children: [
                           Text("Trending Suggestions",
@@ -643,7 +676,8 @@ class _PartyGuestHome extends State<PartyGuestHome> {
                                           crossAxisCount: 2,
                                           crossAxisSpacing: 20,
                                           mainAxisSpacing: 20),
-                                  itemCount: 2,
+                                  itemCount:
+                                      itemList.length > 1 ? 2 : itemList.length,
                                   itemBuilder: (context, index) {
                                     Map suggestion = itemList[index];
                                     return GestureDetector(

@@ -10,10 +10,12 @@ import 'package:musicroom/styles.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+import '../utils/models.dart';
+
 class YourRoom extends StatelessWidget {
   static const String routeName = "/yourRoom";
-  String code;
-  YourRoom({this.code = ""});
+  Event event;
+  YourRoom({required this.event});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,7 +58,8 @@ class YourRoom extends StatelessWidget {
                     ),
                     IconButton(
                         onPressed: () {
-                          Clipboard.setData(new ClipboardData(text: "${code}"))
+                          Clipboard.setData(
+                                  new ClipboardData(text: "${event.code!}"))
                               .then((_) {
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                                 content: Text(
@@ -71,7 +74,7 @@ class YourRoom extends StatelessWidget {
                 )),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: code
+              children: event.code!
                   .split("")
                   .map((e) => Container(
                         height: 90,
@@ -94,25 +97,29 @@ class YourRoom extends StatelessWidget {
               style: GoogleFonts.workSans(
                   fontSize: 18, fontWeight: FontWeight.w300),
             ),
-            AspectRatio(
-                aspectRatio: 1 / 1,
+            Center(
                 child: Container(
-                  padding: EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                      image: DecorationImage(
-                          image:
-                              AssetImage("assets/images/qr_bounding_box.png"),
-                          fit: BoxFit.contain)),
-                  child: Center(
-                    child: QrImage(
-                      data: '${code}',
-                      version: QrVersions.auto,
-                      size: 290,
-                      gapless: false,
-                      backgroundColor: Colors.white,
+              height: MediaQuery.of(context).size.height * 0.45,
+              child: AspectRatio(
+                  aspectRatio: 1 / 1,
+                  child: Container(
+                    padding: EdgeInsets.all(50),
+                    decoration: BoxDecoration(
+                        image: DecorationImage(
+                            image:
+                                AssetImage("assets/images/qr_bounding_box.png"),
+                            fit: BoxFit.contain)),
+                    child: Center(
+                      child: QrImage(
+                        data: '${event.code!}',
+                        version: QrVersions.auto,
+                        size: 290,
+                        gapless: false,
+                        backgroundColor: Colors.white,
+                      ),
                     ),
-                  ),
-                )),
+                  )),
+            )),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -142,7 +149,7 @@ class YourRoom extends StatelessWidget {
 
   shareImage() async {
     final qrValidationResult = QrValidator.validate(
-      data: "${code}",
+      data: "${event.code}",
       version: QrVersions.auto,
       errorCorrectionLevel: QrErrorCorrectLevel.L,
     );
@@ -167,7 +174,13 @@ class YourRoom extends StatelessWidget {
     await writeToFile(picData!, path);
 
     await Share.shareFiles([path],
-        mimeTypes: ["image/png"], subject: 'Join Event!', text: '${code}');
+        mimeTypes: ["image/png"],
+        subject: 'Join ${event.name!} by:${event.organizer}',
+        text: """About Event:
+${event.about!} \n
+To join this event,
+Use unique code: ${event.code!}
+or link: example.com/${event.code}""");
   }
 
   Future<void> writeToFile(ByteData data, String path) async {

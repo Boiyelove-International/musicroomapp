@@ -191,6 +191,8 @@ class _EventDetail extends State<EventDetail> {
                                   children: [
                                     GestureDetector(
                                       onTap: () {
+                                        print(
+                                            "suggestions are ${_event.suggestions}");
                                         Navigator.of(context).push(MaterialPageRoute(
                                             builder: (context) => SuggestionScreen(
                                                 suggestions:
@@ -442,7 +444,11 @@ class _EventDetail extends State<EventDetail> {
                       topLeft: const Radius.circular(40.0),
                       topRight: const Radius.circular(40.0),
                     )),
-                padding: EdgeInsets.only(top: 10, left: 20, right: 20, bottom: MediaQuery.of(context).viewInsets.bottom),
+                padding: EdgeInsets.only(
+                    top: 10,
+                    left: 20,
+                    right: 20,
+                    bottom: MediaQuery.of(context).viewInsets.bottom),
                 height: MediaQuery.of(context).size.height * 0.6,
                 child: CreateEventForm(
                   event: _event,
@@ -455,8 +461,7 @@ class _EventDetail extends State<EventDetail> {
                 )),
             backgroundColor: Colors.transparent,
             context: context,
-            isScrollControlled: true
-    )
+            isScrollControlled: true)
         .whenComplete(() {});
   }
 
@@ -482,7 +487,7 @@ class _EventDetail extends State<EventDetail> {
                 onPressed: () {
                   Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) => YourRoom(
-                            code: _event.code!,
+                            event: _event,
                           )));
                 }),
             FocusedMenuItem(

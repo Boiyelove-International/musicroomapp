@@ -76,17 +76,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   padding:
                       EdgeInsets.only(top: 15, bottom: 20, left: 10, right: 10),
                   children: [
-                    Text("Let's get you setup",
-                        style: GoogleFonts.workSans(
-                            fontWeight: FontWeight.w700, textStyle: headline4)),
                     SizedBox(height: 20),
-                    Text(
-                        'Kindly provide the necessary details to get your account up and running',
-                        style: GoogleFonts.workSans(
-                            fontWeight: FontWeight.w300,
-                            fontSize: 16,
-                            height: 1.8)),
-                    SizedBox(height: 60),
                     TextFormField(
                       controller: _organizerName,
                       textCapitalization: TextCapitalization.characters,
@@ -119,7 +109,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             TextStyle(color: Colors.white.withOpacity(0.6)),
                         fillColor: Colors.transparent,
                         contentPadding: EdgeInsets.all(16),
-                        labelText: "DJ/Event Organizer Name",
+                        labelText: "Host",
                       ),
                     ),
                     SizedBox(height: 30),
@@ -236,7 +226,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           style: GoogleFonts.workSans(
                               fontWeight: FontWeight.w300, fontSize: 16),
                         ),
-                        SizedBox(width: 10),
                         TextButton(
                             onPressed: () {
                               Navigator.pushReplacementNamed(
@@ -323,6 +312,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       print("Access Token >> ${userCredential?.accessToken}");
       print("ID Token >> ${userCredential?.idToken}");
+      print("data $data");
       print(data?.id);
 
       Map<String, dynamic> payload = {
@@ -336,7 +326,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       _login(payload);
     } catch (error) {
-      print(error);
+      print("an error occured: $error");
     }
     setState(() {
       isLoading = false;
@@ -357,10 +347,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
         await prefs.setString("token", data["token"]);
         await prefs.setString("email", data["email"]);
         await prefs.setString("display_name", data["display_name"]);
+        Navigator.of(context).pushNamedAndRemoveUntil(
+            Routes.organizerHome, (Route<dynamic> route) => false);
         setState(() {
           isLoading = false;
         });
-        Navigator.pushReplacementNamed(context, Routes.organizerHome);
       });
     } catch (e) {
       setState(() {
@@ -891,7 +882,8 @@ class _RegisterPartyGuest extends State<RegisterPartyGuest> {
           SharedPreferences prefs = await SharedPreferences.getInstance();
           prefs.remove("token");
           prefs.setString("display_name", _displayNameController.text);
-          Navigator.pushReplacementNamed(context, Routes.guestHome);
+          Navigator.of(context).pushNamedAndRemoveUntil(
+              Routes.guestHome, (Route<dynamic> route) => false);
         });
       } catch (e) {
         setState(() {
