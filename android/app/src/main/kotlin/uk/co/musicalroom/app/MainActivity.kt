@@ -1,4 +1,4 @@
-package com.musicroomapp.musicroom
+package uk.co.musicalroom.app
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,4 +1,4 @@
-package com.musicroomapp.musicroom
+package uk.co.musicalroom.app
 
 import io.flutter.app.FlutterApplication
 import io.flutter.plugin.common.PluginRegistry
