@@ -392,6 +392,7 @@ class _LoginScreenState extends State<LoginScreen> {
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
   bool isLoading = false;
+  bool _showPassword = false;
 
   @override
   void initState() {
@@ -457,8 +458,23 @@ class _LoginScreenState extends State<LoginScreen> {
                 text: value.trim(), selection: _passwordController.selection);
           },
           validator: (value) => value!.isEmpty ? "Cannot be empty" : null,
+          obscureText: !_showPassword,
+          autocorrect: false,
+          enableSuggestions: false,
           // textAlign: TextAlign.center,
           decoration: new InputDecoration(
+            suffixIcon: IconButton(
+              icon: Icon(
+                _showPassword ? Icons.visibility : Icons.visibility_off,
+                color: Colors.grey,
+              ),
+              onPressed: () {
+                print("show passwoerd is ${_showPassword}");
+                setState(() {
+                  _showPassword = !_showPassword;
+                });
+              },
+            ),
             floatingLabelBehavior: FloatingLabelBehavior.always,
             labelStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
             focusedBorder: OutlineInputBorder(
