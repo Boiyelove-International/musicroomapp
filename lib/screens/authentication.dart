@@ -29,8 +29,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController _organizerName = TextEditingController();
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
+
   final _formKey = GlobalKey<FormState>();
   bool isLoading = false;
+  bool _showPassword = false;
 
   _register() async {
     setState(() {
@@ -160,7 +162,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       validator: (value) =>
                           value!.isEmpty ? "Cannot be empty" : null,
                       // textAlign: TextAlign.center,
+                      obscureText: !_showPassword,
+                      enableSuggestions: false,
+                      autocorrect: false,
                       decoration: new InputDecoration(
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _showPassword
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: Colors.grey,
+                          ),
+                          onPressed: () {
+                            print("show passwoerd is ${_showPassword}");
+                            setState(() {
+                              _showPassword = !_showPassword;
+                            });
+                          },
+                        ),
                         floatingLabelBehavior: FloatingLabelBehavior.always,
                         labelStyle:
                             TextStyle(color: Colors.white.withOpacity(0.4)),
