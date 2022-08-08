@@ -9,7 +9,6 @@ import 'package:musicroom/screens/suggestion_list.dart';
 import 'package:musicroom/screens/yourRoom.dart';
 import 'package:musicroom/utils/apiServices.dart';
 import 'package:musicroom/utils/models.dart';
-import '../routes.dart';
 import '../styles.dart';
 
 class EventDetail extends StatefulWidget {

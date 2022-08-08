@@ -16,7 +16,7 @@
         <item name="android:windowBackground">?android:colorBackground</item>
     </style>
 
-    <string name="app_name">MusicRoom.</string>
+    <string name="app_name">Musical Room</string>
 
     <!-- Replace "000000000000" with your Facebook App ID here. -->
     <string name="facebook_app_id">471028527989498</string>
@@ -26,5 +26,6 @@
       **NOTE**: The scheme needs to start with `fb` and then your ID.
     -->
     <string name="fb_login_protocol_scheme">fb471028527989498</string>
-</resources>
+    <string name="facebook_client_token">a1e32ecd93bfb5e69aee21faec3ec30a</string>
 
+</resources>

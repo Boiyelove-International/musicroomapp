@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,13 +13,12 @@ import 'package:musicroom/screens/notifications.dart';
 import 'package:musicroom/screens/premium.dart';
 import 'package:musicroom/screens/profile.dart';
 import 'package:musicroom/screens/search.dart';
-import 'package:musicroom/screens/suggestion_list.dart';
-import 'package:musicroom/screens/yourRoom.dart';
 import 'package:musicroom/styles.dart';
 import 'package:musicroom/utils.dart';
 import 'package:musicroom/utils/fcm-service.dart';
 import 'package:musicroom/utils/models.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,7 +38,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Flutter Demo',
+        title: 'Musical Room',
         theme: ThemeData(
             scaffoldBackgroundColor: Colors.black,
             primarySwatch: Colors.blue,
@@ -53,7 +51,7 @@ class MyApp extends StatelessWidget {
               fontFamily: GoogleFonts.workSans().fontFamily,
             )),
         debugShowCheckedModeBanner: false,
-        home: OnBoardingPage(),
+        home: SplashScreen(),
         routes: <String, WidgetBuilder>{
           Routes.guestHome: (BuildContext context) => PartyGuestHome(),
           Routes.organizerHome: (BuildContext context) => EventOrganizerHome(),
@@ -91,10 +89,44 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
-    super.initState();
-    new Future.delayed(const Duration(seconds: 3), () async {
-      Navigator.pushReplacementNamed(context, Routes.onboarding);
-    });
+    checkUserLoggedIn().then((value) => super.initState());
+  }
+
+  Future<void> checkUserLoggedIn() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int? userType = prefs.getInt("userType");
+    // bool? userLoggedIn = prefs.getBool("userLoggedIn");;
+
+    switch (userType) {
+      case 1:
+        //userType 1 is Organizer
+        new Future.delayed(const Duration(seconds: 3), () async {
+          Navigator.of(context).pushNamedAndRemoveUntil(
+              Routes.organizerHome, (Route<dynamic> route) => false);
+        });
+
+        break;
+      case 2:
+        //userType 2 is Guest
+        new Future.delayed(const Duration(seconds: 3), () async {
+          Navigator.of(context).pushNamedAndRemoveUntil(
+              Routes.guestHome, (Route<dynamic> route) => false);
+        });
+
+        break;
+      default:
+        if (prefs.get("skipOnboarding") == true) {
+          new Future.delayed(const Duration(seconds: 3), () async {
+            Navigator.pushReplacementNamed(context, Routes.decision);
+          });
+        } else {
+          new Future.delayed(const Duration(seconds: 3), () async {
+            Navigator.pushReplacementNamed(context, Routes.onboarding);
+          });
+        }
+
+        break;
+    }
   }
 
   @override
@@ -268,7 +300,10 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
                                     RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(5.0),
                                         side: BorderSide(color: DarkPalette.darkGold)))),
-                            onPressed: () {
+                            onPressed: () async {
+                              SharedPreferences prefs =
+                                  await SharedPreferences.getInstance();
+                              await prefs.setBool("skipOnboarding", true);
                               Navigator.pushReplacementNamed(
                                   context, Routes.decision);
                             },

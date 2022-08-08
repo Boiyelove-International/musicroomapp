@@ -3,17 +3,19 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:musicroom/styles.dart';
 import 'package:musicroom/utils/apiServices.dart';
 import 'package:musicroom/utils/models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../routes.dart';
 import '../utils.dart';
 import 'buttons.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 
 class RegisterScreen extends StatefulWidget {
   static const String routeName = '/RegisterScreen';
@@ -55,6 +57,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
           .then((value) {
         Navigator.of(context).pushNamed(Routes.login);
         print("value is $value");
+      }).onError((error, stackTrace) {
+        setState(() {
+          isLoading = false;
+        });
       });
 
       if (_formKey.currentState!.validate()) {}
@@ -62,7 +68,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       setState(() {
         isLoading = false;
       });
-      print("error is $e");
+      // print("error is $e");
     }
   }
 
@@ -81,7 +87,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     SizedBox(height: 20),
                     TextFormField(
                       controller: _organizerName,
-                      textCapitalization: TextCapitalization.characters,
+                      textCapitalization: TextCapitalization.words,
                       onChanged: (value) {
                         _organizerName.value = TextEditingValue(
                             text: value.trim(),
@@ -117,7 +123,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     SizedBox(height: 30),
                     TextFormField(
                       controller: _emailController,
-                      textCapitalization: TextCapitalization.characters,
                       onChanged: (value) {
                         _emailController.value = TextEditingValue(
                             text: value.trim(),
@@ -233,7 +238,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         SizedBox(
                           width: 30,
                         ),
-                        Image.asset("assets/images/apple_icon.png"),
+                        GestureDetector(
+                          child: Image.asset("assets/images/apple_icon.png"),
+                          onTap: _appleSocialLogin,
+                        ),
                       ],
                     ),
                     SizedBox(height: 40),
@@ -266,37 +274,102 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ))));
   }
 
+  _appleSocialLogin() async {
+    try {
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+        webAuthenticationOptions: WebAuthenticationOptions(
+          clientId: 'uk.co.musicalroom.musicalroom',
+          redirectUri: Uri.parse(
+            'https://app.musicalroom.co.uk/webhooks/signin_with_apple/',
+          ),
+        ),
+      );
+
+      print("credential =>>>>> $credential");
+      // Now send the credential (especially `credential.authorizationCode`) to your server to create a session
+      // after they have been validated with Apple (see `Integration` section for more information on how to do this)
+      String name = "";
+      // if (name.isNotEmpty && credential.familyName != null) {
+      //   name += " ";
+      //   name += credential.familyName ?? "";
+      // } else {
+      //   name += credential.familyName ?? "";
+      // }
+
+      if (credential.givenName != null && credential.familyName != null) {
+        name = credential.givenName! + " " + credential.familyName!;
+      } else if (credential.givenName == null ||
+          credential.familyName == null) {
+        if (credential.givenName != null) {
+          name = credential.givenName!;
+        } else if (credential.familyName != null) {
+          name = credential.familyName!;
+        }
+      }
+      print("name is >>>>>>>>>>> $name");
+      Map<String, dynamic> payload = {
+        "auth_token": credential.authorizationCode,
+        "id_token": credential.identityToken,
+        "email": credential.email,
+        "name": name,
+        "social": "apple"
+      };
+
+      _login(payload);
+    } catch (e) {
+      print("E ============> $e");
+    }
+  }
+
   _facebookSocialLogin() async {
-    final facebookLogin = FacebookLogin();
-    final result = await facebookLogin.logIn(['email']);
+    // final facebookLogin = FacebookLogin();
+    // final result = await facebookLogin.logIn(['email']);
+
+    final LoginResult result = await FacebookAuth.instance
+        .login(); // by default we request the email and the public profile
+    // or FacebookAuth.i.login()
+    if (result.status == LoginStatus.success) {
+      // you are logged
+      final AccessToken accessToken = result.accessToken!;
+      print("facebook accessToken is =====> ${accessToken.toJson()}");
+      print("facebook Token is =====> ${accessToken.token}");
+      print("facebook Token is =====> ${accessToken.userId}");
+    } else {
+      print("facebook login status is =====> ${result.status}");
+      print("facebook login message is =====> ${result.message}");
+    }
 
     switch (result.status) {
-      case FacebookLoginStatus.loggedIn:
+      case LoginStatus.success:
         print(result);
-        _getFacebookDetails(result);
+        _getFacebookDetails(result.accessToken!);
         break;
-      case FacebookLoginStatus.cancelledByUser:
+      case LoginStatus.cancelled:
         print('was canceled');
         break;
-      case FacebookLoginStatus.error:
+      case LoginStatus.failed:
         print("Facebook error");
         break;
     }
   }
 
-  _getFacebookDetails(FacebookLoginResult result) async {
+  _getFacebookDetails(AccessToken accessToken) async {
     setState(() {
       isLoading = true;
     });
     try {
-      final token = result.accessToken.token;
+      final token = accessToken;
       final graphResponse = await http.get(Uri.parse(
-          "https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,picture,email&access_token=${result.accessToken.token}"));
+          "https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,picture,email&access_token=${accessToken.token}"));
       final profile = jsonDecode(graphResponse.body);
       print(profile);
       Map<String, dynamic> payload = {
-        "access_token": result.accessToken.token,
-        "id_token": result.accessToken.userId,
+        "access_token": accessToken.token,
+        "id_token": accessToken.userId,
         "email": profile['email'],
         "name": profile['first_name'] + ' ' + profile['last_name'],
         "image_url": profile['picture']['data']['url'],
@@ -317,7 +390,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     GoogleSignIn _googleSignIn = GoogleSignIn(
       scopes: [
         'email',
-        'https://www.googleapis.com/auth/contacts.readonly',
       ],
     );
 
@@ -366,6 +438,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         await prefs.setString("token", data["token"]);
         await prefs.setString("email", data["email"]);
         await prefs.setString("display_name", data["display_name"]);
+        await prefs.setInt("userType", 1);
+        await prefs.setBool("userLoggedIn", true);
         Navigator.of(context).pushNamedAndRemoveUntil(
             Routes.organizerHome, (Route<dynamic> route) => false);
         setState(() {
@@ -422,7 +496,7 @@ class _LoginScreenState extends State<LoginScreen> {
         SizedBox(height: 60),
         TextFormField(
           controller: _emailController,
-          textCapitalization: TextCapitalization.characters,
+          // textCapitalization: TextCapitalization.characters,
           onChanged: (value) {
             _emailController.value = TextEditingValue(
                 text: value.trim(), selection: _emailController.selection);
@@ -469,7 +543,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 color: Colors.grey,
               ),
               onPressed: () {
-                print("show passwoerd is ${_showPassword}");
                 setState(() {
                   _showPassword = !_showPassword;
                 });
@@ -542,14 +615,15 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             GestureDetector(
               child: Image.asset("assets/images/facebook_icon.png"),
-              onTap: () {
-                _facebookSocialLogin();
-              },
+              onTap: _facebookSocialLogin,
             ),
             SizedBox(
               width: 20,
             ),
-            Image.asset("assets/images/apple_icon.png"),
+            GestureDetector(
+              child: Image.asset("assets/images/apple_icon.png"),
+              onTap: _appleSocialLogin,
+            ),
           ],
         ),
         SizedBox(height: 40),
@@ -578,37 +652,113 @@ class _LoginScreenState extends State<LoginScreen> {
     )));
   }
 
+  _appleSocialLogin() async {
+    try {
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+        webAuthenticationOptions: WebAuthenticationOptions(
+          clientId: 'uk.co.musicalroom.musicalroom',
+          redirectUri: Uri.parse(
+            'https://app.musicalroom.co.uk/webhooks/signin_with_apple/',
+          ),
+        ),
+      );
+
+      print("credential =>>>>> $credential");
+      // Now send the credential (especially `credential.authorizationCode`) to your server to create a session
+      // after they have been validated with Apple (see `Integration` section for more information on how to do this)
+      String name = "";
+      // if (name.isNotEmpty && credential.familyName != null) {
+      //   name += " ";
+      //   name += credential.familyName ?? "";
+      // } else {
+      //   name += credential.familyName ?? "";
+      // }
+
+      if (credential.givenName != null && credential.familyName != null) {
+        name = credential.givenName! + " " + credential.familyName!;
+      } else if (credential.givenName == null ||
+          credential.familyName == null) {
+        if (credential.givenName != null) {
+          name = credential.givenName!;
+        } else if (credential.familyName != null) {
+          name = credential.familyName!;
+        }
+      }
+      print("name is >>>>>>>>>>> $name");
+      Map<String, dynamic> payload = {
+        "auth_token": credential.authorizationCode,
+        "id_token": credential.identityToken,
+        "email": credential.email,
+        "name": name,
+        "social": "apple"
+      };
+
+      _login(payload);
+    } catch (e) {
+      print("E ============> $e");
+    }
+  }
+
   _facebookSocialLogin() async {
-    final facebookLogin = FacebookLogin();
-    final result = await facebookLogin.logIn(['email']);
+    //     FacebookAuth.instance
+    //     .login(permissions: ["public_profile", "email"]).then((value) {
+    //   FacebookAuth.instance.getUserData().then((userData) {
+    //     print("userData =====> $userData");
+    //   });
+    // });
+    // if (kIsWeb) {
+    //   // initialiaze the facebook javascript SDK
+    //   await FacebookAuth.i.webInitialize(
+    //     appId: "471028527989498",
+    //     cookie: true,
+    //     xfbml: true,
+    //     version: "v13.0",
+    //   );
+    // }
+    final LoginResult result = await FacebookAuth.instance
+        .login(); // by default we request the email and the public profile
+    // or FacebookAuth.i.login()
+    if (result.status == LoginStatus.success) {
+      // you are logged
+      final AccessToken accessToken = result.accessToken!;
+    } else {
+      print(result.status);
+      print(result.message);
+    }
+    // final facebookLogin = FacebookLogin();
+    // final result = await facebookLogin.logIn(['email']);
 
     switch (result.status) {
-      case FacebookLoginStatus.loggedIn:
+      case LoginStatus.success:
         print(result);
-        _getFacebookDetails(result);
+        _getFacebookDetails(result.accessToken!);
         break;
-      case FacebookLoginStatus.cancelledByUser:
+      case LoginStatus.cancelled:
         print('was canceled');
         break;
-      case FacebookLoginStatus.error:
+      case LoginStatus.failed:
         print("Facebook error");
         break;
     }
   }
 
-  _getFacebookDetails(FacebookLoginResult result) async {
+  _getFacebookDetails(AccessToken accessToken) async {
     setState(() {
       isLoading = true;
     });
     try {
-      final token = result.accessToken.token;
+      final token = accessToken.token;
       final graphResponse = await http.get(Uri.parse(
-          "https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,picture,email&access_token=${result.accessToken.token}"));
+          "https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,picture,email&access_token=${accessToken.token}"));
       final profile = jsonDecode(graphResponse.body);
       print(profile);
       Map<String, dynamic> payload = {
-        "access_token": result.accessToken.token,
-        "id_token": result.accessToken.userId,
+        "access_token": accessToken.token,
+        "id_token": accessToken.userId,
         "email": profile['email'],
         "name": profile['first_name'] + ' ' + profile['last_name'],
         "image_url": profile['picture']['data']['url'],
@@ -629,7 +779,6 @@ class _LoginScreenState extends State<LoginScreen> {
     GoogleSignIn _googleSignIn = GoogleSignIn(
       scopes: [
         'email',
-        'https://www.googleapis.com/auth/contacts.readonly',
       ],
     );
 
@@ -668,6 +817,8 @@ class _LoginScreenState extends State<LoginScreen> {
       isLoading = true;
     });
 
+    print("login started");
+
     ApiBaseHelper api = ApiBaseHelper();
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.remove("token");
@@ -677,18 +828,30 @@ class _LoginScreenState extends State<LoginScreen> {
         await prefs.setString("token", data["token"]);
         await prefs.setString("email", data["email"]);
         await prefs.setString("display_name", data["display_name"]);
+        await prefs.setBool("userLoggedIn", true);
+        await prefs.setInt("userType", 1);
         setState(() {
           isLoading = false;
         });
         Navigator.of(context).pushNamedAndRemoveUntil(
             Routes.organizerHome, (Route<dynamic> route) => false);
+      }).onError((error, stackTrace) {
+        print("error is ===> ${error}");
+        print("stackTrace is ===>  ${stackTrace}");
+        setState(() {
+          isLoading = false;
+        });
       });
     } catch (e) {
+      // print("error is ===> ${e}");
+      // print("stackTrace is ===>  ${stackTrace}");
       setState(() {
         isLoading = false;
       });
       print("error is $e");
     }
+
+    print("login started");
   }
 }
 
@@ -896,7 +1059,8 @@ class _RegisterPartyGuest extends State<RegisterPartyGuest> {
     setState(() {
       isLoading = true;
     });
-
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove("token");
     if (_displayNameKey.currentState!.validate()) {
       try {
         ApiBaseHelper api = ApiBaseHelper();
@@ -914,11 +1078,17 @@ class _RegisterPartyGuest extends State<RegisterPartyGuest> {
         }
 
         api.post("/register/guest/", data).then((data) async {
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          prefs.remove("token");
           prefs.setString("display_name", _displayNameController.text);
+          prefs.setBool("userLoggedIn", true);
+          prefs.setInt("userType", 2);
           Navigator.of(context).pushNamedAndRemoveUntil(
               Routes.guestHome, (Route<dynamic> route) => false);
+        }).onError((error, stackTrace) {
+          print("error is ===> ${error}");
+          print("stackTrace is ===>  ${stackTrace}");
+          setState(() {
+            isLoading = false;
+          });
         });
       } catch (e) {
         setState(() {

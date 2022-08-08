@@ -427,6 +427,7 @@ class SongSuggestionList extends StatelessWidget {
                 shrinkWrap: true,
                 physics: !isScrollable ? NeverScrollableScrollPhysics() : null,
                 itemBuilder: (context, index) {
+                  print("suggestion index is $index of ${suggestions.length}");
                   Map suggestion = suggestions[index];
                   switch (suggestion['accepted']) {
                     case true:

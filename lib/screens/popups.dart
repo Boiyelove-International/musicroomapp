@@ -653,6 +653,7 @@ class _CreateEventForm extends State<CreateEventForm> {
   var _selectedDate;
   Event? eventItem;
   int _currentPage = 0;
+  TimeOfDay? pickedTime;
 
   bool isLoading = false;
 
@@ -692,8 +693,8 @@ class _CreateEventForm extends State<CreateEventForm> {
 
   @override
   Widget build(BuildContext context) {
-    print("widget.event?.image");
-    print(widget.event?.image);
+    // print("widget.event?.image");
+    // print(widget.event?.image);
     return Column(
       children: [
         Visibility(
@@ -879,13 +880,14 @@ class _CreateEventForm extends State<CreateEventForm> {
             }
           },
           onTap: () async {
-            TimeOfDay? pickedTime = await showTimePicker(
+            pickedTime = await showTimePicker(
               initialTime: TimeOfDay.now(),
               context: context,
             );
 
             if (pickedTime != null) {
-              print(pickedTime.format(context)); //output 10:51 PM
+              print(
+                  "picked time ==> ${pickedTime!.format(context)}"); //output 10:51 PM
               // DateTime parsedTime = DateFormat.jm().parse(pickedTime.format(context).toString());
               // //converting to DateTime so that we can further format on different pattern.
               // print(parsedTime); //output 1970-01-01 22:53:00.000
@@ -895,7 +897,7 @@ class _CreateEventForm extends State<CreateEventForm> {
 
               setState(() {
                 _eventTimeController.text =
-                    pickedTime.format(context); //set the value of text field.
+                    pickedTime!.format(context); //set the value of text field.
                 print("the time is set");
               });
             } else {
@@ -1069,7 +1071,11 @@ class _CreateEventForm extends State<CreateEventForm> {
       ]));
 
   _submit() async {
-    if (result == null && widget.event == null) return;
+    if (result == null && widget.event == null) {
+      print("we can't submit this");
+      return;
+    }
+    ;
 
     setState(() {
       isLoading = true;
@@ -1092,8 +1098,16 @@ class _CreateEventForm extends State<CreateEventForm> {
       });
       request.fields["name"] = _eventNameController.text;
       request.fields["about"] = _aboutEventController.text;
-      request.fields["event_time"] = _eventTimeController.text;
+      if (widget.event != null) {
+        pickedTime = widget.event!.event_time;
+      }
+      request.fields["event_time"] =
+          "${pickedTime!.hour.toString().padLeft(2, "0")}:${pickedTime!.minute.toString().padLeft(2, "0")}";
       request.fields["event_date"] = _selectedDate;
+
+      print("submitted time ==> ${_eventTimeController.text}");
+      print(
+          "picked time ==> ${pickedTime!.hour.toString().padLeft(2, "0")}:${pickedTime!.minute.toString().padLeft(2, "0")}");
 
       if (result != null) {
         request.files.add(await http.MultipartFile.fromPath(
@@ -1101,7 +1115,10 @@ class _CreateEventForm extends State<CreateEventForm> {
       }
 
       var response = await request.send();
-      print(response.statusCode);
+      // final respStr = await response.stream.bytesToString();
+      // print("Status code is  =====> ${response.statusCode}");
+      // print("Result is ===> ${respStr}");
+
       if (response.statusCode == 201) {
         //Event created
         String data = await response.stream.bytesToString();
@@ -1118,6 +1135,13 @@ class _CreateEventForm extends State<CreateEventForm> {
         widget.callback!(Event.fromJson(item));
         _changePage(4);
         return;
+      }
+
+      if (response.statusCode >= 400) {
+        print("response ====> ${response.toString()} ");
+        setState(() {
+          isLoading = false;
+        });
       }
     } catch (e) {
       setState(() {
@@ -1379,7 +1403,7 @@ class _SuggestEventForm extends State<SuggestEventForm> {
             textAlign: TextAlign.center),
         SizedBox(height: 20),
         Text(
-            "You will ge updated on the status of your suggestion as soon as the event organizer approves it. ",
+            "You will get updated on the status of your suggestion as soon as the event organizer approves it. ",
             style: GoogleFonts.workSans(
                 fontSize: 15, fontWeight: FontWeight.w300, height: 1.5),
             textAlign: TextAlign.center),
@@ -1616,6 +1640,8 @@ class _JoinEventForm extends State<JoinEventForm> {
     setState(() {
       isLoading = true;
     });
+    FocusScope.of(context).requestFocus(new FocusNode());
+    // FocusManager.instance.primaryFocus?.unfocus();
 
     if (_eventCodeForm.currentState!.validate()) {
       try {
@@ -1623,13 +1649,19 @@ class _JoinEventForm extends State<JoinEventForm> {
             _codeBox1.text + _codeBox2.text + _codeBox3.text + _codeBox4.text;
         q = q.toUpperCase();
 
-        _api.get("/event/join/?q=$q").then((value) {
-          print("event join response is value");
+        _api.get("/event/join/?q=$q", context: context).then((value) {
+          print("event join response is $value");
           setState(() {
             eventData = Event.fromJson(value);
           });
           _changePage(3, skip: true);
           FocusScope.of(context).unfocus();
+        }).onError((error, stackTrace) {
+          setState(() {
+            isLoading = false;
+          });
+          print(
+              "event join error ====> $error \n \n StackTrace =====> $stackTrace");
         });
       } catch (e) {
         setState(() {
@@ -2441,7 +2473,7 @@ class _SuggestSongForm extends State<SuggestSongForm> {
           textAlign: TextAlign.center),
       SizedBox(height: 20),
       Text(
-          "You will ge updated on the status of your suggestion as soon as the event organizer approves it. ",
+          "You will get updated on the status of your suggestion as soon as the event organizer approves it. ",
           style: GoogleFonts.workSans(
               fontSize: 15, fontWeight: FontWeight.w300, height: 1.5),
           textAlign: TextAlign.center),

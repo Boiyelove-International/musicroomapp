@@ -35,6 +35,15 @@ class InvalidInputException extends AppException {
   InvalidInputException(String message) : super(message, "Invalid Input: ");
 }
 
+class ResourceNotFoundException extends AppException {
+  ResourceNotFoundException(String message)
+      : super(message, "Resource Not Found: ");
+}
+
+class ServerErrorException extends AppException {
+  ServerErrorException([message]) : super(message, "Server Error: ");
+}
+
 class ApiResponse<T> {
   Status status;
   T? data;
@@ -52,17 +61,24 @@ enum Status { LOADING, COMPLETED, ERROR }
 
 class ApiBaseHelper {
   // final String _baseUrl = "http://127.0.0.1:8000/api";
+
+  // final String _baseUrl = "http://192.168.0.141:8000/api";
+
   final String _baseUrl = "https://app.musicalroom.co.uk/api";
   String get baseurl => _baseUrl;
   BuildContext? context;
 
-  Future<dynamic> get(String url) async {
+  Future<dynamic> get(String url, {BuildContext? context}) async {
     String? FCMdeviceId = await FirebaseMessaging.instance.getToken();
     print('Api Get, url $url');
     var responseJson;
     SharedPreferences pref = await SharedPreferences.getInstance();
     String? token = await pref.getString("token");
     String deviceId = await getDeviceId();
+
+    if (context != null) {
+      this.context = context;
+    }
 
     try {
       Map<String, String> headers = {
@@ -118,6 +134,12 @@ class ApiBaseHelper {
         headers.addAll({"guest": deviceId});
       }
       headers.addAll({"fcm-device-id": FCMdeviceId ?? ''});
+      userClient["deviceName"] = "${userClient["deviceName"]}"
+          .replaceAll("’", "")
+          .replaceAll("'", "")
+          .replaceAll('"', "");
+      print(userClient);
+      print("John Doe’s iPhone".replaceAll(RegExp("\'"), ""));
       headers.addAll(userClient);
 
       final response = await http.post(Uri.parse(_baseUrl + url),
@@ -130,6 +152,9 @@ class ApiBaseHelper {
       print('No net');
       displayMessage("No Internet Connection");
       throw FetchDataException('No Internet connection');
+    } on BadRequestException {
+      print("an error occured");
+      throw new BadRequestException("Invalid Data");
     }
     print('api post received!');
     return responseJson;
@@ -261,24 +286,48 @@ class ApiBaseHelper {
 
   dynamic _returnResponse(http.Response response) {
     print("status is ${response.statusCode}");
+    var responseJson = json.decode(response.body.toString());
     if (response.statusCode >= 400 && response.statusCode <= 511) {
-      print("it falls in line");
-      displayMessage('${response.body.toString()}');
+      print(
+          "it falls in line  with result ${responseJson.runtimeType}===> $responseJson");
+
+      try {
+        if (responseJson is Map && responseJson["error"] == true) {
+          print("if ======> 1");
+          responseJson["errors"].forEach((key, value) {
+            value = value.join(", ");
+            displayMessage('$key: $value'.capitalize());
+          });
+        }
+        if (responseJson["non_field_errors"] is List &&
+            responseJson["non_field_errors"] != []) {
+          print("if ======> 2");
+          print("ResponseJson ========> $responseJson");
+          displayMessage(
+              '${responseJson["non_field_errors"].join(",")}'.capitalize());
+        } else {
+          print("if ======> 3");
+          displayMessage('Error: ${responseJson["error"]}'.capitalize());
+        }
+      } catch (e) {
+        print("the try attement broke because =====> $e");
+      }
     }
+
     switch (response.statusCode) {
       case 200:
-        var responseJson = json.decode(response.body.toString());
-        // print(responseJson);
         return responseJson;
       case 201:
-        var responseJson = json.decode(response.body.toString());
         return responseJson;
       case 400:
         throw BadRequestException(response.body.toString());
       case 401:
+      case 404:
+        throw ResourceNotFoundException(response.body.toString());
       case 403:
         throw UnauthorisedException(response.body.toString());
       case 500:
+        throw ServerErrorException(response.body.toString());
       default:
         displayMessage(
             'Error occured while Communication with Server with StatusCode : ${response.statusCode}');

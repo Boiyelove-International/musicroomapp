@@ -1,11 +1,14 @@
 import 'dart:io';
+import 'dart:async';
 
 import 'package:email_validator/email_validator.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:iconly/iconly.dart';
 import 'package:musicroom/main.dart';
 import 'package:musicroom/styles.dart';
@@ -30,7 +33,6 @@ class _ProfileScreen extends State<ProfileScreen> {
   TextEditingController oldPasswordController = TextEditingController();
   TextEditingController newPasswordController1 = TextEditingController();
   TextEditingController newPasswordController2 = TextEditingController();
-  late SharedPreferences prefs;
 
   @override
   void initState() {
@@ -39,7 +41,7 @@ class _ProfileScreen extends State<ProfileScreen> {
   }
 
   _loadData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       display_name = prefs.getString("display_name");
       email = prefs.getString("email");
@@ -66,7 +68,14 @@ class _ProfileScreen extends State<ProfileScreen> {
           elevation: 0,
           actions: [
             IconButton(
-                onPressed: () {
+                onPressed: () async {
+                  GoogleSignIn().disconnect();
+                  await FacebookAuth.instance.logOut();
+                  final SharedPreferences prefs =
+                      await SharedPreferences.getInstance();
+                  await prefs.remove("userType");
+                  await prefs.remove("userLoggedIn");
+                  await prefs.remove("display_name");
                   Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(builder: (context) => DecisionPage()),
                       (Route<dynamic> route) => false);
@@ -116,9 +125,7 @@ class _ProfileScreen extends State<ProfileScreen> {
                       padding: EdgeInsets.only(left: 5, right: 5),
                       child: TabBarView(
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
+                          ListView(
                             children: [
                               Container(
                                 padding: EdgeInsets.only(top: 50, bottom: 15),
@@ -602,13 +609,13 @@ class _ProfileScreen extends State<ProfileScreen> {
                                     )),
                               ),
                               SizedBox(
-                                height: 40,
+                                height: 20,
                               ),
                               Text("Connected Accounts",
                                   style: GoogleFonts.workSans(
                                       fontWeight: FontWeight.w300,
                                       fontSize: 16)),
-                              SizedBox(height: 40),
+                              SizedBox(height: 20),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
@@ -633,8 +640,8 @@ class _ProfileScreen extends State<ProfileScreen> {
                               children: [
                                 GestureDetector(
                                     onTap: () {
-                                      Navigator.of(context)
-                                          .pushNamed(Routes.subscription);
+                                      // Navigator.of(context)
+                                      //     .pushNamed(Routes.subscription);
                                     },
                                     child: Container(
                                       padding:
@@ -649,14 +656,16 @@ class _ProfileScreen extends State<ProfileScreen> {
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
                                         children: [
-                                          Text("Go Premium"),
+                                          Text("Go Premium (Coming Soon)"),
                                           IconButton(
                                             onPressed: () {
-                                              Navigator.of(context).pushNamed(
-                                                  Routes.subscription);
+                                              // Navigator.of(context).pushNamed(
+                                              //     Routes.subscription);
                                             },
                                             icon: Icon(Icons.chevron_right,
-                                                size: 30, color: Colors.amber),
+                                                size: 30,
+                                                color: Color.fromARGB(
+                                                    255, 0, 0, 0)),
                                           )
                                         ],
                                       ),

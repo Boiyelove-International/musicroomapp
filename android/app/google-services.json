@@ -29,6 +29,14 @@
             {
               "client_id": "813500069884-f3jggj2md4f974rlt5hu4skvkugqhbd8.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "813500069884-0as5ntb0q5tleg0j7299h12ds85sgcub.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "uk.co.musicalroom.musicalroom",
+                "app_store_id": "1626807193"
+              }
             }
           ]
         }

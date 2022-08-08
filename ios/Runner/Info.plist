@@ -33,7 +33,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.1098978988225-rp2o34pv4ulhuro9qfreadl2eecf25tl</string>
+				<string>com.googleusercontent.apps.813500069884-0as5ntb0q5tleg0j7299h12ds85sgcub</string>
 			</array>
 		</dict>
 	</array>
@@ -41,8 +41,12 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>FacebookAppID</key>
 	<string>471028527989498</string>
+	<key>FacebookClientToken</key>
+	<string>CLIENT-TOKEN</string>
 	<key>FacebookDisplayName</key>
 	<string>Musical Room</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>fbapi</string>
@@ -61,6 +65,10 @@
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>This app needs camera access to scan QR codes</string>
+	<key>NSLocationUsageDescription</key>
+	<string>This app uses location to filter song searches</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app uses location to filter song searches</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>This app needs media access to scan QR codes</string>
 	<key>NSPhotoLibraryUsageDescription</key>
@@ -91,7 +99,5 @@
 	<false/>
 	<key>io.flutter.embedded_views_preview</key>
 	<true/>
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
 </dict>
 </plist>
