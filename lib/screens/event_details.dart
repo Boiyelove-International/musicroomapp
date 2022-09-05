@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:focused_menu/focused_menu.dart';
 import 'package:focused_menu/modals.dart';
@@ -9,6 +11,7 @@ import 'package:musicroom/screens/suggestion_list.dart';
 import 'package:musicroom/screens/yourRoom.dart';
 import 'package:musicroom/utils/apiServices.dart';
 import 'package:musicroom/utils/models.dart';
+
 import '../styles.dart';
 
 class EventDetail extends StatefulWidget {
@@ -56,7 +59,7 @@ class _EventDetail extends State<EventDetail> {
         }
         break;
     }
-
+    log("Event Date and Time is ${widget.event.event_date} ${widget.event.event_date}");
     return Scaffold(
       body: SafeArea(
         top: true,
@@ -311,10 +314,10 @@ class _EventDetail extends State<EventDetail> {
     );
   }
 
-  _allSuggestionActionHandler(int suggestion_id, bool action) async {
+  _allSuggestionActionHandler(int suggestionId, bool action) async {
     print(action);
     Map<String, dynamic> payload = {
-      "suggestion_id": suggestion_id,
+      "suggestion_id": suggestionId,
       "accept_suggestion": action
     };
     ApiBaseHelper _api = ApiBaseHelper();

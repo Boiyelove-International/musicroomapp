@@ -1,8 +1,11 @@
 import 'dart:convert';
-import 'dart:math';
-import 'package:firebase_messaging/firebase_messaging.dart';
+import 'dart:developer';
+import 'dart:math' as math;
+
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
 // Import the generated file
 import '../firebase_options.dart';
 
@@ -30,7 +33,7 @@ class FCMService {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    // await FirebaseMessaging.instance.requestPermission();
+    await FirebaseMessaging.instance.requestPermission();
     String? deviceId = await FirebaseMessaging.instance.getToken();
     print("FCM DEVICE ID >>> $deviceId");
 // Set the background messaging handler early on, as a named top-level function
@@ -72,7 +75,7 @@ class FCMService {
       RemoteNotification? notification = message.notification;
       AndroidNotification? android = message.notification?.android;
 
-      print(message.notification?.title);
+      log("${message.notification?.title}");
       print(message.notification?.body);
 
       notify(message.notification?.title, message.notification?.body,
@@ -95,10 +98,10 @@ class FCMService {
 
   Future notify(title, text,
       {String? payload, channelID: 'musicroom_id', hashcode: 0}) async {
-    int notification_id = Random().nextInt(1000);
+    int notificationId = math.Random().nextInt(1000);
 
     flutterLocalNotificationsPlugin.show(
-        notification_id,
+        notificationId,
         title,
         text,
         NotificationDetails(

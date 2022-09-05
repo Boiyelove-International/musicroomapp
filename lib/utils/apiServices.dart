@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:http_parser/http_parser.dart';
 import 'package:musicroom/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -60,11 +60,15 @@ class ApiResponse<T> {
 enum Status { LOADING, COMPLETED, ERROR }
 
 class ApiBaseHelper {
+  //Local host
   // final String _baseUrl = "http://127.0.0.1:8000/api";
+  // final String _baseUrl = "http://10.0.2.2:8000/api";
 
-  // final String _baseUrl = "http://192.168.0.141:8000/api";
+  // Live device on same network
+  final String _baseUrl = "http://192.168.0.141:8000/api";
 
-  final String _baseUrl = "https://app.musicalroom.co.uk/api";
+  // Production URL
+  // final String _baseUrl = "https://app.musicalroom.co.uk/api";
   String get baseurl => _baseUrl;
   BuildContext? context;
 
@@ -73,7 +77,7 @@ class ApiBaseHelper {
     print('Api Get, url $url');
     var responseJson;
     SharedPreferences pref = await SharedPreferences.getInstance();
-    String? token = await pref.getString("token");
+    String? token = pref.getString("token");
     String deviceId = await getDeviceId();
 
     if (context != null) {
@@ -118,7 +122,7 @@ class ApiBaseHelper {
     print('Api Post, url $url');
     var responseJson;
     SharedPreferences pref = await SharedPreferences.getInstance();
-    String? token = await pref.getString("token");
+    String? token = pref.getString("token");
     String deviceId = await getDeviceId();
     Map<String, String> userClient = await getDeviceData();
 
@@ -139,13 +143,13 @@ class ApiBaseHelper {
           .replaceAll("'", "")
           .replaceAll('"', "");
       print(userClient);
-      print("John Doe’s iPhone".replaceAll(RegExp("\'"), ""));
+      log("John Doe’s iPhone".replaceAll(RegExp("\'"), ""));
       headers.addAll(userClient);
 
       final response = await http.post(Uri.parse(_baseUrl + url),
           headers: headers, body: json.encode(data));
 
-      print("response is ${response.body}");
+      log("response is ${response.body}");
 
       responseJson = _returnResponse(response);
     } on SocketException {
@@ -153,7 +157,7 @@ class ApiBaseHelper {
       displayMessage("No Internet Connection");
       throw FetchDataException('No Internet connection');
     } on BadRequestException {
-      print("an error occured");
+      log("an error occured");
       throw new BadRequestException("Invalid Data");
     }
     print('api post received!');
@@ -165,7 +169,7 @@ class ApiBaseHelper {
     print('Api Put, url $url');
     var responseJson;
     SharedPreferences pref = await SharedPreferences.getInstance();
-    String? token = await pref.getString("token");
+    String? token = pref.getString("token");
     String deviceId = await getDeviceId();
     String? FCMdeviceId = await FirebaseMessaging.instance.getToken();
 
@@ -188,7 +192,7 @@ class ApiBaseHelper {
       if (returnHttpResponse) {
         return response;
       }
-      print("response is ${response.body}");
+      log("response is ${response.body}");
 
       responseJson = _returnResponse(response);
     } on SocketException {
@@ -204,7 +208,7 @@ class ApiBaseHelper {
     print('Api Post, url $url');
     var responseJson;
     SharedPreferences pref = await SharedPreferences.getInstance();
-    String? token = await pref.getString("token");
+    String? token = pref.getString("token");
     String deviceId = await getDeviceId();
     String? FCMdeviceId = await FirebaseMessaging.instance.getToken();
 
@@ -224,7 +228,7 @@ class ApiBaseHelper {
       final response = await http.patch(Uri.parse(_baseUrl + url),
           headers: headers, body: json.encode(data));
 
-      print("response is ${response.body}");
+      log("response is ${response.body}");
 
       responseJson = _returnResponse(response);
     } on SocketException {
@@ -240,7 +244,7 @@ class ApiBaseHelper {
     print('Api Post, url $url');
     var responseJson;
     SharedPreferences pref = await SharedPreferences.getInstance();
-    String? token = await pref.getString("token");
+    String? token = pref.getString("token");
     String deviceId = await getDeviceId();
     String? FCMdeviceId = await FirebaseMessaging.instance.getToken();
 
@@ -260,7 +264,7 @@ class ApiBaseHelper {
       final response = await http.delete(Uri.parse(_baseUrl + url),
           headers: headers, body: json.encode(data));
 
-      print("response is ${response.body}");
+      log("response is ${response.body}");
 
       responseJson = _returnResponse(response);
     } on SocketException {
@@ -285,7 +289,7 @@ class ApiBaseHelper {
   }
 
   dynamic _returnResponse(http.Response response) {
-    print("status is ${response.statusCode}");
+    log("status is ${response.statusCode}");
     var responseJson = json.decode(response.body.toString());
     if (response.statusCode >= 400 && response.statusCode <= 511) {
       print(
@@ -293,7 +297,7 @@ class ApiBaseHelper {
 
       try {
         if (responseJson is Map && responseJson["error"] == true) {
-          print("if ======> 1");
+          log("if ======> 1");
           responseJson["errors"].forEach((key, value) {
             value = value.join(", ");
             displayMessage('$key: $value'.capitalize());
@@ -301,16 +305,16 @@ class ApiBaseHelper {
         }
         if (responseJson["non_field_errors"] is List &&
             responseJson["non_field_errors"] != []) {
-          print("if ======> 2");
-          print("ResponseJson ========> $responseJson");
+          log("if ======> 2");
+          log("ResponseJson ========> $responseJson");
           displayMessage(
               '${responseJson["non_field_errors"].join(",")}'.capitalize());
         } else {
-          print("if ======> 3");
+          log("if ======> 3");
           displayMessage('Error: ${responseJson["error"]}'.capitalize());
         }
       } catch (e) {
-        print("the try attement broke because =====> $e");
+        log("the try attement broke because =====> ${e.toString()}");
       }
     }
 

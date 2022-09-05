@@ -1,13 +1,16 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 import 'package:iconly/iconly.dart';
+import 'package:intl/intl.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:musicroom/screens/buttons.dart';
 import 'package:musicroom/screens/empty_content.dart';
@@ -20,9 +23,8 @@ import 'package:musicroom/styles.dart';
 import 'package:musicroom/utils/apiServices.dart';
 import 'package:musicroom/utils/models.dart';
 import 'package:page_transition/page_transition.dart';
-import 'package:intl/intl.dart';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../utils.dart';
 
 enum Popup {
@@ -415,7 +417,7 @@ class _PopupWidget extends State<PopupWidget> {
         "pk": widget.event?.id,
       });
 
-      print(response);
+      log("API PUT event/id/suggestion is $response");
     }
 
     // Navigator.pushReplacementNamed(context, Routes.guestHome);
@@ -553,7 +555,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                   onTap: () async {
                     double val = (_currentPosition - 5.0);
                     if (val < 0) val = 0;
-                    print(val);
+                    // log(val);
                     player.seek(Duration(seconds: val.toInt()));
                   },
                   child: Container(
@@ -654,6 +656,7 @@ class _CreateEventForm extends State<CreateEventForm> {
   Event? eventItem;
   int _currentPage = 0;
   TimeOfDay? pickedTime;
+  late String _selectedTime;
 
   bool isLoading = false;
 
@@ -680,6 +683,7 @@ class _CreateEventForm extends State<CreateEventForm> {
       Future.delayed(Duration(milliseconds: 100), () {
         Event event = widget.event!;
         var pickedDate = event.event_date;
+        pickedTime = event.event_time;
         _eventNameController.text = event.name!;
         _aboutEventController.text = event.about!;
         _eventTimeController.text = event.event_time.format(context);
@@ -693,8 +697,8 @@ class _CreateEventForm extends State<CreateEventForm> {
 
   @override
   Widget build(BuildContext context) {
-    // print("widget.event?.image");
-    // print(widget.event?.image);
+    // log("widget.event?.image");
+    // log(widget.event?.image);
     return Column(
       children: [
         Visibility(
@@ -761,6 +765,7 @@ class _CreateEventForm extends State<CreateEventForm> {
               if (value == null || value.isEmpty) {
                 return "Please enter an event name";
               }
+              return null;
             },
             decoration: InputDecoration(
               border: OutlineInputBorder(
@@ -793,6 +798,7 @@ class _CreateEventForm extends State<CreateEventForm> {
               if (value == null || value.isEmpty) {
                 return "Enter details about the event";
               }
+              return null;
             },
             decoration: InputDecoration(
               border: OutlineInputBorder(
@@ -878,6 +884,7 @@ class _CreateEventForm extends State<CreateEventForm> {
             if (value == null || value.isEmpty) {
               return "Select the time of this event";
             }
+            return null;
           },
           onTap: () async {
             pickedTime = await showTimePicker(
@@ -886,22 +893,23 @@ class _CreateEventForm extends State<CreateEventForm> {
             );
 
             if (pickedTime != null) {
-              print(
-                  "picked time ==> ${pickedTime!.format(context)}"); //output 10:51 PM
+              log("picked time ==> ${pickedTime!.format(context)}"); //output 10:51 PM
               // DateTime parsedTime = DateFormat.jm().parse(pickedTime.format(context).toString());
               // //converting to DateTime so that we can further format on different pattern.
-              // print(parsedTime); //output 1970-01-01 22:53:00.000
+              // log(parsedTime); //output 1970-01-01 22:53:00.000
               // String formattedTime = DateFormat('HH:mm:ss').format(parsedTime);
-              // print(formattedTime); //output 14:59:00
+              // log(formattedTime); //output 14:59:00
               // //DateFormat() is from intl package, you can format the time on any pattern you need.
 
               setState(() {
                 _eventTimeController.text =
                     pickedTime!.format(context); //set the value of text field.
-                print("the time is set");
+                log("timezone offset is ${pickedTime?.periodOffset}");
+                log("timezone format is ${pickedTime?.format(context)}");
+                log("the time is set");
               });
             } else {
-              print("Time is not selected");
+              log("Time is not selected");
             }
           },
           decoration: InputDecoration(
@@ -935,28 +943,22 @@ class _CreateEventForm extends State<CreateEventForm> {
             if (value == null || value.isEmpty) {
               return "Select the date of this event";
             }
+            return null;
           },
           onTap: () async {
+            //date format for visual aid
             DateFormat dateFormat = new DateFormat("dd MMMM, yyyy");
             DateTime? pickedDate = await showDatePicker(
-                context: context,
-                initialDate: DateTime.now(),
-                firstDate: DateTime.now(),
-                lastDate: DateTime(2101));
+              context: context,
+              initialDate: DateTime.now(),
+              firstDate: DateTime.now(),
+              lastDate: DateTime(2101),
+            );
 
             if (pickedDate != null) {
-              //output 10:51 PM
-              // DateTime parsedDate = DateFormat.jm().parse(pickedDate.toString());
-              // //converting to DateTime so that we can further format on different pattern.
-              print("date is $pickedDate"); //output 1970-01-01 22:53:00.000
-
               setState(() {
                 _eventDateController.text = dateFormat.format(pickedDate);
-                _selectedDate =
-                    "${pickedDate.year}-${pickedDate.month}-${pickedDate.day}";
               });
-            } else {
-              print("Time is not selected");
             }
           },
           decoration: InputDecoration(
@@ -1011,6 +1013,34 @@ class _CreateEventForm extends State<CreateEventForm> {
               ),
               onPressed: () {
                 if (_eventDateFormKey.currentState!.validate()) {
+                  log("picked date is ${_eventDateController.text}");
+                  log("picked time is $pickedTime");
+
+                  //date format for server
+                  _selectedDate = new DateFormat("dd MMMM, yyyy")
+                      .parse(_eventDateController.text);
+
+                  _selectedDate = _selectedDate.add(Duration(
+                      hours: pickedTime!.hour, minutes: pickedTime!.minute));
+
+                  String _dateTime =
+                      "${_selectedDate.toString()} ${pickedTime!.hour}:${pickedTime!.minute}";
+
+                  //date format for utc converstion
+                  DateFormat _dateFormat = DateFormat("yyyy-MM-dd HH:mm");
+                  DateTime dateTime = _dateFormat.parse(_dateTime);
+                  log("Date time result is $dateTime");
+
+                  // to send to server
+                  log("Date time to UTC is ${dateTime.toUtc()}");
+                  setState(() {
+                    _selectedDate =
+                        new DateFormat("yyyy-MM-dd").format(dateTime.toUtc());
+                    _selectedTime = DateFormat.Hm().format(dateTime.toUtc());
+                    log("Selected time is $_selectedDate");
+                    log("Selected time is $_selectedTime");
+                  });
+
                   _changePage(2);
                 }
               },
@@ -1072,10 +1102,9 @@ class _CreateEventForm extends State<CreateEventForm> {
 
   _submit() async {
     if (result == null && widget.event == null) {
-      print("we can't submit this");
+      log("we can't submit this");
       return;
     }
-    ;
 
     setState(() {
       isLoading = true;
@@ -1101,13 +1130,12 @@ class _CreateEventForm extends State<CreateEventForm> {
       if (widget.event != null) {
         pickedTime = widget.event!.event_time;
       }
-      request.fields["event_time"] =
-          "${pickedTime!.hour.toString().padLeft(2, "0")}:${pickedTime!.minute.toString().padLeft(2, "0")}";
+      request.fields["event_time"] = _selectedTime;
       request.fields["event_date"] = _selectedDate;
+      log("The selected date is $_selectedDate");
 
-      print("submitted time ==> ${_eventTimeController.text}");
-      print(
-          "picked time ==> ${pickedTime!.hour.toString().padLeft(2, "0")}:${pickedTime!.minute.toString().padLeft(2, "0")}");
+      log("submitted time ==> ${_eventTimeController.text}");
+      log("picked time ==> ${pickedTime!.hour.toString().padLeft(2, "0")}:${pickedTime!.minute.toString().padLeft(2, "0")}");
 
       if (result != null) {
         request.files.add(await http.MultipartFile.fromPath(
@@ -1116,8 +1144,8 @@ class _CreateEventForm extends State<CreateEventForm> {
 
       var response = await request.send();
       // final respStr = await response.stream.bytesToString();
-      // print("Status code is  =====> ${response.statusCode}");
-      // print("Result is ===> ${respStr}");
+      // log("Status code is  =====> ${response.statusCode}");
+      // log("Result is ===> ${respStr}");
 
       if (response.statusCode == 201) {
         //Event created
@@ -1138,7 +1166,8 @@ class _CreateEventForm extends State<CreateEventForm> {
       }
 
       if (response.statusCode >= 400) {
-        print("response ====> ${response.toString()} ");
+        log("response ====> ${response.toString()} ");
+        log("response ====> ${await response.stream.bytesToString()} ");
         setState(() {
           isLoading = false;
         });
@@ -1147,7 +1176,7 @@ class _CreateEventForm extends State<CreateEventForm> {
       setState(() {
         isLoading = false;
       });
-      print("error is $e");
+      log("error is $e");
     }
   }
 
@@ -1426,9 +1455,7 @@ class _SuggestEventForm extends State<SuggestEventForm> {
       ]);
 
   suggest() async {
-    if (audio != null) {
-      audio.stop();
-    }
+    audio.stop();
 
     if (_event != null) {
       ApiBaseHelper _api = ApiBaseHelper();
@@ -1439,7 +1466,7 @@ class _SuggestEventForm extends State<SuggestEventForm> {
             "pk": _event?.id,
           },
           returnHttpResponse: true);
-      print("response is ${response.body}");
+      log("response is ${response.body}");
 
       if (response.statusCode == 201) {
         _changePage(2);
@@ -1650,7 +1677,7 @@ class _JoinEventForm extends State<JoinEventForm> {
         q = q.toUpperCase();
 
         _api.get("/event/join/?q=$q", context: context).then((value) {
-          print("event join response is $value");
+          log("event join response is $value");
           setState(() {
             eventData = Event.fromJson(value);
           });
@@ -1660,14 +1687,13 @@ class _JoinEventForm extends State<JoinEventForm> {
           setState(() {
             isLoading = false;
           });
-          print(
-              "event join error ====> $error \n \n StackTrace =====> $stackTrace");
+          log("event join error ====> $error \n \n StackTrace =====> $stackTrace");
         });
       } catch (e) {
         setState(() {
           isLoading = false;
         });
-        print("event join error is $e");
+        log("event join error is $e");
       }
     }
   }
@@ -1711,6 +1737,7 @@ class _JoinEventForm extends State<JoinEventForm> {
                       if (value == null || value.isEmpty) {
                         return 'required';
                       }
+                      return null;
                     },
                     textAlignVertical: TextAlignVertical.center,
                     textAlign: TextAlign.center,
@@ -1742,6 +1769,7 @@ class _JoinEventForm extends State<JoinEventForm> {
                       if (value == null || value.isEmpty) {
                         return 'required';
                       }
+                      return null;
                     },
                     textAlignVertical: TextAlignVertical.center,
                     textAlign: TextAlign.center,
@@ -1770,6 +1798,7 @@ class _JoinEventForm extends State<JoinEventForm> {
                       if (value == null || value.isEmpty) {
                         return 'required';
                       }
+                      return null;
                     },
                     inputFormatters: [
                       new LengthLimitingTextInputFormatter(1),
@@ -1800,6 +1829,7 @@ class _JoinEventForm extends State<JoinEventForm> {
                       if (value == null || value.isEmpty) {
                         return 'required';
                       }
+                      return null;
                     },
                     inputFormatters: [
                       new LengthLimitingTextInputFormatter(1),
@@ -2056,7 +2086,7 @@ class _JoinEventForm extends State<JoinEventForm> {
     });
     try {
       bool joined = await eventData!.joinEvent();
-      print(joined);
+      log(" is $joined");
       if (joined) {
         _changePage(5);
       }
@@ -2064,7 +2094,7 @@ class _JoinEventForm extends State<JoinEventForm> {
       setState(() {
         isLoadingJoin = false;
       });
-      print("error is $e");
+      log("error is $e");
     }
   }
 }

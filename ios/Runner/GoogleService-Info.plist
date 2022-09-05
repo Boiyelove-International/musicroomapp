@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>813500069884-0as5ntb0q5tleg0j7299h12ds85sgcub.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.813500069884-0as5ntb0q5tleg0j7299h12ds85sgcub</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>813500069884-hvd5uv5gid0gphuqtqdtk3nkonrachpb.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBCB-p8r_iMyALfYcyITIWypIvqCEL9Juc</string>
+	<key>GCM_SENDER_ID</key>
+	<string>813500069884</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>uk.co.musicalroom.musicalroom</string>
+	<key>PROJECT_ID</key>
+	<string>musical-room-d4185</string>
+	<key>STORAGE_BUCKET</key>
+	<string>musical-room-d4185.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:813500069884:ios:332650eb631e26104de479</string>
+</dict>
+</plist>

@@ -63,6 +63,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '813500069884',
     projectId: 'musical-room-d4185',
     storageBucket: 'musical-room-d4185.appspot.com',
+    androidClientId: '813500069884-hvd5uv5gid0gphuqtqdtk3nkonrachpb.apps.googleusercontent.com',
     iosClientId: '813500069884-0as5ntb0q5tleg0j7299h12ds85sgcub.apps.googleusercontent.com',
     iosBundleId: 'uk.co.musicalroom.musicalroom',
   );

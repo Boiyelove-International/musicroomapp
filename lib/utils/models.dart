@@ -1,8 +1,9 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:musicroom/utils/apiServices.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:provider/provider.dart';
 
 enum UserType { partyOrganizer, partyGuest }
 
@@ -100,13 +101,33 @@ class Event {
   }
 
   factory Event.fromJson(Map<String, dynamic> data) {
+    log("event data is $data");
     String s = data["event_time"];
-    TimeOfDay _event_time = TimeOfDay(
+    // 2022-08-31T00:00:00.000000Z,
+    //,
+    // event_date:
+
+    log("${DateTime.parse(data['event_date'])}");
+
+    TimeOfDay EventTime = TimeOfDay(
         hour: int.parse(s.split(":")[0]), minute: int.parse(s.split(":")[1]));
-    DateFormat format = new DateFormat("yyy-mm-dd");
-    DateTime _event_date = format.parse(data["event_date"]);
-    _event_date = DateTime(_event_date.year, _event_date.month, _event_date.day,
-        _event_time.hour, _event_time.minute);
+    DateTime EventDate = DateTime.parse(data['event_date'])
+        .add(Duration(hours: EventTime.hour, minutes: EventTime.minute))
+        .toLocal();
+    log("Datetime of event is $EventDate");
+    var something = new DateFormat("dd MMMM, yyyy").format(EventDate);
+    log("Formatted date is $something");
+
+    // log("Formatted Datetime of event is $EventDate");
+
+    // EventDate = DateTime.utc(EventDate.year, EventDate.month, EventDate.day,
+    //     .toLocal();
+
+    log("Datetime of event is $EventDate");
+
+    EventTime = TimeOfDay.fromDateTime(EventDate);
+    log("time of day is $EventTime");
+
     // event_time =
     // data is {'id': 2,
     // 'organizer_display_picture': None,
@@ -115,7 +136,7 @@ class Event {
     // 'name': 'dfghjhgfdsaw',
     // 'about': 'ertgyhjkjhgfdsa',
     // 'event_time': '09:37:00',
-    // 'event_date': '2021-12-21',
+    // 'event_date': '2022-08-31T00:00:00.000000Z',
     // 'image': '/media/event_images/IMG_0003.jpeg',
     // 'code': 'ABCD',
     // 'organizer': 9,
@@ -123,8 +144,8 @@ class Event {
     // 'suggestions': []}
 
     DateTime _now = DateTime.now();
-    int inMinutes = _event_date.difference(_now).inMinutes;
-    int inHours = _event_date.difference(_now).inHours;
+    int inMinutes = EventDate.difference(_now).inMinutes;
+    int inHours = EventDate.difference(_now).inHours;
     if (inHours < 0) inHours = 0;
     if (inMinutes < 0) inMinutes = 0;
     // print("${_now.day} -- ${_now.hour} -- ${_now.minute}");
@@ -138,8 +159,8 @@ class Event {
         name: data["name"],
         // modified: data["modified"],
         created: data["created"],
-        event_time: _event_time,
-        event_date: _event_date,
+        event_time: EventTime,
+        event_date: EventDate,
         image: data["image"],
         code: data["code"],
         startsIn: startsIn,

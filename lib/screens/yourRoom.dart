@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'dart:ui';
-import 'package:share/share.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
@@ -9,6 +9,7 @@ import 'package:iconly/iconly.dart';
 import 'package:musicroom/styles.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:share/share.dart';
 
 import '../utils/models.dart';
 
@@ -180,7 +181,8 @@ class YourRoom extends StatelessWidget {
 ${event.about!} \n
 To join this event,
 Use unique code: ${event.code!}
-or link: example.com/${event.code}""");
+or Scan the QR Code
+""");
   }
 
   Future<void> writeToFile(ByteData data, String path) async {

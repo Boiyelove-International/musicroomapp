@@ -1,21 +1,21 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:musicroom/styles.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
 import 'package:musicroom/utils/apiServices.dart';
 import 'package:musicroom/utils/models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+
 import '../routes.dart';
 import '../utils.dart';
 import 'buttons.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
 class RegisterScreen extends StatefulWidget {
   static const String routeName = '/RegisterScreen';
@@ -179,7 +179,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             color: Colors.grey,
                           ),
                           onPressed: () {
-                            print("show passwoerd is ${_showPassword}");
+                            print("show passwoerd is $_showPassword");
                             setState(() {
                               _showPassword = !_showPassword;
                             });
@@ -431,7 +431,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     ApiBaseHelper api = ApiBaseHelper();
     SharedPreferences prefs = await SharedPreferences.getInstance();
-
+    prefs.remove("token");
     try {
       api.post("/login/", payload, context: context).then((data) async {
         print("value is $data");
@@ -475,6 +475,8 @@ class _LoginScreenState extends State<LoginScreen> {
     // _emailController.text = "roland@boiyelove.website";
     // _passwordController.text = "somepassword";
   }
+
+// G4EBA0
 
   @override
   Widget build(BuildContext context) {
@@ -836,8 +838,8 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.of(context).pushNamedAndRemoveUntil(
             Routes.organizerHome, (Route<dynamic> route) => false);
       }).onError((error, stackTrace) {
-        print("error is ===> ${error}");
-        print("stackTrace is ===>  ${stackTrace}");
+        print("error is ===> $error");
+        print("stackTrace is ===>  $stackTrace");
         setState(() {
           isLoading = false;
         });
@@ -855,6 +857,14 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
+extension PasswordValidator on String {
+  bool isValidPassword() {
+    return RegExp(
+            r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$')
+        .hasMatch(this);
+  }
+}
+
 class ForgotPassword extends StatefulWidget {
   static const String routeName = "/forgotPassword";
 
@@ -864,13 +874,136 @@ class ForgotPassword extends StatefulWidget {
 
 class _ForgotPasswordState extends State<ForgotPassword> {
   TextEditingController _emailController = TextEditingController();
+  PageController _forgotPasswordPageController = PageController(initialPage: 0);
+
+  bool _showPassword = false;
+  TextEditingController _codeController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+  TextEditingController _passwordAgainController = TextEditingController();
+  bool _isLoading = false;
+
+  static final _emailFormKey = GlobalKey<FormState>();
+  static final _resetCodeFormKey = GlobalKey<FormState>();
+  static final _newPasswordFormKey = GlobalKey<FormState>();
+
+  FocusNode _emailFocusNode = FocusNode();
+  FocusNode _codeFocusNode = FocusNode();
+  FocusNode _passwordFocusNode = FocusNode();
+
+  @override
+  void dispose() {
+    _emailFocusNode.dispose();
+    _codeFocusNode.dispose();
+    _passwordFocusNode.dispose();
+
+    super.dispose();
+  }
+
+  _submitFPData() async {
+    if (_newPasswordFormKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+      log("code is ${_codeController.text}");
+      log("code is ${_emailController.text}");
+      await ApiBaseHelper()
+          .post(
+              "/forgot-password/change_password/",
+              {
+                "email": _emailController.text,
+                "code": _codeController.text,
+                "new_password": _passwordController.text
+              },
+              context: context)
+          .then((value) {
+        ScaffoldMessenger.of(this.context).showSnackBar(SnackBar(
+          content: Text(
+            'Your password has been updated successfully. Kindly login',
+            textAlign: TextAlign.center,
+          ),
+          backgroundColor: Colors.green,
+        ));
+        Navigator.of(context).pushReplacementNamed(Routes.login);
+
+        setState(() {
+          _isLoading = false;
+        });
+      });
+    }
+  }
+
+  _requestPasswordReset() async {
+    if (_emailFormKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      log("code is ${_codeController.text}");
+      log("code is ${_emailController.text}");
+      await ApiBaseHelper()
+          .post(
+        "/forgot-password/send_code/",
+        {
+          "email": _emailController.text,
+        },
+        context: context,
+      )
+          .then((value) {
+        ScaffoldMessenger.of(this.context).showSnackBar(SnackBar(
+          content: Text(
+            'A password reset code has been sent to your inbox',
+            textAlign: TextAlign.center,
+          ),
+          backgroundColor: Colors.green,
+        ));
+        //go to next page
+
+        _forgotPasswordPageController.nextPage(
+            curve: Curves.easeIn, duration: Duration(milliseconds: 350));
+        setState(() {
+          _isLoading = false;
+        });
+      }).onError((error, stackTrace) {
+        setState(() {
+          _isLoading = false;
+        });
+        log("${error.toString()}");
+        log("${stackTrace.toString()}");
+      });
+    }
+  }
+
+  _submitRequestCode() async {
+    if (_resetCodeFormKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+      await ApiBaseHelper()
+          .post("/forgot-password/verify_code/",
+              {"email": _emailController.text, "code": _codeController.text},
+              context: context)
+          .then((value) {
+        //go to next page
+        _forgotPasswordPageController.nextPage(
+            curve: Curves.easeIn, duration: Duration(milliseconds: 350));
+        setState(() {
+          _isLoading = false;
+        });
+      }).onError((error, stackTrace) {
+        log("${error.toString()}");
+        log("${stackTrace.toString()}");
+        setState(() {
+          _isLoading = false;
+        });
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: SafeArea(
-            child: ListView(
+    Widget _page1 = ListView(
       padding: EdgeInsets.only(top: 15, bottom: 20, left: 10, right: 10),
+      shrinkWrap: true,
       children: [
         Text("Forgot Password?",
             style: GoogleFonts.workSans(
@@ -881,61 +1014,54 @@ class _ForgotPasswordState extends State<ForgotPassword> {
         Text(
             'Having issues signing in to your account? provide your email and let’s fix this issue. '),
         SizedBox(height: 30),
-        TextFormField(
-          controller: _emailController,
-          textCapitalization: TextCapitalization.characters,
-          onChanged: (value) {
-            _emailController.value = TextEditingValue(
-                text: value.trim(), selection: _emailController.selection);
-          },
-          validator: (value) => value!.isEmpty ? "Cannot be empty" : null,
-          // textAlign: TextAlign.center,
-          decoration: new InputDecoration(
-            floatingLabelBehavior: FloatingLabelBehavior.always,
-            labelStyle: TextStyle(color: Colors.white),
-            focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.grey.withOpacity(0.4))),
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey.withOpacity(0.4)),
-            ),
-            border: OutlineInputBorder(
-              borderRadius: const BorderRadius.all(
-                const Radius.circular(10.0),
+        Form(
+          key: _emailFormKey,
+          child: TextFormField(
+            focusNode: _emailFocusNode,
+            controller: _emailController,
+            onChanged: (value) {
+              _emailController.value = TextEditingValue(
+                  text: value.trim(), selection: _emailController.selection);
+            },
+            validator: (value) => value!.isEmpty ? "Cannot be empty" : null,
+            // textAlign: TextAlign.center,
+            // autofocus: true,
+            decoration: new InputDecoration(
+              floatingLabelBehavior: FloatingLabelBehavior.always,
+              labelStyle: TextStyle(color: Colors.white),
+              focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey.withOpacity(0.4))),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.grey.withOpacity(0.4)),
               ),
-            ),
-            filled: true,
-            hintStyle: TextStyle(color: Colors.grey[800]),
-            fillColor: Colors.transparent,
-            contentPadding: EdgeInsets.all(16),
-            labelText: "Email Address",
-          ),
-        ),
-        SizedBox(height: 20),
-        Row(children: [
-          Expanded(
-              child: InkWell(
-            onTap: () {},
-            child: Ink(
-              decoration: const BoxDecoration(
-                gradient: DarkPalette.borderGradient1,
-                borderRadius: BorderRadius.all(Radius.circular(5.0)),
-              ),
-              child: Container(
-                padding: EdgeInsets.only(top: 13, bottom: 13.0),
-                constraints: BoxConstraints(
-                    minWidth: 88.0,
-                    minHeight: 36.0), // min sizes for Material buttons
-                alignment: Alignment.center,
-                child: Text(
-                  'OK',
-                  style: TextStyle(color: DarkPalette.darkDark),
-                  textAlign: TextAlign.center,
+              border: OutlineInputBorder(
+                borderRadius: const BorderRadius.all(
+                  const Radius.circular(10.0),
                 ),
               ),
+              filled: true,
+              hintStyle: TextStyle(color: Colors.grey[800]),
+              fillColor: Colors.transparent,
+              contentPadding: EdgeInsets.all(16),
+              labelText: "Email Address",
             ),
-          ))
-        ]),
+          ),
+        ),
+        SizedBox(height: 30),
+        GoldButton(
+            isLoading: _isLoading,
+            onPressed: _requestPasswordReset,
+            buttonText: "Get Password Reset Code"),
         SizedBox(height: 20),
+        TextButton(
+            onPressed: () {
+              if (_emailFormKey.currentState!.validate()) {
+                _forgotPasswordPageController.nextPage(
+                    duration: Duration(milliseconds: 350),
+                    curve: Curves.easeIn);
+              }
+            },
+            child: Text("I already have a reset code")),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -950,6 +1076,232 @@ class _ForgotPasswordState extends State<ForgotPassword> {
           ],
         )
       ],
+    );
+    Widget _page2 = ListView(
+      shrinkWrap: true,
+      padding: EdgeInsets.only(top: 15, bottom: 20, left: 20, right: 20),
+      children: [
+        Text("Forgot Password?",
+            style: GoogleFonts.workSans(
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+            )),
+        SizedBox(height: 20),
+        Text('Enter the code you received below'),
+        SizedBox(height: 30),
+        Form(
+          key: _resetCodeFormKey,
+          child: TextFormField(
+            focusNode: _codeFocusNode,
+            controller: _codeController,
+            onChanged: (value) {
+              _codeController.value = TextEditingValue(
+                  text: value.trim(), selection: _codeController.selection);
+            },
+
+            validator: (value) => value!.isEmpty ? "Cannot be empty" : null,
+            // textAlign: TextAlign.center,
+            decoration: new InputDecoration(
+              floatingLabelBehavior: FloatingLabelBehavior.always,
+              labelStyle: TextStyle(color: Colors.white),
+              focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey.withOpacity(0.4))),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.grey.withOpacity(0.4)),
+              ),
+              border: OutlineInputBorder(
+                borderRadius: const BorderRadius.all(
+                  const Radius.circular(10.0),
+                ),
+              ),
+              filled: true,
+              hintStyle: TextStyle(color: Colors.grey[800]),
+              fillColor: Colors.transparent,
+              contentPadding: EdgeInsets.all(16),
+              labelText: "Forgot Password Reset Code",
+            ),
+          ),
+        ),
+        SizedBox(height: 20),
+        SizedBox(height: 30),
+        GoldButton(
+            isLoading: _isLoading,
+            onPressed: _submitRequestCode,
+            buttonText: "Verify"),
+        SizedBox(height: 30),
+        TextButton(
+            onPressed: () {
+              _codeController.text = '';
+              _forgotPasswordPageController.previousPage(
+                  curve: Curves.easeIn, duration: Duration(milliseconds: 350));
+            },
+            child: Text("Start Over")),
+      ],
+    );
+    Widget _page3 = ListView(
+      shrinkWrap: true,
+      padding: EdgeInsets.only(top: 15, bottom: 20, left: 10, right: 10),
+      children: [
+        Text("Set Your New Password",
+            style: GoogleFonts.workSans(
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+            )),
+        SizedBox(height: 30),
+        SizedBox(height: 5),
+        Text("""
+Requirements
+- Should contain at least one upper case \n
+- Should contain at least one lower case \n
+- Should contain at least one digit \n 
+- Should contain at least one Special character \n
+- Must be at least 8 characters in length. 
+        """),
+        SizedBox(height: 20),
+        Form(
+          key: _newPasswordFormKey,
+          child: TextFormField(
+            focusNode: _passwordFocusNode,
+            controller: _passwordController,
+            validator: (value) {
+              RegExp regex = RegExp(
+                  r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$');
+              if (value == null || value.isEmpty) {
+                return 'Please enter password';
+              } else {
+                if (!regex.hasMatch(value)) {
+                  return 'Enter valid password';
+                } else {
+                  return null;
+                }
+              }
+            },
+            obscureText: !_showPassword,
+            enableSuggestions: false,
+            autocorrect: false,
+            decoration: new InputDecoration(
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _showPassword ? Icons.visibility : Icons.visibility_off,
+                  color: Colors.grey,
+                ),
+                onPressed: () {
+                  print("show passwoerd is $_showPassword");
+                  setState(() {
+                    _showPassword = !_showPassword;
+                  });
+                },
+              ),
+              floatingLabelBehavior: FloatingLabelBehavior.always,
+              labelStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
+              focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white.withOpacity(0.7))),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.white.withOpacity(0.7)),
+              ),
+              border: OutlineInputBorder(
+                borderRadius: const BorderRadius.all(
+                  const Radius.circular(10.0),
+                ),
+              ),
+              filled: true,
+              hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+              fillColor: Colors.transparent,
+              contentPadding: EdgeInsets.all(16),
+              labelText: "Password",
+            ),
+          ),
+        ),
+        SizedBox(height: 30),
+        TextFormField(
+          controller: _passwordAgainController,
+          validator: (value) {
+            RegExp regex = RegExp(
+                r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$');
+            if (value == null || value.isEmpty) {
+              return 'Please enter password';
+            } else {
+              if (!regex.hasMatch(value)) {
+                return 'Enter valid password';
+              } else {
+                if (_passwordController.text != _passwordAgainController.text) {
+                  return "Your passwords do not match";
+                } else {
+                  return null;
+                }
+              }
+            }
+          },
+          obscureText: !_showPassword,
+          enableSuggestions: false,
+          autocorrect: false,
+          decoration: new InputDecoration(
+            suffixIcon: IconButton(
+              icon: Icon(
+                _showPassword ? Icons.visibility : Icons.visibility_off,
+                color: Colors.grey,
+              ),
+              onPressed: () {
+                print("show passwoerd is $_showPassword");
+                setState(() {
+                  _showPassword = !_showPassword;
+                });
+              },
+            ),
+            floatingLabelBehavior: FloatingLabelBehavior.always,
+            labelStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
+            focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.white.withOpacity(0.7))),
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.white.withOpacity(0.7)),
+            ),
+            border: OutlineInputBorder(
+              borderRadius: const BorderRadius.all(
+                const Radius.circular(10.0),
+              ),
+            ),
+            filled: true,
+            hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+            fillColor: Colors.transparent,
+            contentPadding: EdgeInsets.all(16),
+            labelText: "Repeat Password",
+          ),
+        ),
+        SizedBox(height: 30),
+        GoldButton(
+            isLoading: _isLoading,
+            onPressed: _submitFPData,
+            buttonText: "Submit New Password"),
+        SizedBox(height: 20),
+        SizedBox(height: 30),
+        TextButton(
+            onPressed: () {
+              _codeController.text = '';
+              _forgotPasswordPageController.previousPage(
+                  curve: Curves.easeIn, duration: Duration(milliseconds: 350));
+            },
+            child: Text("Start Over")),
+      ],
+    );
+    return Scaffold(
+        body: SafeArea(
+            child: PageView(
+      onPageChanged: (int value) {
+        log("page changed to  $value");
+        switch (value) {
+          case 0:
+            _emailFocusNode.requestFocus();
+            break;
+          case 1:
+            _codeFocusNode.requestFocus();
+            break;
+          case 2:
+            _passwordFocusNode.requestFocus();
+        }
+      },
+      physics: NeverScrollableScrollPhysics(),
+      controller: _forgotPasswordPageController,
+      children: [_page1, _page2, _page3],
     )));
   }
 }
@@ -1084,8 +1436,8 @@ class _RegisterPartyGuest extends State<RegisterPartyGuest> {
           Navigator.of(context).pushNamedAndRemoveUntil(
               Routes.guestHome, (Route<dynamic> route) => false);
         }).onError((error, stackTrace) {
-          print("error is ===> ${error}");
-          print("stackTrace is ===>  ${stackTrace}");
+          print("error is ===> $error");
+          print("stackTrace is ===>  $stackTrace");
           setState(() {
             isLoading = false;
           });

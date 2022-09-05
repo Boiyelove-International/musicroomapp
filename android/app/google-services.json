@@ -14,6 +14,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "813500069884-hvd5uv5gid0gphuqtqdtk3nkonrachpb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "uk.co.musicalroom.app",
+            "certificate_hash": "97ca726c41ffeaf1f03e272dff23954d3620257a"
+          }
+        },
+        {
+          "client_id": "813500069884-m8k2lnssb1ta3odv3udcb9oa5esnc339.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "uk.co.musicalroom.app",
+            "certificate_hash": "db3a69ce9c16df21dea2a7d5496d9968a54e5d2d"
+          }
+        },
+        {
           "client_id": "813500069884-f3jggj2md4f974rlt5hu4skvkugqhbd8.apps.googleusercontent.com",
           "client_type": 3
         }

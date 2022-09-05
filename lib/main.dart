@@ -15,12 +15,13 @@ import 'package:musicroom/screens/profile.dart';
 import 'package:musicroom/screens/search.dart';
 import 'package:musicroom/styles.dart';
 import 'package:musicroom/utils.dart';
-import 'package:musicroom/utils/fcm-service.dart';
 import 'package:musicroom/utils/models.dart';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
-void main() {
+import 'utils/fcm-service.dart';
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   LicenseRegistry.addLicense(() async* {
@@ -29,6 +30,9 @@ void main() {
   });
 
   FCMService();
+  // await Firebase.initializeApp(
+  //   options: DefaultFirebaseOptions.currentPlatform,
+  // );
 
   runApp(MyApp());
 }

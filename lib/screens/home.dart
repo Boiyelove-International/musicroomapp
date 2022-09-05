@@ -7,7 +7,6 @@ import 'package:iconly/iconly.dart';
 import 'package:musicroom/screens/empty_content.dart';
 import 'package:musicroom/screens/event_card_gold.dart';
 import 'package:musicroom/screens/event_details.dart';
-import 'package:musicroom/screens/event_list.dart';
 import 'package:musicroom/screens/event_party_guest.dart';
 import 'package:musicroom/screens/popups.dart';
 import 'package:musicroom/screens/search.dart';
@@ -18,7 +17,7 @@ import 'package:musicroom/utils/models.dart';
 import 'package:musicroom/widgets.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
+
 import '../routes.dart';
 import 'events.dart';
 
@@ -139,9 +138,10 @@ class _EventOrganizerHome extends State<EventOrganizerHome> {
                                 TextFormField(
                                   controller: _searchContoller,
                                   validator: (value) {
-                                    if (value!.isEmpty || value == null) {
+                                    if (value!.isEmpty) {
                                       return "Enter a search query";
                                     }
+                                    return null;
                                   },
                                   autofocus: false,
                                   autocorrect: false,
@@ -174,9 +174,8 @@ class _EventOrganizerHome extends State<EventOrganizerHome> {
                                           color: DarkPalette.darkGold,
                                         ),
                                         onPressed: () {
-                                          if (_searchContoller.text != null &&
-                                              _searchContoller
-                                                  .text.isNotEmpty) {
+                                          if (_searchContoller
+                                              .text.isNotEmpty) {
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
@@ -556,9 +555,10 @@ class _PartyGuestHome extends State<PartyGuestHome> {
                                       TextFormField(
                                         controller: _searchContoller,
                                         validator: (value) {
-                                          if (value!.isEmpty || value == null) {
+                                          if (value!.isEmpty) {
                                             return "Enter a search query";
                                           }
+                                          return null;
                                         },
                                         autofocus: false,
                                         autocorrect: false,
@@ -594,10 +594,8 @@ class _PartyGuestHome extends State<PartyGuestHome> {
                                               color: DarkPalette.darkGold,
                                             ),
                                             onPressed: () {
-                                              if (_searchContoller.text !=
-                                                      null &&
-                                                  _searchContoller
-                                                      .text.isNotEmpty) {
+                                              if (_searchContoller
+                                                  .text.isNotEmpty) {
                                                 Navigator.push(
                                                   context,
                                                   MaterialPageRoute(
