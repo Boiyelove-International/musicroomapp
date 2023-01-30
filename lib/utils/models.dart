@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:musicroom/utils/apiServices.dart';
@@ -53,13 +51,15 @@ class SongModel {
   String artist;
   String album_art;
   String apple_song_id;
+  String? apple_music_link;
 
   SongModel(
       {required this.title,
       required this.artist,
       required this.album_art,
       required this.previewUrl,
-      required this.apple_song_id});
+      required this.apple_song_id,
+      this.apple_music_link});
 }
 
 class Event {
@@ -101,32 +101,32 @@ class Event {
   }
 
   factory Event.fromJson(Map<String, dynamic> data) {
-    log("event data is $data");
+    // log("event data is $data");
     String s = data["event_time"];
     // 2022-08-31T00:00:00.000000Z,
     //,
     // event_date:
 
-    log("${DateTime.parse(data['event_date'])}");
+    // log("${DateTime.parse(data['event_date'])}");
 
     TimeOfDay EventTime = TimeOfDay(
         hour: int.parse(s.split(":")[0]), minute: int.parse(s.split(":")[1]));
     DateTime EventDate = DateTime.parse(data['event_date'])
         .add(Duration(hours: EventTime.hour, minutes: EventTime.minute))
         .toLocal();
-    log("Datetime of event is $EventDate");
+    // log("Datetime of event is $EventDate");
     var something = new DateFormat("dd MMMM, yyyy").format(EventDate);
-    log("Formatted date is $something");
+    // log("Formatted date is $something");
 
     // log("Formatted Datetime of event is $EventDate");
 
     // EventDate = DateTime.utc(EventDate.year, EventDate.month, EventDate.day,
     //     .toLocal();
 
-    log("Datetime of event is $EventDate");
+    // log("Datetime of event is $EventDate");
 
     EventTime = TimeOfDay.fromDateTime(EventDate);
-    log("time of day is $EventTime");
+    // log("time of day is $EventTime");
 
     // event_time =
     // data is {'id': 2,

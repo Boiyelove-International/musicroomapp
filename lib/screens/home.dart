@@ -1,6 +1,7 @@
+import 'dart:developer';
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
@@ -392,6 +393,9 @@ class _EventOrganizerHome extends State<EventOrganizerHome> {
             _events.removeWhere((element) => element.id == id);
           });
         }
+        if (data.containsKey("shouldRefresh")) {
+          _loadEvents();
+        }
       }
     });
   }
@@ -447,15 +451,77 @@ class _PartyGuestHome extends State<PartyGuestHome> {
   String display_name = "Guest";
   TextEditingController _searchContoller = TextEditingController();
 
+  FirebaseDynamicLinks dynamicLinks = FirebaseDynamicLinks.instance;
+
   @override
   void initState() {
     // TODO: implement initState
-
     SharedPreferences.getInstance().then((prefs) => setState(() {
           display_name = prefs.getString("display_name")!;
         }));
-
+    this.initDynamicLinks();
     super.initState();
+  }
+
+  Future<void> initDynamicLinks() async {
+    await Future.delayed(Duration(seconds: 3));
+    log("running initDynamicLinks");
+    final PendingDynamicLinkData? initialLink =
+        await FirebaseDynamicLinks.instance.getInitialLink();
+    log("printing initial link");
+    log(initialLink.toString());
+
+    dynamicLinks.onLink.listen((dynamicLinkData) {
+      log("printing dynamic link on Listen");
+
+      log(dynamicLinkData.asMap().toString());
+      log("link is: " + dynamicLinkData.link.toString());
+
+      log("path is:" + dynamicLinkData.link.path);
+      if (dynamicLinkData.link.path.isNotEmpty) {
+        String eventCode = dynamicLinkData.link.path.replaceAll("/", "");
+        joinEventSheet(eventCode);
+
+        log("event code is $eventCode");
+      }
+      log("query is: " + dynamicLinkData.link.query);
+
+      // joinEventFromLink();
+      // Navigator.pushNamed(context, dynamicLinkData.link.path);
+    }).onError((error) {
+      print('onLink error');
+      print(error.message);
+    });
+  }
+
+  void joinEventSheet([String? eventCode]) {
+    setState(() {
+      showFab = false;
+    });
+    showModalBottomSheet<void>(
+            isScrollControlled: true,
+            builder: (BuildContext context) => Wrap(
+                  children: [
+                    Container(
+                        decoration: BoxDecoration(
+                            color: Colors.black,
+                            borderRadius: new BorderRadius.only(
+                              topLeft: const Radius.circular(40.0),
+                              topRight: const Radius.circular(40.0),
+                            )),
+                        padding: EdgeInsets.only(
+                            top: 30, left: 20, right: 20, bottom: 20),
+                        height: MediaQuery.of(context).size.height * 8,
+                        child: JoinEventForm(
+                          eventCode: eventCode,
+                        ))
+                  ],
+                ),
+            backgroundColor: Colors.transparent,
+            context: context)
+        .whenComplete(() => setState(() {
+              showFab = true;
+            }));
   }
 
   @override
@@ -521,6 +587,7 @@ class _PartyGuestHome extends State<PartyGuestHome> {
                   FutureBuilder(
                       future: _api.get("/events/"),
                       builder: (context, snapshot) {
+                        log("got event list future in party guest home");
                         if (snapshot.hasData) {
                           var itemList = snapshot.data as List;
 
@@ -660,6 +727,7 @@ class _PartyGuestHome extends State<PartyGuestHome> {
                       FutureBuilder(
                         future: _api.get("/suggestions/?q=trending"),
                         builder: (context, snapshot) {
+                          log("got trending suggestions list in party guest home");
                           if (snapshot.hasData) {
                             var itemList = snapshot.data as List;
                             if (itemList.isNotEmpty) {
@@ -738,6 +806,7 @@ class _PartyGuestHome extends State<PartyGuestHome> {
                       FutureBuilder(
                           future: _api.get("/events/"),
                           builder: (context, snapshot) {
+                            log("get events list in partyguest home");
                             if (snapshot.hasData) {
                               var itemList = snapshot.data as List;
 
@@ -799,38 +868,7 @@ class _PartyGuestHome extends State<PartyGuestHome> {
             child: FloatingActionButton.extended(
                 backgroundColor: DarkPalette.darkGold,
                 onPressed: () {
-                  setState(() {
-                    showFab = false;
-                  });
-                  showModalBottomSheet<void>(
-                          isScrollControlled: true,
-                          builder: (BuildContext context) => Wrap(
-                                children: [
-                                  Container(
-                                      decoration: BoxDecoration(
-                                          color: Colors.black,
-                                          borderRadius: new BorderRadius.only(
-                                            topLeft:
-                                                const Radius.circular(40.0),
-                                            topRight:
-                                                const Radius.circular(40.0),
-                                          )),
-                                      padding: EdgeInsets.only(
-                                          top: 30,
-                                          left: 20,
-                                          right: 20,
-                                          bottom: 20),
-                                      height:
-                                          MediaQuery.of(context).size.height *
-                                              8,
-                                      child: JoinEventForm())
-                                ],
-                              ),
-                          backgroundColor: Colors.transparent,
-                          context: context)
-                      .whenComplete(() => setState(() {
-                            showFab = true;
-                          }));
+                  joinEventSheet();
                 },
                 label: Text("Join an Event",
                     style: TextStyle(color: Colors.black)))));

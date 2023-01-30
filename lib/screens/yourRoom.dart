@@ -1,6 +1,8 @@
+import 'dart:developer';
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_feather_icons/flutter_feather_icons.dart';
@@ -13,10 +15,113 @@ import 'package:share/share.dart';
 
 import '../utils/models.dart';
 
+class ShareEventButton extends StatefulWidget {
+  ShareEventButton({Key? key, required this.event}) : super(key: key);
+  Event event;
+
+  @override
+  _ShareEventButtonState createState() => _ShareEventButtonState();
+}
+
+class _ShareEventButtonState extends State<ShareEventButton> {
+  bool _shareLoading = false;
+
+  shareImage() async {
+    setState(() {
+      _shareLoading = true;
+    });
+    final dynamicLinkParams = DynamicLinkParameters(
+      link: Uri.parse("https://musicalroom.co.uk/${widget.event.code}/"),
+      uriPrefix: "https://musicalroom.page.link",
+      androidParameters:
+          const AndroidParameters(packageName: "uk.co.musicalroom.app"),
+      iosParameters:
+          const IOSParameters(bundleId: 'uk.co.musicalroom.musicalroom'),
+    );
+    final dynamicLink =
+        await FirebaseDynamicLinks.instance.buildShortLink(dynamicLinkParams);
+
+    final qrValidationResult = QrValidator.validate(
+      data: "${widget.event.code}",
+      version: QrVersions.auto,
+      errorCorrectionLevel: QrErrorCorrectLevel.L,
+    );
+
+    if (!qrValidationResult.isValid) return;
+
+    final painter = QrPainter.withQr(
+      qr: qrValidationResult.qrCode!,
+      color: const Color(0xFFffffff),
+      gapless: true,
+      embeddedImageStyle: null,
+      embeddedImage: null,
+    );
+
+    Directory tempDir = await getTemporaryDirectory();
+    String tempPath = tempDir.path;
+    final ts = DateTime.now().millisecondsSinceEpoch.toString();
+    String path = '$tempPath/$ts.png';
+
+    final picData =
+        await painter.toImageData(2048, format: ImageByteFormat.png);
+    await writeToFile(picData!, path);
+    log(dynamicLink.shortUrl.toString());
+    await Share.shareFiles([path],
+        mimeTypes: ["image/png"],
+        subject: 'Join ${widget.event.name!} by:${widget.event.organizer}',
+        text: """About Event:
+${widget.event.about!} \n
+To join this event,
+Use unique code: ${widget.event.code!}
+or Scan the QR Code or link this link ${dynamicLink.shortUrl}
+""");
+    setState(() {
+      _shareLoading = false;
+    });
+  }
+
+  Future<void> writeToFile(ByteData data, String path) async {
+    final buffer = data.buffer;
+    await File(path).writeAsBytes(
+        buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _shareLoading
+            ? CircularProgressIndicator(
+                color: Colors.amber,
+                strokeWidth: 1,
+              )
+            : Container(
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: DarkPalette.borderGradient1,
+                    border:
+                        Border.all(color: DarkPalette.darkYellow, width: 3)),
+                child: Center(
+                    child: InkWell(
+                  onTap: () {
+                    shareImage();
+                  },
+                  child: Icon(FeatherIcons.share2,
+                      size: 30, color: DarkPalette.darkYellow),
+                )),
+              )
+      ],
+    );
+  }
+}
+
 class YourRoom extends StatelessWidget {
   static const String routeName = "/yourRoom";
   Event event;
   YourRoom({required this.event});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -121,73 +226,12 @@ class YourRoom extends StatelessWidget {
                     ),
                   )),
             )),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: DarkPalette.borderGradient1,
-                      border:
-                          Border.all(color: DarkPalette.darkYellow, width: 3)),
-                  child: Center(
-                      child: InkWell(
-                    onTap: () {
-                      shareImage();
-                    },
-                    child: Icon(FeatherIcons.share2,
-                        size: 30, color: DarkPalette.darkYellow),
-                  )),
-                )
-              ],
+            ShareEventButton(
+              event: event,
             )
           ],
         ),
       ),
     );
-  }
-
-  shareImage() async {
-    final qrValidationResult = QrValidator.validate(
-      data: "${event.code}",
-      version: QrVersions.auto,
-      errorCorrectionLevel: QrErrorCorrectLevel.L,
-    );
-
-    if (!qrValidationResult.isValid) return;
-
-    final painter = QrPainter.withQr(
-      qr: qrValidationResult.qrCode!,
-      color: const Color(0xFFffffff),
-      gapless: true,
-      embeddedImageStyle: null,
-      embeddedImage: null,
-    );
-
-    Directory tempDir = await getTemporaryDirectory();
-    String tempPath = tempDir.path;
-    final ts = DateTime.now().millisecondsSinceEpoch.toString();
-    String path = '$tempPath/$ts.png';
-
-    final picData =
-        await painter.toImageData(2048, format: ImageByteFormat.png);
-    await writeToFile(picData!, path);
-
-    await Share.shareFiles([path],
-        mimeTypes: ["image/png"],
-        subject: 'Join ${event.name!} by:${event.organizer}',
-        text: """About Event:
-${event.about!} \n
-To join this event,
-Use unique code: ${event.code!}
-or Scan the QR Code
-""");
-  }
-
-  Future<void> writeToFile(ByteData data, String path) async {
-    final buffer = data.buffer;
-    await File(path).writeAsBytes(
-        buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
   }
 }

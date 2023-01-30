@@ -1,16 +1,16 @@
+import 'dart:developer';
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:iconly/iconly.dart';
 import 'package:musicroom/screens/empty_content.dart';
-import 'package:musicroom/screens/event_card.dart';
 import 'package:musicroom/screens/event_details.dart';
-import 'package:musicroom/screens/events.dart';
 import 'package:musicroom/screens/popups.dart';
 import 'package:musicroom/utils.dart';
 import 'package:musicroom/utils/apiServices.dart';
 import 'package:musicroom/utils/models.dart';
 import 'package:page_transition/page_transition.dart';
-import 'dart:math' as math;
-import '../routes.dart';
+
 import '../styles.dart';
 
 class EventListScreen extends StatefulWidget {
@@ -30,6 +30,7 @@ class _EventListScreen extends State<EventListScreen> {
 
   Future<void> _refreshEvents() async {
     setState(() {
+      log("gettubg event list for refresh events");
       eventList = _api.get("${widget.url}?order_by=orderBy");
     });
   }

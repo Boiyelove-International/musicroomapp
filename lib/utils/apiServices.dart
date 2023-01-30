@@ -65,10 +65,10 @@ class ApiBaseHelper {
   // final String _baseUrl = "http://10.0.2.2:8000/api";
 
   // Live device on same network
-  final String _baseUrl = "http://192.168.0.141:8000/api";
+  // final String _baseUrl = "http://192.168.0.141:8003/api";
 
   // Production URL
-  // final String _baseUrl = "https://app.musicalroom.co.uk/api";
+  final String _baseUrl = "https://app.musicalroom.co.uk/api";
   String get baseurl => _baseUrl;
   BuildContext? context;
 
@@ -143,13 +143,13 @@ class ApiBaseHelper {
           .replaceAll("'", "")
           .replaceAll('"', "");
       print(userClient);
-      log("John Doe’s iPhone".replaceAll(RegExp("\'"), ""));
+      // log("John Doe’s iPhone".replaceAll(RegExp("\'"), ""));
       headers.addAll(userClient);
 
       final response = await http.post(Uri.parse(_baseUrl + url),
           headers: headers, body: json.encode(data));
 
-      log("response is ${response.body}");
+      // log("response is ${response.body}");
 
       responseJson = _returnResponse(response);
     } on SocketException {
@@ -185,7 +185,7 @@ class ApiBaseHelper {
         headers.addAll({"guest": deviceId});
       }
       headers.addAll({"fcm-device-id": FCMdeviceId ?? ''});
-      print(data);
+      // print(data);
       final response = await http.put(Uri.parse(_baseUrl + url),
           headers: headers, body: json.encode(data));
 
@@ -228,7 +228,7 @@ class ApiBaseHelper {
       final response = await http.patch(Uri.parse(_baseUrl + url),
           headers: headers, body: json.encode(data));
 
-      log("response is ${response.body}");
+      // log("response is ${response.body}");
 
       responseJson = _returnResponse(response);
     } on SocketException {
@@ -264,7 +264,7 @@ class ApiBaseHelper {
       final response = await http.delete(Uri.parse(_baseUrl + url),
           headers: headers, body: json.encode(data));
 
-      log("response is ${response.body}");
+      // log("response is ${response.body}");
 
       responseJson = _returnResponse(response);
     } on SocketException {
@@ -306,7 +306,7 @@ class ApiBaseHelper {
         if (responseJson["non_field_errors"] is List &&
             responseJson["non_field_errors"] != []) {
           log("if ======> 2");
-          log("ResponseJson ========> $responseJson");
+          // log("ResponseJson ========> $responseJson");
           displayMessage(
               '${responseJson["non_field_errors"].join(",")}'.capitalize());
         } else {

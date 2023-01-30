@@ -39,8 +39,24 @@ class _EventDetail extends State<EventDetail> {
   bool _showAbout = false;
   late Widget _rightContext = Container();
   Event get _event => widget.event;
+  Map _callbackData = {};
+
   set _event(Event value) {
     widget.event = value;
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    widget.event.refreshData().then((Event refreshedData) {
+      if (!identical(widget.event, refreshedData)) {
+        setState(() {
+          widget.event = refreshedData;
+          _callbackData["shouldRefresh"] = true;
+        });
+      }
+    });
   }
 
   @override
@@ -470,7 +486,8 @@ class _EventDetail extends State<EventDetail> {
   _deleteEvent() async {
     ApiBaseHelper _api = ApiBaseHelper();
     _api.delete("/event/${_event.id}/", {});
-    Navigator.pop(context, {"rm_event": _event.id});
+    _callbackData["rm_event"] = _event.id;
+    Navigator.pop(context, _callbackData);
   }
 
   Widget get _contextMenuDots => FocusedMenuHolder(
