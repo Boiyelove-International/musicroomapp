@@ -1,13 +1,13 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:focused_menu/focused_menu.dart';
 import 'package:focused_menu/modals.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
 import 'package:musicroom/screens/popups.dart';
-import 'package:musicroom/screens/search.dart';
 import 'package:musicroom/styles.dart';
 import 'package:musicroom/utils.dart';
-import 'package:musicroom/utils/apiServices.dart';
 import 'package:musicroom/utils/models.dart';
 
 class SuggestionScreen extends StatefulWidget {
@@ -25,7 +25,7 @@ class SuggestionScreen extends StatefulWidget {
       required this.event,
       required this.suggestions,
       this.callBack,
-      this.userType = UserType.partyGuest})
+      this.userType = UserType.partyOrganizer})
       : super(key: key);
 
   @override
@@ -35,6 +35,7 @@ class SuggestionScreen extends StatefulWidget {
 class _SuggestionScreen extends State<SuggestionScreen> {
   Future<void> _refreshData() async {
     widget.event = await widget.event.refreshData();
+    log("getting data from web");
     setState(() {
       widget.suggestions = widget.suggestions;
     });
@@ -69,7 +70,7 @@ class _SuggestionScreen extends State<SuggestionScreen> {
                 return SongSuggestion(
                   event: widget.event,
                   suggestion: suggestion,
-                  userType: UserType.partyOrganizer,
+                  userType: widget.userType,
                   suggestionType: SuggestionType.All,
                   callBack: widget.callBack ?? null,
                 );
@@ -115,7 +116,7 @@ class SongSuggestion extends StatelessWidget {
               FocusedMenuItem(
                   title: Text(
                     "Remove this song",
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(color: Colors.black),
                   ),
                   onPressed: () {
                     if (callBack != null) {
@@ -158,7 +159,7 @@ class SongSuggestion extends StatelessWidget {
             menuItems = <FocusedMenuItem>[
               FocusedMenuItem(
                   title: Text(
-                    "Cool! I'm gonna play this",
+                    "Remove this song",
                     style: TextStyle(color: Colors.black),
                   ),
                   onPressed: () {
@@ -166,14 +167,6 @@ class SongSuggestion extends StatelessWidget {
                       callBack!();
                     }
                   }),
-              FocusedMenuItem(
-                  title: Text("Oops! can't play this song",
-                      style: TextStyle(color: Colors.black)),
-                  onPressed: () {
-                    if (callBack != null) {
-                      callBack!();
-                    }
-                  })
             ];
           }
         }
@@ -224,7 +217,7 @@ class SongSuggestion extends StatelessWidget {
               FocusedMenuItem(
                   title: Text(
                     "Remove this song",
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(color: Colors.black),
                   ),
                   onPressed: () {
                     if (callBack != null) {
@@ -334,11 +327,13 @@ class SongSuggestion extends StatelessWidget {
             height: MediaQuery.of(context).size.height * 0.7,
             child: AudioPlayerScreen(
                 song: SongModel(
-                    title: suggestion['song']['song_title'],
-                    artist: suggestion['song']['artist_name'],
-                    album_art: suggestion['song']['album_art'],
-                    previewUrl: suggestion['song']['song_url'],
-                    apple_song_id: suggestion['song']['apple_song_id']))),
+              title: suggestion['song']['song_title'],
+              artist: suggestion['song']['artist_name'],
+              album_art: suggestion['song']['album_art'],
+              previewUrl: suggestion['song']['song_url'],
+              apple_song_id: suggestion['song']['apple_song_id'],
+              apple_music_link: suggestion['song']['apple_music_link'],
+            ))),
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
         context: context);
@@ -362,7 +357,7 @@ class SongSuggestionList extends StatelessWidget {
       required this.suggestions,
       required this.event,
       this.callBack,
-      this.userType = UserType.partyGuest});
+      this.userType = UserType.partyOrganizer});
   bool isScrollable;
   String? title;
   Color color;
@@ -390,8 +385,11 @@ class SongSuggestionList extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => SearchResultScreen(
+                          builder: (context) => SuggestionScreen(
+                                suggestions: event.suggestions ?? [],
                                 title: "$title",
+                                event: event,
+                                userType: UserType.partyGuest,
                               )),
                     );
                   },
@@ -432,19 +430,17 @@ class SongSuggestionList extends StatelessWidget {
                   switch (suggestion['accepted']) {
                     case true:
                       {
-                        SuggestionType suggestion_type =
-                            SuggestionType.Accepted;
+                        SuggestionType suggestionType = SuggestionType.Accepted;
                         break;
                       }
                     case false:
                       {
-                        SuggestionType suggestion_type =
-                            SuggestionType.Accepted;
+                        SuggestionType suggestionType = SuggestionType.Accepted;
                         break;
                       }
                     case null:
                       {
-                        SuggestionType suggestion_type = SuggestionType.New;
+                        SuggestionType suggestionType = SuggestionType.New;
                         break;
                       }
                   }

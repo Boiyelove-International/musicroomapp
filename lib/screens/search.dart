@@ -1,11 +1,10 @@
-import 'dart:math' as math;
+import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:iconly/iconly.dart';
 import 'package:musicroom/screens/empty_content.dart';
-import 'package:musicroom/screens/popups.dart';
 import 'package:musicroom/styles.dart';
 import 'package:musicroom/utils.dart';
 import 'package:musicroom/utils/apiServices.dart';
@@ -45,6 +44,7 @@ class _SearchResultScreen extends State<SearchResultScreen> {
 
   @override
   Widget build(BuildContext context) {
+    log("about to get widget url in search result screen");
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -205,6 +205,7 @@ class _SearchResultScreen extends State<SearchResultScreen> {
   }
 
   _searchTerm() async {
+    log("getting searchTerm");
     ApiBaseHelper _api = ApiBaseHelper();
     Map<String, dynamic> response = await _api.get(widget.url ?? '');
     print(response);

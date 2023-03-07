@@ -7,7 +7,7 @@ import io.flutter.plugin.common.PluginRegistry.PluginRegistrantCallback
 import io.flutter.view.FlutterMain
 //import io.flutter.plugins.firebasemessaging.FlutterFirebaseMessagingService
 
-class Application : FlutterApplication(), PluginRegistrantCallback {
+class Application : FlutterApplication() {
 
     override fun onCreate() {
         super.onCreate()
@@ -15,9 +15,9 @@ class Application : FlutterApplication(), PluginRegistrantCallback {
         FlutterMain.startInitialization(this)
     }
 
-    override fun registerWith(registry: PluginRegistry?) {
-//        if (!registry!!.hasPlugin("io.flutter.plugins.firebasemessaging")) {
-//            FirebaseMessagingPlugin.registerWith(registry!!.registrarFor("io.flutter.plugins.firebasemessaging.FirebaseMessagingPlugin"));
-//        }
-    }
+//    override fun registerWith(registry: PluginRegistry?) {
+////        if (!registry!!.hasPlugin("io.flutter.plugins.firebasemessaging")) {
+////            FirebaseMessagingPlugin.registerWith(registry!!.registrarFor("io.flutter.plugins.firebasemessaging.FirebaseMessagingPlugin"));
+////        }
+//    }
 }

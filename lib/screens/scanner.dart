@@ -1,11 +1,10 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:musicroom/utils/apiServices.dart';
-import 'package:musicroom/utils/models.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 
 class QRScannerScreen extends StatefulWidget {
   Function? onCompleted;
@@ -89,7 +88,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         result = scanData;
         isJoining = true;
       });
-
+      log("get event join with code");
       _api.get("/event/join/?q=${result?.code}").then((value) {
         setState(() {
           isJoining = false;

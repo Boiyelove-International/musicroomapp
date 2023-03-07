@@ -63,12 +63,12 @@ class FCMService {
 
     var initializationSettingsAndroid =
         AndroidInitializationSettings('mipmap/ic_launcher');
-    var initializationSettingsIOS = IOSInitializationSettings(
+    var initializationSettingsIOS = DarwinInitializationSettings(
         onDidReceiveLocalNotification: onDidReceiveLocalNotification);
     var initializationSettings = InitializationSettings(
         android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
     await flutterLocalNotificationsPlugin.initialize(initializationSettings,
-        onSelectNotification: selectNotification);
+        onDidReceiveNotificationResponse: selectNotification);
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       print('received push notification');

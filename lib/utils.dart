@@ -1,9 +1,7 @@
 import 'dart:io';
 
 import 'package:device_info/device_info.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:musicroom/screens/popups.dart';
 import 'package:musicroom/utils/models.dart';
@@ -13,8 +11,7 @@ class GradientBorder extends Border {
   final double width;
 
   const GradientBorder({this.width = 0.0, required this.borderGradient})
-      : assert(borderGradient != null),
-        super();
+      : super();
 
   @override
   void paint(Canvas canvas, Rect rect,
@@ -88,8 +85,7 @@ class GradientBorder extends Border {
   }
 
   const GradientBorder._fromUniform(Gradient gradient, double width)
-      : assert(gradient != null),
-        assert(width >= 0.0),
+      : assert(width >= 0.0),
         borderGradient = gradient,
         width = width;
 }
@@ -202,7 +198,8 @@ MRselectSong(Map dataItem, BuildContext context, Event? event,
                     artist: dataItem['artist_name'],
                     album_art: dataItem['album_art'],
                     previewUrl: dataItem['song_url'],
-                    apple_song_id: dataItem['apple_song_id']))
+                    apple_song_id: dataItem['apple_song_id'],
+                    apple_music_link: dataItem['apple_music_link']))
           ],
         );
       });
@@ -231,7 +228,8 @@ MRselectSong2(Map dataItem, BuildContext context,
               artist: dataItem['artist_name'],
               album_art: dataItem['album_art'],
               previewUrl: dataItem['song_url'],
-              apple_song_id: dataItem['apple_song_id']),
+              apple_song_id: dataItem['apple_song_id'],
+              apple_music_link: dataItem['apple_music_link']),
         )),
   );
 }

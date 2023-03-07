@@ -6,16 +6,17 @@ import 'package:musicroom/screens/suggestion_list.dart';
 import 'package:musicroom/utils.dart';
 import 'package:musicroom/utils/apiServices.dart';
 import 'package:musicroom/utils/models.dart';
-import 'dart:math' as math;
-import '../styles.dart';
 
+import '../styles.dart';
 
 class EventDetailPartyGuest extends StatefulWidget {
   static const String routeName = "/evetDetail";
 
-  EventDetailPartyGuest({Key? key,
-    this.userType = UserType.partyGuest,
-    this.eventStatus = EventStatus.EventPending, required this.event})
+  EventDetailPartyGuest(
+      {Key? key,
+      this.userType = UserType.partyGuest,
+      this.eventStatus = EventStatus.EventPending,
+      required this.event})
       : super(key: key);
 
   UserType? userType;
@@ -31,27 +32,27 @@ class _EventDetailPartyGuest extends State<EventDetailPartyGuest> {
   bool _showAbout = false;
   List<Widget> _suggestionPlaylist = [];
   late String _timingTitle;
-  Event get event=> widget.event;
+  Event get event => widget.event;
   List allSuggestions = [];
   List guestSuggestions = [];
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
 
     _getSuggestion();
   }
 
-  List _getFewSuggestion(){
+  List _getFewSuggestion() {
     print(event.suggestions!.length);
     List temp = event.suggestions!;
-    if(temp.length > 2){
+    if (temp.length > 2) {
       temp = temp.sublist(0, 3);
     }
     return temp;
   }
 
-  _getSuggestion()async {
+  _getSuggestion() async {
     ApiBaseHelper _api = ApiBaseHelper();
     List guestResponse = await _api.get("/event/${event.id}/suggestions/");
     print('guest suggestion');
@@ -60,6 +61,7 @@ class _EventDetailPartyGuest extends State<EventDetailPartyGuest> {
       guestSuggestions = guestResponse;
     });
   }
+
   Widget get _attendees => ListView.separated(
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
@@ -69,7 +71,7 @@ class _EventDetailPartyGuest extends State<EventDetailPartyGuest> {
           children: [
             CircleAvatar(
               radius: 25,
-              backgroundImage:NetworkImage(attendee['profile_photo']?? ''),
+              backgroundImage: NetworkImage(attendee['profile_photo'] ?? ''),
             ),
             SizedBox(
               width: 20,
@@ -80,8 +82,7 @@ class _EventDetailPartyGuest extends State<EventDetailPartyGuest> {
                 children: [
                   Text(
                     "${attendee['display_name']}",
-                    style:
-                    TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 3),
                   Text("Attendee",
@@ -95,116 +96,103 @@ class _EventDetailPartyGuest extends State<EventDetailPartyGuest> {
       separatorBuilder: (context, index) {
         return SizedBox(height: 20);
       },
-      itemCount: event.attendees.length
-  );
+      itemCount: event.attendees.length);
   Widget get _timingBox => Container(
       padding: EdgeInsets.all(10.0),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.2),
         borderRadius: BorderRadius.circular(10),
       ),
-      child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text("",
-              style: GoogleFonts.workSans(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w300
-              )
-            ),
-            Text("24h: 30m",
-              style: GoogleFonts.workSans(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold
-              )
-            )
-          ])
-      );
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        Text("",
+            style: GoogleFonts.workSans(
+                fontSize: 12, fontWeight: FontWeight.w300)),
+        Text("24h: 30m",
+            style:
+                GoogleFonts.workSans(fontSize: 16, fontWeight: FontWeight.bold))
+      ]));
   Widget get _backButton => IconButton(
-    icon: Icon(IconlyBold.arrow_left),
-    color: Colors.white,
-    onPressed: () {
-      setState(() {
-        if (_showAttendees){
-          _showAttendees = false;
-        }
-        if(_showAbout){
-          _showAbout = false;
-        }
-      });
-    },
-  );
+        icon: Icon(IconlyBold.arrow_left),
+        color: Colors.white,
+        onPressed: () {
+          setState(() {
+            if (_showAttendees) {
+              _showAttendees = false;
+            }
+            if (_showAbout) {
+              _showAbout = false;
+            }
+          });
+        },
+      );
   Widget get _infoBox => IconButton(
-    icon: Icon(IconlyBold.info_circle,
-        size: 30),
-    color: Colors.white,
-    onPressed: () {
-      setState(() {
-        _showAbout = true;
-      });
-    },
-  );
-
+        icon: Icon(IconlyBold.info_circle, size: 30),
+        color: Colors.white,
+        onPressed: () {
+          setState(() {
+            _showAbout = true;
+          });
+        },
+      );
 
   @override
   Widget build(BuildContext context) {
-
-    switch (widget.eventStatus!){
-      case EventStatus.EventPending:{
-        _timingTitle = "Starts in";
-        _suggestionPlaylist = [
-          SongSuggestionList(
-            title: "All Suggestions",
-            event: event,
-            suggestions: _getFewSuggestion(),
-            trailing: true,
-          ),
-          SizedBox(height: 50),
-          SongSuggestionList(
-            title: "Your Suggestions",
-            event: event,
-            suggestions: guestSuggestions,
-            trailing: true,
-          ),
-        ];
-      }
-      break;
-      case EventStatus.EventStarted:{
-        _timingTitle = "Started";
-        _suggestionPlaylist = [
-          SongSuggestionList(
-            title: "Currently Playing",
-            event: event,
-            suggestions: [],
-          ),
-          SizedBox(height: 30),
-          SongSuggestionList(
-            title: "Up Next",
-            event: event,
-            suggestions: [],
-          ),
-          SizedBox(height: 30),
-          SongSuggestionList(
-              title: "Queued",
+    switch (widget.eventStatus!) {
+      case EventStatus.EventPending:
+        {
+          _timingTitle = "Starts in";
+          _suggestionPlaylist = [
+            SongSuggestionList(
+              title: "All Suggestions",
+              event: event,
+              suggestions: _getFewSuggestion(),
+              trailing: true,
+              userType: widget.userType!,
+            ),
+            SizedBox(height: 50),
+            SongSuggestionList(
+              title: "Your Suggestions",
+              event: event,
+              suggestions: guestSuggestions,
+              userType: widget.userType!,
+              trailing: true,
+            ),
+          ];
+        }
+        break;
+      case EventStatus.EventStarted:
+        {
+          _timingTitle = "Started";
+          _suggestionPlaylist = [
+            SongSuggestionList(
+              title: "Currently Playing",
               event: event,
               suggestions: [],
-              trailing: true
-          )
-        ];
-      }
-      break;
-      case EventStatus.EventEnded:{
-        _timingTitle = "Event Ended";
-        _suggestionPlaylist = [
-          SongSuggestionList(
-              title: "Event Playlist",
+            ),
+            SizedBox(height: 30),
+            SongSuggestionList(
+              title: "Up Next",
               event: event,
               suggestions: [],
-              trailing: true
-          )
-        ];
-      }
-      break;
+            ),
+            SizedBox(height: 30),
+            SongSuggestionList(
+                title: "Queued", event: event, suggestions: [], trailing: true)
+          ];
+        }
+        break;
+      case EventStatus.EventEnded:
+        {
+          _timingTitle = "Event Ended";
+          _suggestionPlaylist = [
+            SongSuggestionList(
+                title: "Event Playlist",
+                event: event,
+                suggestions: [],
+                trailing: true)
+          ];
+        }
+        break;
     }
 
     return Scaffold(
@@ -220,22 +208,22 @@ class _EventDetailPartyGuest extends State<EventDetailPartyGuest> {
               decoration: BoxDecoration(
                   image: DecorationImage(
                       fit: BoxFit.cover,
-                      image: NetworkImage("${event.image}")
-                  )
-              ),
+                      image: NetworkImage("${event.image}"))),
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
                   Positioned(
                       left: 2,
                       top: 30,
-                      child:
-                      (_showAttendees || _showAbout) ? _backButton : _timingBox),
+                      child: (_showAttendees || _showAbout)
+                          ? _backButton
+                          : _timingBox),
                   Positioned(
                       right: 2,
                       top: 30,
-                      child:
-                      (_showAttendees || _showAbout) ? _timingBox : _infoBox),
+                      child: (_showAttendees || _showAbout)
+                          ? _timingBox
+                          : _infoBox),
                   Positioned(
                     right: 0,
                     bottom: -40,
@@ -245,24 +233,22 @@ class _EventDetailPartyGuest extends State<EventDetailPartyGuest> {
                             isScrollControlled: true,
                             backgroundColor: Colors.transparent,
                             context: context,
-                            builder: (BuildContext context) => Wrap(
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                        color: Colors.black,
-                                        borderRadius: new BorderRadius.only(
-                                          topLeft: const Radius.circular(40.0),
-                                          topRight: const Radius.circular(40.0),
-                                        )),
-                                    padding: EdgeInsets.only(
-                                        top: 30, left: 20, right: 20, bottom: 20),
-                                    height: MediaQuery.of(context).size.height * 0.7,
-                                    child: SuggestSongForm(
-                                      selectedEvent: event,
-                                    )
-                                  )
-                                ]
-                            ),
+                            builder: (BuildContext context) => Wrap(children: [
+                              Container(
+                                  decoration: BoxDecoration(
+                                      color: Colors.black,
+                                      borderRadius: new BorderRadius.only(
+                                        topLeft: const Radius.circular(40.0),
+                                        topRight: const Radius.circular(40.0),
+                                      )),
+                                  padding: EdgeInsets.only(
+                                      top: 30, left: 20, right: 20, bottom: 20),
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.7,
+                                  child: SuggestSongForm(
+                                    selectedEvent: event,
+                                  ))
+                            ]),
                           );
                         },
                         child: Container(
@@ -275,31 +261,29 @@ class _EventDetailPartyGuest extends State<EventDetailPartyGuest> {
                           child: Center(
                               child: widget.userType == UserType.partyOrganizer
                                   ? Image.asset("assets/images/music.png",
-                                  height: 100, width: 100)
+                                      height: 100, width: 100)
                                   : Icon(
-                                IconlyBold.plus,
-                                color: Colors.white,
-                                size: 40,
-                              )),
+                                      IconlyBold.plus,
+                                      color: Colors.white,
+                                      size: 40,
+                                    )),
                         )),
                   ),
                   Positioned.fill(
                       child: Align(
-                        alignment: Alignment.topCenter,
-                        child: GestureDetector(
-                            onTap: (){
-                              Navigator.pop(context);
-                            },
-                            child: Container(
-                              width: MediaQuery.of(context).size.width *  0.3,
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(10)
-                              ),
-                              height:3,
-                            )
-                        ),
-                      )),
+                    alignment: Alignment.topCenter,
+                    child: GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        child: Container(
+                          width: MediaQuery.of(context).size.width * 0.3,
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10)),
+                          height: 3,
+                        )),
+                  )),
                 ],
               ),
             ),
@@ -326,8 +310,8 @@ class _EventDetailPartyGuest extends State<EventDetailPartyGuest> {
                         children: [
                           CircleAvatar(
                             radius: 25,
-                            backgroundImage:
-                            NetworkImage("${event.organizer_display_picture}"),
+                            backgroundImage: NetworkImage(
+                                "${event.organizer_display_picture}"),
                           ),
                           SizedBox(
                             width: 20,
@@ -339,7 +323,6 @@ class _EventDetailPartyGuest extends State<EventDetailPartyGuest> {
                                 Text(
                                   '${event.organizer}',
                                   style: TextStyle(
-
                                       fontSize: 15,
                                       fontWeight: FontWeight.bold),
                                 ),
@@ -355,34 +338,37 @@ class _EventDetailPartyGuest extends State<EventDetailPartyGuest> {
                       _showAttendees
                           ? _attendees
                           : Column(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildAttendeeToggle(),
-                          Visibility(visible: _showAbout,
-                              child: SizedBox(height: 50)),
-                          Visibility(visible: _showAbout,
-                              child:Text(
-                                "About",
-                                style: TextStyle(
-                                    fontSize: 25,
-                                    fontWeight: FontWeight.w900),
-                              )),
-                          Visibility(visible: _showAbout,
-                              child:SizedBox(height: 20)),
-                          Visibility(visible: _showAbout,
-                              child:Text(
-                                  "${event.about}".capitalize())),
-                          SizedBox(height: 30),
-                          Visibility(
-                              visible: !_showAbout,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [..._suggestionPlaylist],
-                              ))
-                        ],
-                      )
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildAttendeeToggle(),
+                                Visibility(
+                                    visible: _showAbout,
+                                    child: SizedBox(height: 50)),
+                                Visibility(
+                                    visible: _showAbout,
+                                    child: Text(
+                                      "About",
+                                      style: TextStyle(
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.w900),
+                                    )),
+                                Visibility(
+                                    visible: _showAbout,
+                                    child: SizedBox(height: 20)),
+                                Visibility(
+                                    visible: _showAbout,
+                                    child: Text("${event.about}".capitalize())),
+                                SizedBox(height: 30),
+                                Visibility(
+                                    visible: !_showAbout,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [..._suggestionPlaylist],
+                                    ))
+                              ],
+                            )
                     ]))
           ],
         ),
@@ -390,8 +376,8 @@ class _EventDetailPartyGuest extends State<EventDetailPartyGuest> {
     );
   }
 
-  Widget _buildAttendeeToggle(){
-    if(event.attendees.length == 0) return Container();
+  Widget _buildAttendeeToggle() {
+    if (event.attendees.length == 0) return Container();
 
     Map attendee = event.attendees[0];
 
@@ -405,23 +391,19 @@ class _EventDetailPartyGuest extends State<EventDetailPartyGuest> {
           width: 20,
         ),
         Column(
-            crossAxisAlignment:
-            CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 "${attendee['display_name']}",
-                style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 3),
               Text("Attendee",
                   style: TextStyle(
                     fontSize: 10,
                   ))
-            ]
-        ),
+            ]),
         Spacer(),
         InkWell(
           onTap: () {
@@ -443,4 +425,3 @@ class _EventDetailPartyGuest extends State<EventDetailPartyGuest> {
     );
   }
 }
-

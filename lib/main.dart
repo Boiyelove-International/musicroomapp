@@ -30,6 +30,11 @@ void main() async {
   });
 
   FCMService();
+  // final PendingDynamicLinkData? initialLink =
+  //     await FirebaseDynamicLinks.instance.getInitialLink();
+  // log("initialLink from main.dart $initialLink");
+  // print("initial link is $initialLink");
+
   // await Firebase.initializeApp(
   //   options: DefaultFirebaseOptions.currentPlatform,
   // );
@@ -145,12 +150,15 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Container(color: Colors.white, height: 60, width: 1),
       ),
       Flexible(
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Text("Music",
-            style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
-        Text("Room",
-            style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold))
-      ]))
+          child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+            Text("Musical",
+                style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
+            Text("Room",
+                style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold))
+          ]))
     ]))));
   }
 }

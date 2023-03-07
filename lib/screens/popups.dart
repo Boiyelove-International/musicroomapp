@@ -24,6 +24,7 @@ import 'package:musicroom/utils/apiServices.dart';
 import 'package:musicroom/utils/models.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../utils.dart';
 
@@ -1367,7 +1368,34 @@ class _SuggestEventForm extends State<SuggestEventForm> {
                     )
                   ],
                 ),
-              ))
+              )),
+          SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.link,
+                color: DarkPalette.darkGold,
+              ),
+              SizedBox(width: 5),
+              TextButton(
+                  onPressed: () async {
+                    log("song apple music url is, ${song.apple_music_link}");
+                    Uri url = Uri.parse(song.apple_music_link!);
+                    if (await canLaunchUrl(url))
+                      await launchUrl(url);
+                    else
+                      // can't launch url, there is some error
+                      throw "Could not launch ${song.apple_music_link}";
+                  },
+                  style: TextButton.styleFrom(
+                    primary: DarkPalette.darkGrey2,
+                  ),
+                  child: song.apple_music_link != null
+                      ? Text("View on Apple music")
+                      : Text("Apple music currently unavailable")),
+            ],
+          )
         ],
       );
 
@@ -1482,6 +1510,9 @@ class _SuggestEventForm extends State<SuggestEventForm> {
 }
 
 class JoinEventForm extends StatefulWidget {
+  JoinEventForm({this.eventCode});
+
+  String? eventCode;
   @override
   _JoinEventForm createState() => _JoinEventForm();
 }
@@ -1501,14 +1532,34 @@ class _JoinEventForm extends State<JoinEventForm> {
   ApiBaseHelper _api = ApiBaseHelper();
   Event? eventData;
   TextStyle? subtitle2;
-
+  bool isFirstLoad = true;
   bool isLoading = false;
   bool isLoadingJoin = false;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+
+    super.initState();
+  }
 
   @override
   void didChangeDependencies() {
     // TODO: implement didChangeDependencies
     super.didChangeDependencies();
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      if (_pageController.hasClients &&
+          widget.eventCode != null &&
+          isFirstLoad) {
+        setState(() {
+          isFirstLoad = false;
+        });
+
+        _pageController.jumpToPage(3);
+        _submitCode();
+      }
+    });
+
     subtitle2 = Theme.of(context).textTheme.subtitle2!;
     _focusBox1.requestFocus();
   }
@@ -1669,11 +1720,20 @@ class _JoinEventForm extends State<JoinEventForm> {
     });
     FocusScope.of(context).requestFocus(new FocusNode());
     // FocusManager.instance.primaryFocus?.unfocus();
-
-    if (_eventCodeForm.currentState!.validate()) {
+    log("Event code widget is ${widget.eventCode}");
+    log("Event code null or not ${widget.eventCode != null}");
+    if (widget.eventCode != null || _eventCodeForm.currentState!.validate()) {
+      log("Entered submit code if block");
       try {
-        String q =
-            _codeBox1.text + _codeBox2.text + _codeBox3.text + _codeBox4.text;
+        late String q;
+
+        if (widget.eventCode == null) {
+          String q =
+              _codeBox1.text + _codeBox2.text + _codeBox3.text + _codeBox4.text;
+        } else {
+          q = widget.eventCode!;
+        }
+
         q = q.toUpperCase();
 
         _api.get("/event/join/?q=$q", context: context).then((value) {
@@ -1687,6 +1747,7 @@ class _JoinEventForm extends State<JoinEventForm> {
           setState(() {
             isLoading = false;
           });
+          // show invalid event error;
           log("event join error ====> $error \n \n StackTrace =====> $stackTrace");
         });
       } catch (e) {
@@ -2010,11 +2071,15 @@ class _JoinEventForm extends State<JoinEventForm> {
                     ]))
           ],
         )
-      : Center(
-          child: CircularProgressIndicator(
-          color: Colors.amber,
-          strokeWidth: 1,
-        ));
+      : Column(
+          children: [
+            Center(
+                child: CircularProgressIndicator(
+              color: Colors.amber,
+              strokeWidth: 1,
+            ))
+          ],
+        );
 
   Widget get _joinEventDone => Column(children: [
         Container(

@@ -3,6 +3,12 @@
  <queries>
         <provider android:authorities="com.facebook.katana.provider.PlatformProvider" /> <!-- allows app to access Facebook app features -->
         <provider android:authorities="com.facebook.orca.provider.PlatformProvider" /> <!-- allows sharing to Messenger app -->
+        <!-- Place inside the <queries> element. -->
+<intent>
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.BROWSABLE" />
+    <data android:scheme="https" />
+  </intent>
     </queries>
     <uses-permission android:name="android.permission.INTERNET"/>
 <!-- <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools: node="remove"/> -->
@@ -15,6 +21,7 @@
 <meta-data android:name="com.facebook.sdk.ClientToken" android:value="@string/facebook_client_token"/>
         <activity
             android:name=".MainActivity"
+            android:exported="true"
             android:launchMode="singleTop"
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
